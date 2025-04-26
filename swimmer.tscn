@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://cvsf3liqe130j"]
+
+[ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_2pdhi")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -61.0
+offset_right = 16.0
+color = Color(0.572442, 0.380153, 0.670682, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1, -13)
+shape = SubResource("CapsuleShape2D_2pdhi")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -19.0
+offset_top = -88.0
+offset_right = 21.0
+offset_bottom = -65.0
+text = "00"
+horizontal_alignment = 1

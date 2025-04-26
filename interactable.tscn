@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://7lsyicgsj11u"]
+
+[ext_resource type="Script" uid="uid://cdobjm2jp7k83" path="res://interactable.gd" id="1_wh154"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wh154"]
+size = Vector2(33, 52)
+
+[node name="Interactable" type="Area2D" groups=["grab", "mop"]]
+script = ExtResource("1_wh154")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.5, -24)
+shape = SubResource("RectangleShape2D_wh154")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -2.0
+offset_top = -57.0
+offset_right = 2.0
+offset_bottom = -3.0
+color = Color(0.418487, 0.794922, 0.891355, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="."]
+offset_left = -14.0
+offset_top = -7.0
+offset_right = 15.0
+offset_bottom = 1.0
+color = Color(7.46027e-07, 0.32561, 0.325965, 1)

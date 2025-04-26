@@ -1,0 +1,118 @@
+[gd_scene load_steps=14 format=3 uid="uid://cc6p5v7grul0p"]
+
+[ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
+[ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
+[ext_resource type="Script" uid="uid://j4oxuphwcgj3" path="res://life_guard.gd" id="2_q638n"]
+[ext_resource type="PackedScene" uid="uid://cvsf3liqe130j" path="res://swimmer.tscn" id="4_76ob0"]
+[ext_resource type="PackedScene" uid="uid://7lsyicgsj11u" path="res://interactable.tscn" id="5_7g16q"]
+[ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="6_7g16q"]
+[ext_resource type="Texture2D" uid="uid://8sb0shwr4jh3" path="res://pool_tile.png" id="7_08ey2"]
+[ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
+[ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mdob2"]
+size = Vector2(51, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w78qj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ryjux"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
+size = Vector2(276, 148)
+
+[node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point", "exit_point")]
+script = ExtResource("1_bslhr")
+swimmer_scene = ExtResource("4_76ob0")
+entrance_point = NodePath("Entrance")
+exit_point = NodePath("Exit")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+
+[node name="StolenPool" type="Sprite2D" parent="."]
+position = Vector2(562, 368)
+texture = ExtResource("7_08ey2")
+
+[node name="StolenPool2" type="Sprite2D" parent="."]
+position = Vector2(930, 368)
+texture = ExtResource("7_08ey2")
+
+[node name="StolenPool3" type="Sprite2D" parent="."]
+position = Vector2(563, 601.5)
+texture = ExtResource("7_08ey2")
+
+[node name="StolenPool4" type="Sprite2D" parent="."]
+position = Vector2(931, 601.5)
+texture = ExtResource("7_08ey2")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+material = ExtResource("7_ryjux")
+offset_left = 356.0
+offset_top = 241.0
+offset_right = 738.525
+offset_bottom = 727.43
+scale = Vector2(2.012, 1)
+
+[node name="Entrance" type="Area2D" parent="."]
+position = Vector2(1348, 954)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Entrance"]
+shape = SubResource("RectangleShape2D_mdob2")
+
+[node name="Exit" type="Area2D" parent="."]
+position = Vector2(1474, 954)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Exit"]
+shape = SubResource("RectangleShape2D_w78qj")
+
+[node name="Shower" type="Area2D" parent="."]
+position = Vector2(1479, 809)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shower"]
+shape = SubResource("RectangleShape2D_ryjux")
+
+[node name="ActivityManager" type="Node2D" parent="Shower"]
+script = ExtResource("9_87cwm")
+
+[node name="Locker" type="Node2D" parent="."]
+position = Vector2(1315, 877)
+
+[node name="ActivityManager" type="Node2D" parent="Locker"]
+script = ExtResource("9_87cwm")
+
+[node name="Pool" type="Area2D" parent="."]
+position = Vector2(510, 314)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
+shape = SubResource("RectangleShape2D_08ey2")
+
+[node name="PoolLaps" type="Node2D" parent="."]
+position = Vector2(401, 261)
+
+[node name="PoolSwim" type="Node2D" parent="."]
+position = Vector2(507, 314)
+
+[node name="PoolPlay" type="Node2D" parent="."]
+position = Vector2(599, 360)
+
+[node name="LifeGuard" parent="." instance=ExtResource("1_03hax")]
+position = Vector2(515, 926)
+script = ExtResource("2_q638n")
+
+[node name="Swimmer" parent="." instance=ExtResource("4_76ob0")]
+position = Vector2(1228, 923)
+
+[node name="SpawnTimer" type="Timer" parent="."]
+
+[node name="GameTimer" type="Timer" parent="."]
+
+[node name="Mop" parent="." instance=ExtResource("5_7g16q")]
+position = Vector2(1047, 924)
+
+[node name="DirtArea" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(1268, 675)
+
+[node name="DirtArea2" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(1480, 499)
+
+[node name="DirtArea3" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(1330, 353)

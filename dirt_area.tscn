@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvvlt27k5omf5"]
+
+[ext_resource type="Script" uid="uid://lvflp21iwoyd" path="res://dirt_area.gd" id="1_wfjen"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wfjen"]
+size = Vector2(38, 22)
+
+[node name="DirtArea" type="Area2D"]
+script = ExtResource("1_wfjen")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_wfjen")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -18.0
+offset_top = -10.0
+offset_right = 17.0
+offset_bottom = 10.0
+color = Color(0.417243, 0.356356, 0.165227, 1)

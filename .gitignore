@@ -1,0 +1,22 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Godot file backups and import sources
+*.import/
+.import/
+export_presets.cfg
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.settings/
+.hot_reload/
+
+# Binary assets/cache
+*.godot/tmp/
+*.bin
+*.obj
+*.bpm
+*.repl
