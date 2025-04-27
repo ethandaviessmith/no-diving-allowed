@@ -49,20 +49,10 @@ func add_swimmer():
 	get_parent().add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
-	swimmer.schedule = make_swim_schedule()
-	swimmer.left_pool.connect(_on_swimmer_left_pool.bind(swimmer))
+	swimmer.schedule = Util.make_swim_schedule()
+	#swimmer.left_pool.connect(_on_swimmer_left_pool.bind(swimmer))
 
 func _on_swimmer_left_pool(swimmer):
 	swimmers_in_scene.erase(swimmer)
 	swimmer.queue_free() # Or pool for reuse (object pooling)
 	
-func make_swim_schedule() -> Array:
-	var schedule = Util.POOL_ENTER
-	var activities = Util.POOL_ACTIVITIES.duplicate()
-	activities.shuffle()
-	
-	for i in range(randi() % 2 + 1):
-		schedule.append(activities[i])
-
-	schedule.append_array(Util.POOL_EXIT)
-	return schedule

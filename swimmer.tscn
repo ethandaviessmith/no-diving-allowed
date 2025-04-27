@@ -20,9 +20,10 @@ position = Vector2(-1, -13)
 shape = SubResource("CapsuleShape2D_2pdhi")
 
 [node name="Label" type="Label" parent="."]
-offset_left = -19.0
-offset_top = -88.0
-offset_right = 21.0
-offset_bottom = -65.0
+offset_left = -36.0
+offset_top = -78.0
+offset_right = 108.0
+offset_bottom = -55.0
+scale = Vector2(0.5, 0.5)
 text = "00"
 horizontal_alignment = 1

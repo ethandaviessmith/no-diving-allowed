@@ -1,27 +1,10 @@
-[gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://se8w6lephliu"]
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://se8w6lephliu"]
 
 [ext_resource type="Shader" uid="uid://cklr82xqkeeet" path="res://water.gdshader" id="1_4slwd"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_ah6vi"]
-noise_type = 3
-seed = 6
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7hxoa"]
-seamless = true
-as_normal_map = true
-noise = SubResource("FastNoiseLite_ah6vi")
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ifkpt"]
-seamless = true
-as_normal_map = true
-noise = SubResource("FastNoiseLite_ah6vi")
-
 [resource]
 shader = ExtResource("1_4slwd")
-shader_parameter/texture_normal = SubResource("NoiseTexture2D_7hxoa")
-shader_parameter/texture_refraction = SubResource("NoiseTexture2D_ifkpt")
-shader_parameter/albedo = Color(0, 0.552941, 0.847059, 0.686275)
-shader_parameter/normal_scale = 1.0
+shader_parameter/water_color = Color(0.19, 0.47, 0.88, 0.85)
 shader_parameter/wave_speed = 0.055
 shader_parameter/wave_strength = 0.02
 shader_parameter/refraction = 0.12
