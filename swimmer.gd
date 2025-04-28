@@ -3,6 +3,7 @@ enum State { IDLE, APPROACH_TASK, IN_LINE, WANDERING, PERFORM_ACTIVITY }
 
 var state: State = State.IDLE
 var schedule: Array = []      # Given at setup: e.g. [Util.ACT_SHOWER, Util.ACT_POOL]
+var pool: Pool
 var target_activity: Node     # Set when planning
 var curr_action = null        # e.g. Util.ACT_SHOWER
 var wait_timer: Timer
@@ -10,8 +11,10 @@ var line_position: Vector2
 var wander_points: Array[Vector2] = []
 var wander_index: int = 0
 var move_target: Vector2
-var speed: float = 100
+var speed: float = 120
 @onready var state_label: Label = $Label
+
+signal left_pool
 
 func _ready():
 	wait_timer = Timer.new()
@@ -22,28 +25,38 @@ func _ready():
 	if schedule.is_empty():
 		schedule = Util.make_swim_schedule() # manual swimmers
 	update_state_label()
+	$Sprite2D.frame = randi() % $Sprite2D.hframes
+
+func _process(delta: float) -> void:
+	if state == State.IDLE and schedule.size() == 0:
+		left_pool.emit(self)
+		var tween = create_tween()
+		tween.tween_property(self, "modulate:a", 0, 0.4)
+		tween.tween_property(self, "scale", scale * Vector2(1.0, 0.8), 0.35)
+		tween.set_parallel(true)
+		tween.connect("finished", Callable(self, "queue_free"))
+		pass
 
 func _physics_process(delta):
-	Log.pr("process", state)
 	if state == State.APPROACH_TASK or state == State.WANDERING or state == State.IN_LINE:
 		_step_move()
 	# nothing else handled each frame
 	update_state_label()
 
 func start_next_action():
-	if schedule.is_empty():
+	if schedule.is_empty() or not pool:
 		state = State.IDLE
 		return
 
 	curr_action = schedule[0]
 	schedule.remove_at(0)
 	#var activity_manager = Util.get_activity_manager(curr_action)
-	var activity_manager: ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
+	var activity_manager: ActivityManager = pool.getActivityManager(curr_action)
 	if activity_manager:
 		if activity_manager.has_open_direct_slot():
 			target_activity = activity_manager
 			if (activity_manager.try_queue_swimmer(self)):
-				_begin_approach_to_activity(activity_manager)
+				begin_approach_to_activity(activity_manager)
 		else:
 			if activity_manager.has_available_line_position():
 				target_activity = activity_manager
@@ -52,18 +65,10 @@ func start_next_action():
 			else:
 				state = State.WANDERING
 				_setup_wander_and_go(curr_action)
-	
 
-	#curr_action = schedule[0]
-	#target_manager = Util.get_activity_manager(curr_action)
-	#if target_manager:    
-		#target_manager.try_queue_swimmer(self)
-	#else:
-		#state = State.IDLE # Or: skip to next?
-
-func _begin_approach_to_activity(activity_manager: ActivityManager):
+func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH_TASK
-	move_target = activity_manager.get_interaction_pos()
+	move_target = activity_manager.get_interaction_pos(self)
 
 func _step_move():
 	var dist = global_position.distance_to(move_target)
@@ -86,12 +91,15 @@ func try_leave_line_and_use_activity(activity_manager):
 		schedule.pop_front()
 	target_activity = activity_manager
 	state = State.APPROACH_TASK
-	move_target = activity_manager.get_interaction_pos()
+	move_target = activity_manager.get_interaction_pos(self)
 
 func _on_PerformDone():
 	state = State.IDLE
+	
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self) # tells manager to pop next in line, etc
+		Log.pr("target", "notify done", target_activity.get_parent().name, curr_action)
+	curr_action = null
 	start_next_action()
 
 func _setup_wander_and_go(action):
@@ -108,6 +116,7 @@ func _setup_wander_and_go(action):
 	move_target = wander_points[wander_index]
 
 func _process_wander():
+	await get_tree().create_timer(randf_range(1.0, 3.0)).timeout
 	wander_index += 1
 	if wander_index < wander_points.size():
 		move_target = wander_points[wander_index]
@@ -134,5 +143,5 @@ func update_state_label():
 	var dur = ""
 	if state == State.PERFORM_ACTIVITY:
 		dur = "%.1f" % get_state_duration_left()
-	var txt = "%s%s" % [str(State.keys()[state]), dur if dur != "" else ""]
+	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
 	state_label.text = txt

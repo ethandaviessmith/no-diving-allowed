@@ -1,4 +1,4 @@
-extends Node2D
+class_name Pool extends Node2D
 
 @export var max_guests := 8
 var guests := 0
@@ -33,9 +33,12 @@ var base_payment = 10
 @export var exit_point: Node2D
 @export var max_swimmers := 12
 
+
 var swimmers_in_scene: Array = []
 var spawn_timer: float = 0.0
-@export var spawn_rate: float = 3.0 # seconds
+@export var spawn_rate: float = 3.0
+var spawn_variation_strength := 1.0
+var spawn_period := 10.0
 
 func _process(delta):
 	# Periodically try to add a new swimmer
@@ -43,16 +46,45 @@ func _process(delta):
 	if spawn_timer > spawn_rate and swimmers_in_scene.size() < max_swimmers:
 		add_swimmer()
 		spawn_timer = 0
+	if spawn_timer > get_elastic_spawn_rate() and swimmers_in_scene.size() < max_swimmers:
+		spawn_timer = 0.0
+		add_swimmer()
+		
+func get_elastic_spawn_rate() -> float:
+	var t := Time.get_unix_time_from_system()
+	var t_mod := float(int(t) % int(spawn_period)) # Ensure both int
+	var phase := t_mod / spawn_period              # Get [0,1) for phase
+	var variance := sin(phase * TAU) * spawn_variation_strength
+	return max(0.5, spawn_rate + variance)
+	
+	## Use a smooth, slightly randomized period start so not always identical cycles
+	#var t = (Time.get_unix_time_from_system() % 100000) + randi() % 10000.0
+	#var phase = ((t % int(spawn_period * 1000.0))) / (spawn_period * 1000.0)
+	#var variance := sin(phase * TAU + randf_range(0, TAU)) * spawn_variation_strength
+	#return max(0.5, spawn_rate + variance)
 
 func add_swimmer():
-	var swimmer = swimmer_scene.instantiate()
+	var swimmer:Swimmer = swimmer_scene.instantiate()
 	get_parent().add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
+	swimmer.pool = self
 	swimmer.schedule = Util.make_swim_schedule()
-	#swimmer.left_pool.connect(_on_swimmer_left_pool.bind(swimmer))
+	
+	swimmer.left_pool.connect(_on_swimmer_left_pool.bind(swimmer))
 
 func _on_swimmer_left_pool(swimmer):
 	swimmers_in_scene.erase(swimmer)
 	swimmer.queue_free() # Or pool for reuse (object pooling)
+
+
+@export var swim_managers = [Util.ACT_LAPS, Util.ACT_PLAY,Util.ACT_SWIM]
+func getActivityManager(curr_action) -> ActivityManager:
+	
+	if swim_managers.has(curr_action):
+		pass
+	
+	var act_mng:ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
+	
+	return act_mng
 	

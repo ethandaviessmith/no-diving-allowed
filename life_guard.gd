@@ -2,6 +2,9 @@
 extends CharacterBody2D
 @export var speed := 200
 
+func _ready() -> void:
+	$Sprite2D.frame = randi() % $Sprite2D.hframes
+
 func _physics_process(delta):
 	var dir = Vector2.ZERO
 	if Input.is_action_pressed("ui_right"): dir.x += 1
