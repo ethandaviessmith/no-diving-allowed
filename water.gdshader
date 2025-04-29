@@ -45,7 +45,7 @@ void fragment() {
     float shimmer_fx = shimmer * sin(uv.x * 34.0 + t * 5.0) * cos(uv.y * 38.0 + t * 3.5);
 
     // Animated normal map distortion (seamless looping if desired)
-    vec2 waved_uv = uv + 
+    vec2 waved_uv = uv +
         (texture(normal_map, uv + vec2(t, -t) * 0.14).xy - 0.5) * wave_strength +
         ripple_sum * wave_strength * 0.4 +
         shimmer_fx * 0.03;

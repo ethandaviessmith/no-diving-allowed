@@ -79,6 +79,8 @@ shape = SubResource("RectangleShape2D_mdob2")
 
 [node name="ActivityManager" type="Node2D" parent="Entrance"]
 script = ExtResource("9_87cwm")
+line_positions = NodePath(".")
+activity_position_path = NodePath(".")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="Exit" type="Area2D" parent="."]
@@ -106,22 +108,22 @@ activity_position_path = NodePath("ActNode")
 [node name="LineNode" type="Node" parent="Shower/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1510, 639)
+position = Vector2(1497, 604)
 
 [node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1461, 642)
+position = Vector2(1448, 607)
 
 [node name="LinePos3" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1415, 643)
+position = Vector2(1402, 608)
 
 [node name="LinePos4" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1413, 696)
+position = Vector2(1400, 661)
 
 [node name="LinePos5" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1466, 695)
+position = Vector2(1453, 660)
 
 [node name="LinePos6" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1513, 694)
+position = Vector2(1500, 659)
 
 [node name="ActNode" type="Node2D" parent="Shower/ActivityManager"]
 

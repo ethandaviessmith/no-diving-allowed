@@ -1,12 +1,10 @@
 class_name ActivityManager extends Node2D
 
-#@export var slot_count: int = 1                  # How many simultaneous swimmers can use this (default 1)
-
-@export var line_positions: NodePath      # Assign Position2D/Node2D nodes for line slots in Inspector
+@export var line_positions: NodePath    
 @onready var line_nodes: Array[Node2D] = []
-@export var activity_position_path: NodePath     # Interaction/perform position node Path
+@export var activity_position_path: NodePath 
 @onready var activity_positions: Array[Node2D] = []
-var current_swimmers: Array = []
+var current_swimmers: Array[Swimmer] = []
 var line_queue: Array = []
 
 func _ready():
@@ -25,6 +23,10 @@ func _ready():
 				activity_positions.append_array(node.get_children())
 			else:
 				activity_positions.append(node)
+				
+	current_swimmers.resize(activity_positions.size())
+	for i in current_swimmers.size():
+		current_swimmers[i] = null
 
 func has_open_direct_slot() -> bool:
 	return current_swimmers.size() < activity_positions.size() + 1
@@ -32,49 +34,58 @@ func has_open_direct_slot() -> bool:
 func has_available_line_position() -> bool:
 	return line_nodes.size() > 0 and line_queue.size() < line_nodes.size()
 
-# Approach & slot logic
 func try_queue_swimmer(swimmer) -> bool:
-	# Priority: fill direct slots if possible
-	if has_open_direct_slot():
-		current_swimmers.append(swimmer)
-		swimmer.target_activity = self
-		#if activity_positions.size() > 0:
-			#swimmer.target_activity = activity_positions[current_swimmers.find(swimmer)]
-		#else:
-		#swimmer.curr_action = null # so current matches
-		# Always go to unique activity pos if provided, else fall back to self.global_position
-		swimmer.begin_approach_to_activity(self)
-		return true
+	for i in current_swimmers.size():
+		if current_swimmers[i] == null:
+			current_swimmers[i] = swimmer
+			swimmer.target_activity = self
+			swimmer.begin_approach_to_activity(self)
+			return true
 
-	# Otherwise: queue if space
 	if has_available_line_position():
 		line_queue.append(swimmer)
 		swimmer.get_in_line(line_nodes[line_queue.size() - 1].global_position)
 	else:
-		# Otherwise: instruct to wander
 		swimmer.state = swimmer.State.WANDERING
 		swimmer._setup_wander_and_go(swimmer.curr_action)
 	return false
 
-func get_interaction_pos(swimmer:Swimmer) -> Vector2:
-	if activity_positions.size() > 0:
-		if current_swimmers.has(swimmer) and activity_positions.size() < current_swimmers.find(swimmer):
-			return activity_positions[current_swimmers.find(swimmer)].global_position
-		else:
-			return activity_positions[min(current_swimmers.size(), activity_positions.size() - 1)].global_position
-	return global_position
 
-func notify_done(swimmer):
-	# Swimmer finished their activity/action: remove them from slot, promote line.
-	current_swimmers.erase(swimmer)
+func assign_swimmer_to_slot(swimmer:Swimmer) -> int:
+	for i in current_swimmers.size():
+		if current_swimmers[i] == null:
+			current_swimmers[i] = swimmer
+			return i
+	return -1 # No free slot
+
+func release_swimmer_from_slot(swimmer:Swimmer):
+	for i in current_swimmers.size():
+		if current_swimmers[i] == swimmer:
+			current_swimmers[i] = null
+			break
+
+func get_interaction_pos(swimmer:Swimmer) -> Vector2:
+	if activity_positions.size() > 1:
+		for i in current_swimmers.size():
+			if current_swimmers[i] == swimmer:
+				return activity_positions[i].global_position
+	return global_position # Default/fallback
+
+
+func notify_done(swimmer: Swimmer) -> void:
+	release_swimmer_from_slot(swimmer)
 	_process_next_in_line()
 
-func _process_next_in_line():
-	if has_open_direct_slot() and line_queue.size() > 0:
-		var next_swimmer = line_queue.pop_front()
-		current_swimmers.append(next_swimmer)
-		next_swimmer.try_leave_line_and_use_activity(self)
-		_cascade_line_queue()
+func _process_next_in_line() -> void:
+	if line_queue.is_empty():
+		return
+	for i in current_swimmers.size():
+		if current_swimmers[i] == null:
+			var swimmer = line_queue.pop_front()
+			current_swimmers[i] = swimmer
+			swimmer.try_leave_line_and_use_activity(self)
+			_cascade_line_queue()
+			break # Only fill one free slot per call
 
 func _cascade_line_queue():
 	# Moves line_queue swimmers forward as far as possible through open positions
