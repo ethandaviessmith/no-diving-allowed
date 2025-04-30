@@ -7,6 +7,9 @@ class_name ActivityManager extends Node2D
 var current_swimmers: Array[Swimmer] = []
 var line_queue: Array = []
 
+@export var wander_area: NodePath
+@onready var wander_area_ref: Area2D
+
 func _ready():
 	if line_positions != NodePath():
 		var node = get_node_or_null(line_positions)
@@ -27,6 +30,8 @@ func _ready():
 	current_swimmers.resize(activity_positions.size())
 	for i in current_swimmers.size():
 		current_swimmers[i] = null
+	if wander_area != NodePath():
+		wander_area_ref = get_node_or_null(wander_area)
 
 func has_open_direct_slot() -> bool:
 	return current_swimmers.size() < activity_positions.size() + 1
@@ -47,8 +52,15 @@ func try_queue_swimmer(swimmer) -> bool:
 		swimmer.get_in_line(line_nodes[line_queue.size() - 1].global_position)
 	else:
 		swimmer.state = swimmer.State.WANDERING
-		swimmer._setup_wander_and_go(swimmer.curr_action)
+		send_swimmer_to_wander(swimmer)
 	return false
+
+func send_swimmer_to_wander(swimmer):
+	if wander_area_ref:
+		swimmer._setup_wander_and_go_with_area(wander_area_ref)
+	else:
+		Log.pr("Missing Wander Area", name)
+		pass #swimmer._setup_wander_and_go(swimmer.curr_action)
 
 
 func assign_swimmer_to_slot(swimmer:Swimmer) -> int:

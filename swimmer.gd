@@ -14,6 +14,12 @@ var move_target: Vector2
 var speed: float = 120
 @onready var state_label: Label = $Label
 
+var base_speed := 120
+var wander_speed_range := Vector2(40, 80)
+var wander_pause_range := Vector2(0.5, 2.5)
+var pause_timer := 0.0
+var wandering_paused := false
+
 signal left_pool
 
 func _ready():
@@ -49,7 +55,7 @@ func start_next_action():
 		return
 
 	curr_action = schedule[0]
-	schedule.remove_at(0)
+	
 	#var activity_manager = Util.get_activity_manager(curr_action)
 	var activity_manager: ActivityManager = pool.getActivityManager(curr_action)
 	if activity_manager:
@@ -57,6 +63,7 @@ func start_next_action():
 			target_activity = activity_manager
 			if (activity_manager.try_queue_swimmer(self)):
 				begin_approach_to_activity(activity_manager)
+				schedule.remove_at(0)
 		else:
 			if activity_manager.has_available_line_position():
 				target_activity = activity_manager
@@ -64,23 +71,44 @@ func start_next_action():
 				activity_manager.try_queue_swimmer(self)
 			else:
 				state = State.WANDERING
-				_setup_wander_and_go(curr_action)
+				#_setup_wander_and_go(curr_action)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH_TASK
 	move_target = activity_manager.get_interaction_pos(self)
 
 func _step_move():
-	var dist = global_position.distance_to(move_target)
-	if dist > 6:
-		velocity = (move_target - global_position).normalized() * speed
-		move_and_slide()
+	if state == State.WANDERING:
+		# Handle wait-at-point:
+		if wandering_paused:
+			pause_timer -= get_physics_process_delta_time()
+			if pause_timer <= 0:
+				wandering_paused = false
+				if wander_index < wander_points.size():
+					move_target = wander_points[wander_index]
+		else:
+			var dist = global_position.distance_to(move_target)
+			var speed = randf_range(wander_speed_range.x, wander_speed_range.y)
+			if dist > 6:
+				velocity = (move_target - global_position).normalized() * speed
+				move_and_slide()
+			else:
+				velocity = Vector2.ZERO
+				# Arrived at point, so pause a bit before next:
+				wandering_paused = true
+				pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
+				_check_wander()
 	else:
-		if state == State.APPROACH_TASK:
+		var dist = global_position.distance_to(move_target)
+		velocity = (move_target - global_position).normalized() * base_speed
+		if dist > 6:
+			move_and_slide()
+		# Handle arrival as before:
+		elif state == State.APPROACH_TASK:
 			state = State.PERFORM_ACTIVITY
 			_do_perform_activity()
-		elif state == State.WANDERING:
-			_process_wander()
+		elif state == State.IN_LINE:
+			pass # line move, if any other custom arrivals
 
 func get_in_line(line_pos: Vector2):
 	state = State.IN_LINE
@@ -102,27 +130,34 @@ func _on_PerformDone():
 	curr_action = null
 	start_next_action()
 
-func _setup_wander_and_go(action):
-	var area = get_node('/root/Pool/LockerRoom') #Util.pick_random_wander_area_for(action)
-	if not area: 
-		state = State.IDLE
+func _setup_wander_and_go_with_area(area: Area2D):
+	var shape = Util.get_area_shape(area)
+	clear_wander()
+	if shape == null:
+		wander_points = [area.global_position]
 		return
 	wander_points.clear()
-	var shape = area.get_node("CollisionShape2D").shape
 	var count = randi_range(3, 6)
 	for i in count:
 		wander_points.append(Util.rand_point_within_shape(shape, area.global_position))
-	wander_index = 0
-	move_target = wander_points[wander_index]
 
-func _process_wander():
-	await get_tree().create_timer(randf_range(1.0, 3.0)).timeout
-	wander_index += 1
-	if wander_index < wander_points.size():
-		move_target = wander_points[wander_index]
+func _check_wander():
+	var target_point = wander_points[wander_index]
+	if move_target == target_point:
+		if global_position.distance_to(target_point) < 10.0:
+			wander_index += 1
+			if wander_index >= wander_points.size():
+				clear_wander()
+				state = State.IDLE
+				start_next_action()
 	else:
-		start_next_action()
+		if wander_index < wander_points.size():
+			move_target = target_point
+			Log.pr("wander", global_position.distance_to(target_point))
 
+func clear_wander():
+	wander_index = 0
+	wander_points.clear()
 
 ## Duration
 var activity_start_time: float = 0
