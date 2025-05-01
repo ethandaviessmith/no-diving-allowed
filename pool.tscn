@@ -22,7 +22,7 @@ size = Vector2(51, 20)
 size = Vector2(741, 455)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3nhhx"]
-size = Vector2(337.5, 126)
+size = Vector2(346.5, 61.5)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point", "exit_point")]
 script = ExtResource("1_bslhr")
@@ -135,6 +135,26 @@ position = Vector2(1500, 659)
 [node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/ActNode"]
 position = Vector2(0, -121)
 
+[node name="LockerDebug" type="Node2D" parent="."]
+position = Vector2(1289, 828)
+
+[node name="ActivityManager" type="Node2D" parent="LockerDebug"]
+position = Vector2(-1, 25)
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../LockerRoom")
+
+[node name="LineNode" type="Node" parent="LockerDebug/ActivityManager"]
+
+[node name="LinePos1" type="Node2D" parent="LockerDebug/ActivityManager/LineNode"]
+position = Vector2(1351, 904)
+
+[node name="ActNode" type="Node2D" parent="LockerDebug/ActivityManager"]
+
+[node name="LinePos1" type="Node2D" parent="LockerDebug/ActivityManager/ActNode"]
+position = Vector2(128, 11)
+
 [node name="Locker" type="Node2D" parent="."]
 position = Vector2(1289, 828)
 
@@ -150,10 +170,28 @@ wander_area = NodePath("../../LockerRoom")
 [node name="LinePos1" type="Node2D" parent="Locker/ActivityManager/LineNode"]
 position = Vector2(1351, 904)
 
+[node name="LinePos2" type="Node2D" parent="Locker/ActivityManager/LineNode"]
+position = Vector2(1326, 908)
+
+[node name="LinePos3" type="Node2D" parent="Locker/ActivityManager/LineNode"]
+position = Vector2(1292, 908)
+
+[node name="LinePos4" type="Node2D" parent="Locker/ActivityManager/LineNode"]
+position = Vector2(1259, 908)
+
 [node name="ActNode" type="Node2D" parent="Locker/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="Locker/ActivityManager/ActNode"]
 position = Vector2(128, 11)
+
+[node name="LinePos2" type="Node2D" parent="Locker/ActivityManager/ActNode"]
+position = Vector2(85, 8)
+
+[node name="LinePos3" type="Node2D" parent="Locker/ActivityManager/ActNode"]
+position = Vector2(41, 4)
+
+[node name="LinePos4" type="Node2D" parent="Locker/ActivityManager/ActNode"]
+position = Vector2(-24, 5)
 
 [node name="Pool" type="Area2D" parent="."]
 position = Vector2(513, 336)
@@ -295,8 +333,9 @@ position = Vector2(705, 573)
 position = Vector2(515, 926)
 script = ExtResource("2_q638n")
 
-[node name="Swimmer" parent="." instance=ExtResource("4_76ob0")]
+[node name="Swimmer" parent="." node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(1560, 988)
+pool = NodePath("..")
 
 [node name="SpawnTimer" type="Timer" parent="."]
 
@@ -318,7 +357,7 @@ position = Vector2(1560, 797)
 position = Vector2(1425, 882)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LockerRoom"]
-position = Vector2(-12.25, 13)
+position = Vector2(-23, 61.75)
 shape = SubResource("RectangleShape2D_3nhhx")
 
 [node name="Lounger" type="Node2D" parent="."]
@@ -357,41 +396,3 @@ position = Vector2(1244, 398)
 
 [node name="ActPos2" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
 position = Vector2(1386, 391)
-
-[node name="Locker2" type="Node2D" parent="."]
-position = Vector2(1289, 828)
-
-[node name="ActivityManager" type="Node2D" parent="Locker2"]
-position = Vector2(-1, 25)
-script = ExtResource("9_87cwm")
-line_positions = NodePath("LineNode")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../LockerRoom")
-
-[node name="LineNode" type="Node" parent="Locker2/ActivityManager"]
-
-[node name="LinePos1" type="Node2D" parent="Locker2/ActivityManager/LineNode"]
-position = Vector2(1351, 904)
-
-[node name="LinePos2" type="Node2D" parent="Locker2/ActivityManager/LineNode"]
-position = Vector2(1326, 908)
-
-[node name="LinePos3" type="Node2D" parent="Locker2/ActivityManager/LineNode"]
-position = Vector2(1292, 908)
-
-[node name="LinePos4" type="Node2D" parent="Locker2/ActivityManager/LineNode"]
-position = Vector2(1259, 908)
-
-[node name="ActNode" type="Node2D" parent="Locker2/ActivityManager"]
-
-[node name="LinePos1" type="Node2D" parent="Locker2/ActivityManager/ActNode"]
-position = Vector2(128, 11)
-
-[node name="LinePos2" type="Node2D" parent="Locker2/ActivityManager/ActNode"]
-position = Vector2(85, 8)
-
-[node name="LinePos3" type="Node2D" parent="Locker2/ActivityManager/ActNode"]
-position = Vector2(41, 4)
-
-[node name="LinePos4" type="Node2D" parent="Locker2/ActivityManager/ActNode"]
-position = Vector2(-24, 5)

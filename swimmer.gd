@@ -1,24 +1,42 @@
 class_name Swimmer extends CharacterBody2D
 enum State { IDLE, APPROACH_TASK, IN_LINE, WANDERING, PERFORM_ACTIVITY }
+enum PersonalityType { RANDOM, CHILD, ADULT, ATHLETE, LEISURE }
+enum Mood { GREAT, GOOD, BAD, ISSUE }
 
+@export var pool: Pool
+@export var schedule: Array = []
 var state: State = State.IDLE
-var schedule: Array = []      # Given at setup: e.g. [Util.ACT_SHOWER, Util.ACT_POOL]
-var pool: Pool
-var target_activity: Node     # Set when planning
-var curr_action = null        # e.g. Util.ACT_SHOWER
-var wait_timer: Timer
-var line_position: Vector2
-var wander_points: Array[Vector2] = []
-var wander_index: int = 0
 var move_target: Vector2
-var speed: float = 120
+var target_activity: Node
+var curr_action = null
+## Duration
+var activity_start_time: float = 0
+var activity_duration: float = 0
+var wait_timer: Timer
 @onready var state_label: Label = $Label
 
+
+var speed: float = 120
 var base_speed := 120
+var wander_points: Array[Vector2] = []
+var wander_index: int = 0
 var wander_speed_range := Vector2(40, 80)
 var wander_pause_range := Vector2(0.5, 2.5)
 var pause_timer := 0.0
 var wandering_paused := false
+
+var happiness: float = 0.8 # 0.0 (upset) to 1.0 (happy)
+var energy: float = 10.0   # 0 (empty) to 10 (full)
+var safety: float = 1.0    # 0 (danger) to 1.0 (very safe)
+var cleanliness: float = 1.0
+@export var personality_type: PersonalityType
+var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
+
+@export var mood_color_great: Color
+@export var mood_color_good: Color
+@export var mood_color_bad: Color
+@export var mood_color_issue: Color
+@onready var mood_bar: ColorRect = $MoodBar
 
 signal left_pool
 
@@ -32,6 +50,15 @@ func _ready():
 		schedule = Util.make_swim_schedule() # manual swimmers
 	update_state_label()
 	$Sprite2D.frame = randi() % $Sprite2D.hframes
+	if personality_type == PersonalityType.RANDOM:
+		personality_type = PersonalityType.values()[randi() % PersonalityType.size()]
+	if personality_type == PersonalityType.CHILD:
+		$Sprite2D.scale.y = 0.7
+		$Sprite2D.scale.x = 0.9
+	elif personality_type == PersonalityType.ATHLETE:
+		$Sprite2D.scale.x = 0.9
+	elif personality_type == PersonalityType.LEISURE:
+		$Sprite2D.scale.x = 1.1
 
 func _process(delta: float) -> void:
 	if state == State.IDLE and schedule.size() == 0:
@@ -42,6 +69,7 @@ func _process(delta: float) -> void:
 		tween.set_parallel(true)
 		tween.connect("finished", Callable(self, "queue_free"))
 		pass
+	update_mood()
 
 func _physics_process(delta):
 	if state == State.APPROACH_TASK or state == State.WANDERING or state == State.IN_LINE:
@@ -92,6 +120,8 @@ func _step_move():
 			if dist > 6:
 				velocity = (move_target - global_position).normalized() * speed
 				move_and_slide()
+				if velocity.x != 0:
+					$Sprite2D.flip_h = velocity.x < 0
 			else:
 				velocity = Vector2.ZERO
 				# Arrived at point, so pause a bit before next:
@@ -103,6 +133,8 @@ func _step_move():
 		velocity = (move_target - global_position).normalized() * base_speed
 		if dist > 6:
 			move_and_slide()
+			if velocity.x != 0:
+				$Sprite2D.flip_h = velocity.x < 0
 		# Handle arrival as before:
 		elif state == State.APPROACH_TASK:
 			state = State.PERFORM_ACTIVITY
@@ -126,7 +158,7 @@ func _on_PerformDone():
 	
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self) # tells manager to pop next in line, etc
-		Log.pr("target", "notify done", target_activity.get_parent().name, curr_action)
+		#Log.pr("target", "notify done", target_activity.get_parent().name, curr_action)
 	curr_action = null
 	start_next_action()
 
@@ -153,15 +185,11 @@ func _check_wander():
 	else:
 		if wander_index < wander_points.size():
 			move_target = target_point
-			Log.pr("wander", global_position.distance_to(target_point))
 
 func clear_wander():
 	wander_index = 0
 	wander_points.clear()
 
-## Duration
-var activity_start_time: float = 0
-var activity_duration: float = 0
 
 func _do_perform_activity():
 	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
@@ -180,3 +208,67 @@ func update_state_label():
 		dur = "%.1f" % get_state_duration_left()
 	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
 	state_label.text = txt
+
+func update_mood():
+	# Just as an example, tweak to fit your liking
+	if happiness > 0.75 and energy > 6.0 and safety > 0.7 and cleanliness > 0.8:
+		mood = Mood.GREAT
+	elif happiness > 0.5 and energy > 3.0 and safety > 0.5:
+		mood = Mood.GOOD
+	elif happiness < 0.25 or energy < 2.0 or safety < 0.3:
+		mood = Mood.BAD
+	else:
+		mood = Mood.ISSUE
+	update_mood_bar_color()
+
+func update_mood_bar_color():
+	match mood:
+		Mood.GREAT: mood_bar.color = mood_color_great
+		Mood.GOOD: mood_bar.color = mood_color_good
+		Mood.BAD: mood_bar.color = mood_color_bad
+		Mood.ISSUE: mood_bar.color = mood_color_issue
+
+func change_happiness(amount: float): 
+	happiness = clamp(happiness + amount, 0.0, 1.0)
+
+func drain_energy(amount: float = 1.0): 
+	energy = max(energy - amount, 0.0)
+
+func restore_energy(amount: float = 1.0): 
+	energy = min(energy + amount, 10.0)
+
+func change_safety(amount: float):
+	safety = clamp(safety + amount, 0.0, 1.0)
+
+func change_cleanliness(amount: float):
+	cleanliness = clamp(cleanliness + amount, 0.0, 1.0)
+
+func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[PersonalityType] = []) -> float:
+	if personality_type in less:
+		return amt * 0.5
+	if personality_type in more:
+		return amt * 1.5
+	return amt
+
+func _personality_factor(types:Array = [], base:float = 0.0) -> float:
+	return base if personality_type in types else 0.0
+
+func _on_mood_timer_timeout() -> void:
+	match state:
+		State.PERFORM_ACTIVITY:
+			var amt = 0.2
+			match curr_action:
+				Util.ACT_LOCKER, Util.ACT_SHOWER:
+					change_cleanliness(_personality_val(amt, [PersonalityType.CHILD]))
+				Util.ACT_LAPS, Util.ACT_SWIM, Util.ACT_PLAY:
+					drain_energy(_personality_val(amt, [], [PersonalityType.LEISURE]))
+				Util.ACT_SUNBATHE:
+					restore_energy(0.1)
+			# Activity random negative cleanliness
+			if randf() < 0.25 + _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.3):
+				change_cleanliness(_personality_val(-0.04, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
+		State.IN_LINE, State.WANDERING:
+			# Random down in happiness, small chance
+			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.1):
+				change_happiness(-0.04)
+	update_mood()

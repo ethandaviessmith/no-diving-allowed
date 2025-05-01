@@ -36,7 +36,7 @@ var base_payment = 10
 
 var swimmers_in_scene: Array = []
 var spawn_timer: float = 0.0
-@export var spawn_rate: float = 3.0
+@export var spawn_rate: float = 1.8
 var spawn_variation_strength := 1.0
 var spawn_period := 10.0
 

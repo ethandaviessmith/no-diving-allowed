@@ -11,7 +11,7 @@ Swimmer
 Has a schedule which involves going to and leaving the pool with random activities between
 
 Swimmers spawn with these random features:
-Mood - determines what activities are chosen (happiness)
+Mood - determines what activities are chosen (happiness) 
 Energy - determines what activities are chosen, how quickly they move
 Safety - chance of bad event happening (slipping, drowning, horseplay, bullying) (affets mood)
 Cleanliness - how much random grime left in places, grime builds up and must be cleaned (affects cleanliness and safety)
