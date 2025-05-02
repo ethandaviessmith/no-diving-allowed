@@ -100,6 +100,7 @@ shape = SubResource("RectangleShape2D_w78qj")
 script = ExtResource("9_87cwm")
 line_positions = NodePath(".")
 activity_position_path = NodePath(".")
+wander_area = null
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="Shower" type="Area2D" parent="."]
@@ -113,7 +114,7 @@ position = Vector2(-4, 1)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../LockerRoom")
+wander_area = null
 
 [node name="LineNode" type="Node" parent="Shower/ActivityManager"]
 
@@ -214,7 +215,8 @@ position = Vector2(537, 348)
 position = Vector2(606, 18)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
-activity_paths_path = NodePath("Node2D")
+activity_position_path = NodePath("ActNode")
+wander_area = null
 
 [node name="LineNode" type="Node" parent="PoolLaps/ActivityManager"]
 
@@ -250,21 +252,10 @@ position = Vector2(788, 302)
 [node name="ActPos4" type="Node2D" parent="PoolLaps/ActivityManager/ActNode"]
 position = Vector2(723, 335)
 
-[node name="Node2D" type="Node2D" parent="PoolLaps/ActivityManager"]
-
-[node name="Path2D" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
-position = Vector2(-606, -18)
+[node name="Path2D" type="Path2D" parent="PoolLaps"]
 curve = SubResource("Curve2D_3nhhx")
 
-[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D"]
-position = Vector2(559, -65)
-rotation = -3.13669
-
-[node name="Path2D2" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
-position = Vector2(-606, 37)
-curve = SubResource("Curve2D_3nhhx")
-
-[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D2"]
+[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/Path2D"]
 position = Vector2(559, -65)
 rotation = -3.13669
 
@@ -275,6 +266,7 @@ position = Vector2(903, 341)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = null
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="LineNode" type="Node" parent="PoolSwim/ActivityManager"]
@@ -318,6 +310,7 @@ position = Vector2(1028, 530)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = null
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="LineNode" type="Node" parent="PoolPlay/ActivityManager"]
@@ -392,6 +385,7 @@ position = Vector2(1192, 348)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = null
 
 [node name="LineNode" type="Node2D" parent="Lounger/ActivityManager"]
 position = Vector2(-19, 186)

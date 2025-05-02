@@ -12,11 +12,12 @@ var curr_action = null
 ## Duration
 var activity_start_time: float = 0
 var activity_duration: float = 0
-var wait_timer: Timer
+@onready var wait_timer: Timer = $WaitTimer
 @onready var state_label: Label = $Label
 
 
 var speed: float = 120
+var swim_speed: float = 80
 var base_speed := 120
 var wander_points: Array[Vector2] = []
 var wander_index: int = 0
@@ -38,18 +39,18 @@ var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
 @export var mood_color_issue: Color
 @onready var mood_bar: ColorRect = $MoodBar
 
+var path_follow: PathFollow2D = null
+var path_direction: int = 1
+var path_progress: float = 0.0
+var is_on_lane: bool = false
+
 signal left_pool
 
 func _ready():
-	wait_timer = Timer.new()
-	wait_timer.one_shot = true
-	add_child(wait_timer)
-	wait_timer.connect("timeout", Callable(self, "_on_PerformDone"))
-	wait_timer.start()
 	if schedule.is_empty():
 		schedule = Util.make_swim_schedule() # manual swimmers
 	update_state_label()
-	$Sprite2D.frame = randi() % $Sprite2D.hframes
+	$Sprite2D.frame = randi() % 4
 	if personality_type == PersonalityType.RANDOM:
 		personality_type = PersonalityType.values()[randi() % PersonalityType.size()]
 	if personality_type == PersonalityType.CHILD:
@@ -70,6 +71,30 @@ func _process(delta: float) -> void:
 		tween.connect("finished", Callable(self, "queue_free"))
 		pass
 	update_mood()
+	
+	if !is_on_lane:
+		return
+	var length = path_follow.get_parent().curve.get_baked_length()
+	path_follow.progress_ratio += path_direction * swim_speed * delta / length
+	
+	# Clamp and swap direction to bounce at ends
+	if path_follow.progress_ratio >= 1 - path_buffer:
+		path_follow.progress_ratio = 1.0 - path_buffer
+		path_direction = -1
+	elif path_follow.progress_ratio <= path_buffer:
+		path_follow.progress_ratio = path_buffer
+		path_direction = 1
+
+	global_position = path_follow.global_position # Follows path
+
+const path_buffer := 0.08
+
+func start_lap_movement():
+	is_on_lane = true
+	path_direction = 1
+	path_follow.progress_ratio = 0.0
+	$AnimationPlayer.play("swim")
+
 
 func _physics_process(delta):
 	if state == State.APPROACH_TASK or state == State.WANDERING or state == State.IN_LINE:
@@ -153,14 +178,6 @@ func try_leave_line_and_use_activity(activity_manager):
 	state = State.APPROACH_TASK
 	move_target = activity_manager.get_interaction_pos(self)
 
-func _on_PerformDone():
-	state = State.IDLE
-	
-	if target_activity and target_activity.has_method("notify_done"):
-		target_activity.notify_done(self) # tells manager to pop next in line, etc
-		#Log.pr("target", "notify done", target_activity.get_parent().name, curr_action)
-	curr_action = null
-	start_next_action()
 
 func _setup_wander_and_go_with_area(area: Area2D):
 	var shape = Util.get_area_shape(area)
@@ -272,3 +289,10 @@ func _on_mood_timer_timeout() -> void:
 			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.1):
 				change_happiness(-0.04)
 	update_mood()
+
+func _on_wait_timer_timeout() -> void:
+	state = State.IDLE
+	if target_activity and target_activity.has_method("notify_done"):
+		target_activity.notify_done(self) # tells manager to pop next in line, etc
+	curr_action = null
+	start_next_action()

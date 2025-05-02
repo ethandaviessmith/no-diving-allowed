@@ -1,9 +1,63 @@
-[gd_scene load_steps=4 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=8 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="2_q2u11"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
+
+[sub_resource type="Animation" id="Animation_q2u11"]
+resource_name = "idle"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_mest2"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_w3fy5"]
+resource_name = "swim"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.166667, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [5, 5, 8]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_r5jdi"]
+_data = {
+&"RESET": SubResource("Animation_mest2"),
+&"idle": SubResource("Animation_q2u11"),
+&"swim": SubResource("Animation_w3fy5")
+}
 
 [node name="Swimmer" type="CharacterBody2D"]
 y_sort_enabled = true
@@ -39,9 +93,20 @@ horizontal_alignment = 1
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, -31)
 texture = ExtResource("2_q2u11")
-hframes = 4
+hframes = 9
 
 [node name="MoodTimer" type="Timer" parent="."]
 autostart = true
 
+[node name="WaitTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+autostart = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_r5jdi")
+}
+
 [connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
+[connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]

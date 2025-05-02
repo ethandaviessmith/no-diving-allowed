@@ -113,7 +113,6 @@ position = Vector2(-4, 1)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../LockerRoom")
 
 [node name="LineNode" type="Node" parent="Shower/ActivityManager"]
 
