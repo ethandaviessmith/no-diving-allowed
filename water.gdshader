@@ -53,7 +53,7 @@ void fragment() {
     // Sun spot (“specular” highlight): moving with time, always on water
     vec2 sun_pos = vec2(0.4 + 0.3 * sin(t * 0.25), 0.2 + 0.4 * cos(t * 0.18));
     float sun_radius = 0.11 + shimmer * 0.09;
-    float sun = smoothstep(sun_radius, sun_radius * 0.7, distance(uv, sun_pos)) * 1.6;
+    float sun = smoothstep(sun_radius, sun_radius * 0.7, distance(uv, sun_pos)) * 4.6;
     // Sun fade along the bottom (optional)
     sun *= smoothstep(0.2, 0.0, uv.y);
 

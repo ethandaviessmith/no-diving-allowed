@@ -44,13 +44,16 @@ var path_direction: int = 1
 var path_progress: float = 0.0
 var is_on_lane: bool = false
 
+var _queued_path_follow: PathFollow2D = null
+var sprite_frame
 signal left_pool
 
 func _ready():
 	if schedule.is_empty():
 		schedule = Util.make_swim_schedule() # manual swimmers
 	update_state_label()
-	$Sprite2D.frame = randi() % 4
+	sprite_frame = randi() % 4
+	$Sprite2D.frame = sprite_frame
 	if personality_type == PersonalityType.RANDOM:
 		personality_type = PersonalityType.values()[randi() % PersonalityType.size()]
 	if personality_type == PersonalityType.CHILD:
@@ -74,6 +77,7 @@ func _process(delta: float) -> void:
 	
 	if !is_on_lane:
 		return
+	
 	var length = path_follow.get_parent().curve.get_baked_length()
 	path_follow.progress_ratio += path_direction * swim_speed * delta / length
 	
@@ -84,17 +88,23 @@ func _process(delta: float) -> void:
 	elif path_follow.progress_ratio <= path_buffer:
 		path_follow.progress_ratio = path_buffer
 		path_direction = 1
+	$Sprite2D.flip_h = path_direction > 0
 
 	global_position = path_follow.global_position # Follows path
 
-const path_buffer := 0.08
+const path_buffer := 0.00
 
 func start_lap_movement():
 	is_on_lane = true
-	path_direction = 1
-	path_follow.progress_ratio = 0.0
+	path_direction = -1
+	path_follow.progress_ratio = path_buffer
 	$AnimationPlayer.play("swim")
 
+func end_lap_movement():
+	is_on_lane = false
+	path_follow = null
+	$AnimationPlayer.stop()
+	$Sprite2D.frame = sprite_frame
 
 func _physics_process(delta):
 	if state == State.APPROACH_TASK or state == State.WANDERING or state == State.IN_LINE:
@@ -167,6 +177,18 @@ func _step_move():
 		elif state == State.IN_LINE:
 			pass # line move, if any other custom arrivals
 
+func _do_perform_activity():
+	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
+	activity_start_time = Time.get_ticks_msec() / 1000.0
+	wait_timer.start(activity_duration)
+	update_state_label()
+	
+	# NEW LAP HANDLING:
+	# If about to do laps and assigned _queued_path_follow, do the attach/setup now:
+	if _queued_path_follow:
+		target_activity.swimmer_attach_to_path(self, _queued_path_follow)
+		_queued_path_follow = null # Clear after starting laps
+
 func get_in_line(line_pos: Vector2):
 	state = State.IN_LINE
 	move_target = line_pos # line position slot
@@ -208,11 +230,6 @@ func clear_wander():
 	wander_points.clear()
 
 
-func _do_perform_activity():
-	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
-	activity_start_time = Time.get_ticks_msec() / 1000.0
-	wait_timer.start(activity_duration)
-	update_state_label()
 
 func get_state_duration_left() -> float:
 	if state == State.PERFORM_ACTIVITY:
@@ -291,6 +308,7 @@ func _on_mood_timer_timeout() -> void:
 	update_mood()
 
 func _on_wait_timer_timeout() -> void:
+	if is_on_lane: end_lap_movement()
 	state = State.IDLE
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self) # tells manager to pop next in line, etc

@@ -23,9 +23,9 @@ size = Vector2(741, 455)
 
 [sub_resource type="Curve2D" id="Curve2D_3nhhx"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 559, -65, 0, 0, 0, 0, 151, -67, 0, 0, 0, 0, -126, -67)
+"points": PackedVector2Array(0, 0, 0, 0, -138, -61, 0, 0, 0, 0, 93, -83, 0, 0, 0, 0, 329, -55, 0, 0, 0, 0, 452, -74, 0, 0, 0, 0, 565, -63)
 }
-point_count = 3
+point_count = 5
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3nhhx"]
 size = Vector2(346.5, 61.5)
@@ -204,11 +204,11 @@ position = Vector2(-24, 5)
 position = Vector2(513, 336)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
-position = Vector2(232.5, 150.5)
+position = Vector2(248, 141)
 shape = SubResource("RectangleShape2D_08ey2")
 
 [node name="PoolLaps" type="Node2D" parent="."]
-position = Vector2(537, 348)
+position = Vector2(1149, 330)
 
 [node name="ActivityManager" type="Node2D" parent="PoolLaps"]
 position = Vector2(606, 18)
@@ -251,22 +251,26 @@ position = Vector2(788, 302)
 position = Vector2(723, 335)
 
 [node name="Node2D" type="Node2D" parent="PoolLaps/ActivityManager"]
+position = Vector2(-612, -39)
 
 [node name="Path2D" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
-position = Vector2(-606, -18)
+position = Vector2(-613, 48)
 curve = SubResource("Curve2D_3nhhx")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D"]
-position = Vector2(559, -65)
-rotation = -3.13669
+position = Vector2(-138, -61)
+rotation = -0.0949517
+loop = false
 
 [node name="Path2D2" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
-position = Vector2(-606, 37)
+position = Vector2(-613, 103)
+scale = Vector2(1, 1.10732)
 curve = SubResource("Curve2D_3nhhx")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D2"]
-position = Vector2(559, -65)
-rotation = -3.13669
+position = Vector2(-138, -61)
+rotation = -0.0949517
+loop = false
 
 [node name="PoolSwim" type="Node2D" parent="."]
 position = Vector2(903, 341)
@@ -359,8 +363,9 @@ position = Vector2(515, 926)
 script = ExtResource("2_q638n")
 
 [node name="Swimmer" parent="." node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
-position = Vector2(1560, 988)
+position = Vector2(408, 404)
 pool = NodePath("..")
+schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
 
 [node name="SpawnTimer" type="Timer" parent="."]
 

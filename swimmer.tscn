@@ -5,9 +5,8 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
 
-[sub_resource type="Animation" id="Animation_q2u11"]
-resource_name = "idle"
-length = 0.1
+[sub_resource type="Animation" id="Animation_mest2"]
+length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -21,8 +20,9 @@ tracks/0/keys = {
 "values": [0]
 }
 
-[sub_resource type="Animation" id="Animation_mest2"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_q2u11"]
+resource_name = "idle"
+length = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true

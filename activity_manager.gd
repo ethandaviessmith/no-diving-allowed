@@ -47,23 +47,19 @@ func has_open_direct_slot() -> bool:
 func has_available_line_position() -> bool:
 	return line_nodes.size() > 0 and line_queue.size() < line_nodes.size()
 
-#func try_queue_swimmer(swimmer: Swimmer) -> bool:
-	#for i in current_swimmers.size():
-		#if current_swimmers[i] == null:
-			#current_swimmers[i] = swimmer
-			#swimmer.target_activity = self
-			#swimmer.begin_approach_to_activity(self)
-			#return true
 
 func try_queue_swimmer(swimmer):
 	for i in activity_positions.size():
+		
 		var node = activity_positions[i]
 		if node is Path2D:
-			# Path2D lane: assign only if free
 			var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
 			if path_follow and current_swimmers[i] == null:
 				current_swimmers[i] = swimmer
-				swimmer_attach_to_path(swimmer, path_follow)
+				swimmer.target_activity = self
+				# Save selected path_follow in swimmer, use attach later:
+				swimmer._queued_path_follow = path_follow
+				swimmer.begin_approach_to_activity(self)
 				return true
 		else:
 			if current_swimmers[i] == null:
@@ -116,7 +112,13 @@ func get_interaction_pos(swimmer:Swimmer) -> Vector2:
 	if activity_positions.size() > 1:
 		for i in current_swimmers.size():
 			if current_swimmers[i] == swimmer:
-				return activity_positions[i].global_position
+				var node = activity_positions[i]
+				if node is Path2D:
+					var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
+					if path_follow:
+						return path_follow.global_position
+				else:
+					return activity_positions[i].global_position
 	return global_position # Default/fallback
 
 
@@ -135,8 +137,8 @@ func _process_next_in_line() -> void:
 			_cascade_line_queue()
 			break # Only fill one free slot per call
 
+## Moves line_queue swimmers forward through open positions
 func _cascade_line_queue():
-	# Moves line_queue swimmers forward as far as possible through open positions
 	for i in range(line_queue.size()):
 		if i < line_nodes.size():
 			line_queue[i].get_in_line(line_nodes[i].global_position)
