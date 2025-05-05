@@ -1,5 +1,5 @@
 class_name Swimmer extends CharacterBody2D
-enum State { IDLE, APPROACH_TASK, IN_LINE, WANDERING, PERFORM_ACTIVITY }
+enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT }
 enum PersonalityType { RANDOM, CHILD, ADULT, ATHLETE, LEISURE }
 enum Mood { GREAT, GOOD, BAD, ISSUE }
 
@@ -27,10 +27,14 @@ var wander_pause_range := Vector2(0.5, 2.5)
 var pause_timer := 0.0
 var wandering_paused := false
 
-var happiness: float = 0.8 # 0.0 (upset) to 1.0 (happy)
-var energy: float = 10.0   # 0 (empty) to 10 (full)
-var safety: float = 1.0    # 0 (danger) to 1.0 (very safe)
+var happiness: float = 0.8
+var max_happy:float = 1.0
+var energy: float = 10.0
+var max_energy: float = 10.0
+var safety: float = 1.0
+var max_safety: float = 1.0
 var cleanliness: float = 1.0
+var max_clean: float = 1.0
 @export var personality_type: PersonalityType
 var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
 
@@ -39,6 +43,12 @@ var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
 @export var mood_color_bad: Color
 @export var mood_color_issue: Color
 @onready var mood_bar: ColorRect = $MoodBar
+
+@onready var bar_happy: TextureProgressBar = $HappyProgressBar
+@onready var bar_energy: TextureProgressBar = $EnergyProgressBar
+@onready var bar_safety: TextureProgressBar = $SafetyProgressBar
+@onready var bar_clean: TextureProgressBar = $CleanProgressBar
+
 
 var path_follow: PathFollow2D = null
 var path_direction: int = 1
@@ -56,11 +66,13 @@ func _on_pool_entered(body):
 	if body == self:
 		is_swimming = true
 		splash.visible = true
+		$Sprite2D.frame = 4
 
 func _on_pool_exited(body):
 	if body == self:
 		is_swimming = false
 		splash.visible = false
+		$Sprite2D.frame = sprite_frame
 
 func set_pool(_pool, s):
 	pool = _pool
@@ -126,10 +138,10 @@ func end_lap_movement():
 	is_on_lane = false
 	path_follow = null
 	$AnimationPlayer.stop()
-	$Sprite2D.frame = sprite_frame
+	$Sprite2D.frame = 4
 
 func _physics_process(delta):
-	if state == State.APPROACH_TASK or state == State.WANDERING or state == State.IN_LINE:
+	if state == State.APPROACH or state == State.WANDERING or state == State.IN_LINE:
 		_step_move()
 	# nothing else handled each frame
 	update_state_label()
@@ -159,7 +171,7 @@ func start_next_action():
 				#_setup_wander_and_go(curr_action)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
-	state = State.APPROACH_TASK
+	state = State.APPROACH
 	move_target = activity_manager.get_interaction_pos(self)
 
 func _step_move():
@@ -193,8 +205,8 @@ func _step_move():
 			if velocity.x != 0:
 				$Sprite2D.flip_h = velocity.x < 0
 		# Handle arrival as before:
-		elif state == State.APPROACH_TASK:
-			state = State.PERFORM_ACTIVITY
+		elif state == State.APPROACH:
+			state = State.ACT
 			_do_perform_activity()
 		elif state == State.IN_LINE:
 			pass # line move, if any other custom arrivals
@@ -205,11 +217,11 @@ func _do_perform_activity():
 	wait_timer.start(activity_duration)
 	update_state_label()
 	
-	# NEW LAP HANDLING:
-	# If about to do laps and assigned _queued_path_follow, do the attach/setup now:
-	if _queued_path_follow:
-		target_activity.swimmer_attach_to_path(self, _queued_path_follow)
-		_queued_path_follow = null # Clear after starting laps
+	var node = target_activity.get_activity_node(self)
+	if node is Path2D:
+		var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
+		if path_follow:
+			target_activity.swimmer_attach_to_path(self, path_follow)
 
 func get_in_line(line_pos: Vector2):
 	state = State.IN_LINE
@@ -219,7 +231,7 @@ func try_leave_line_and_use_activity(activity_manager):
 	if schedule[0] == curr_action: # only try if expected
 		schedule.pop_front()
 	target_activity = activity_manager
-	state = State.APPROACH_TASK
+	state = State.APPROACH
 	move_target = activity_manager.get_interaction_pos(self)
 
 
@@ -254,13 +266,13 @@ func clear_wander():
 
 
 func get_state_duration_left() -> float:
-	if state == State.PERFORM_ACTIVITY:
+	if state == State.ACT:
 		return max(0.0, (activity_start_time + activity_duration) - (Time.get_ticks_msec() / 1000.0))
 	return 0.0
 
 func update_state_label():
 	var dur = ""
-	if state == State.PERFORM_ACTIVITY:
+	if state == State.ACT:
 		dur = "%.1f" % get_state_duration_left()
 	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
 	state_label.text = txt
@@ -276,6 +288,11 @@ func update_mood():
 	else:
 		mood = Mood.ISSUE
 	update_mood_bar_color()
+	set_mood_progress(bar_happy, happiness, max_happy)
+	set_mood_progress(bar_energy, energy, max_energy)
+	set_mood_progress(bar_safety, safety, max_safety)
+	set_mood_progress(bar_clean, cleanliness, max_clean)
+
 
 func update_mood_bar_color():
 	match mood:
@@ -283,6 +300,16 @@ func update_mood_bar_color():
 		Mood.GOOD: mood_bar.color = mood_color_good
 		Mood.BAD: mood_bar.color = mood_color_bad
 		Mood.ISSUE: mood_bar.color = mood_color_issue
+
+func set_mood_progress(bar: TextureProgressBar, value: float, max: float):
+	var ratio = value / max
+	bar.value = ratio * bar.max_value
+	if ratio > 0.66:
+		bar.modulate = Color("62ff49") # green
+	elif ratio > 0.33:
+		bar.modulate = Color("ffdd57") # yellow
+	else:
+		bar.modulate = Color("ff495b") # red
 
 func change_happiness(amount: float): 
 	happiness = clamp(happiness + amount, 0.0, 1.0)
@@ -311,7 +338,7 @@ func _personality_factor(types:Array = [], base:float = 0.0) -> float:
 
 func _on_mood_timer_timeout() -> void:
 	match state:
-		State.PERFORM_ACTIVITY:
+		State.ACT:
 			var amt = 0.2
 			match curr_action:
 				Util.ACT_LOCKER, Util.ACT_SHOWER:

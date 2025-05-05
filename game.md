@@ -21,3 +21,21 @@ Personality Type - affects what activities are chosen (child, adult, athlete, le
 LifeGuard
 Guard Chair - shows colour coding of swimmers moods (view hidden safety risks)
 whistle - distance option to sometimes resolve issue
+
+
+#TODO
+swimmer has schedule based on mood
+e.g. enter then, no schedule checks energy adds tasks
+
+mood timer uses icons to show 
+when interactible is considered gross, status icon appears above swimmer
+
+life guard has things to do
+using activities adds grime, pool activity adds debris
+is_wet chance to spill water 
+will_run toggle on swimmers
+grime or wet with will_run chance to cause accident (slip and fall)
+
+whistle (starts as small cricle that grows, circle grows around player, or arrows used to throw circle (becomes smaller on throw) to whistle far away)
+
+swimmer who heard whistle recently won't cause mischief, and will have a shorter perform_activity timer

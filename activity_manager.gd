@@ -50,23 +50,11 @@ func has_available_line_position() -> bool:
 
 func try_queue_swimmer(swimmer):
 	for i in activity_positions.size():
-		
-		var node = activity_positions[i]
-		if node is Path2D:
-			var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
-			if path_follow and current_swimmers[i] == null:
-				current_swimmers[i] = swimmer
-				swimmer.target_activity = self
-				# Save selected path_follow in swimmer, use attach later:
-				swimmer._queued_path_follow = path_follow
-				swimmer.begin_approach_to_activity(self)
-				return true
-		else:
-			if current_swimmers[i] == null:
-				current_swimmers[i] = swimmer
-				swimmer.target_activity = self
-				swimmer.begin_approach_to_activity(self)
-				return true
+		if current_swimmers[i] == null:
+			current_swimmers[i] = swimmer
+			swimmer.target_activity = self
+			swimmer.begin_approach_to_activity(self)
+			return true
 	if has_available_line_position():
 		line_queue.append(swimmer)
 		swimmer.get_in_line(line_nodes[line_queue.size() - 1].global_position)
@@ -74,6 +62,12 @@ func try_queue_swimmer(swimmer):
 		swimmer.state = swimmer.State.WANDERING
 		send_swimmer_to_wander(swimmer)
 	return false
+
+func get_activity_node(swimmer):
+	for i in current_swimmers.size():
+		if current_swimmers[i] == swimmer:
+			return activity_positions[i]
+	return null
 
 func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 	swimmer.path_follow = path_follow           # Keep a reference for back-and-forth logic

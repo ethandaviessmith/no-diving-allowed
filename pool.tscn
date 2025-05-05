@@ -37,15 +37,16 @@ swimmer_scene = ExtResource("4_76ob0")
 entrance_point = NodePath("Entrance")
 exit_point = NodePath("Exit")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="CementTextureRect" type="TextureRect" parent="."]
 offset_left = 180.0
 offset_top = 172.0
 offset_right = 1634.11
 offset_bottom = 1016.0
 texture = ExtResource("3_dhh87")
 stretch_mode = 1
+metadata/_edit_use_anchors_ = true
 
-[node name="ColorRect2" type="ColorRect" parent="."]
+[node name="CementColorRect" type="ColorRect" parent="."]
 texture_filter = 1
 offset_left = 179.0
 offset_top = 171.0
@@ -55,6 +56,30 @@ color = Color(0.819608, 0.72549, 0.631373, 0.396078)
 metadata/_edit_use_anchors_ = true
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
+
+[node name="LockerRoomColourRect2" type="ColorRect" parent="."]
+offset_left = 1327.0
+offset_top = 434.0
+offset_right = 1635.0
+offset_bottom = 802.0
+color = Color(0.827451, 1, 1, 0.490196)
+metadata/_edit_use_anchors_ = true
+
+[node name="LockerRoomColourRect" type="ColorRect" parent="."]
+offset_left = 1229.0
+offset_top = 802.0
+offset_right = 1634.0
+offset_bottom = 1016.0
+color = Color(1, 1, 0.772549, 0.490196)
+metadata/_edit_use_anchors_ = true
+
+[node name="PoolEdgeColourRect" type="ColorRect" parent="."]
+offset_left = 356.0
+offset_top = 330.0
+offset_right = 1139.0
+offset_bottom = 836.0
+color = Color(1, 1, 1, 0.490196)
+metadata/_edit_use_anchors_ = true
 
 [node name="StolenPool" type="Sprite2D" parent="."]
 position = Vector2(562, 465.5)
@@ -72,12 +97,12 @@ texture = ExtResource("7_08ey2")
 position = Vector2(931, 699)
 texture = ExtResource("7_08ey2")
 
-[node name="Waves" type="ColorRect" parent="."]
+[node name="WavesColourRect" type="ColorRect" parent="."]
 material = ExtResource("7_ryjux")
 offset_left = 367.0
-offset_top = 338.0
-offset_right = 749.525
-offset_bottom = 824.43
+offset_top = 341.0
+offset_right = 744.525
+offset_bottom = 823.43
 scale = Vector2(2.012, 1)
 metadata/_edit_use_anchors_ = true
 
@@ -150,13 +175,11 @@ position = Vector2(-1, -88)
 
 [node name="Sprite2D" type="Sprite2D" parent="Shower"]
 position = Vector2(-136, -133)
-scale = Vector2(1.4, 1.4)
 texture = ExtResource("7_dhh87")
 hframes = 3
 
 [node name="Sprite2D2" type="Sprite2D" parent="Shower"]
 position = Vector2(-6, -133)
-scale = Vector2(1.4, 1.4)
 texture = ExtResource("7_dhh87")
 hframes = 3
 
@@ -190,19 +213,20 @@ line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 wander_area = NodePath("../../LockerRoom")
 
-[node name="LineNode" type="Node" parent="Locker/ActivityManager"]
+[node name="LineNode" type="Node2D" parent="Locker/ActivityManager"]
+position = Vector2(67, 50)
 
 [node name="LinePos1" type="Node2D" parent="Locker/ActivityManager/LineNode"]
-position = Vector2(1351, 904)
+position = Vector2(-19, 17)
 
 [node name="LinePos2" type="Node2D" parent="Locker/ActivityManager/LineNode"]
-position = Vector2(1326, 908)
+position = Vector2(-43, 17)
 
 [node name="LinePos3" type="Node2D" parent="Locker/ActivityManager/LineNode"]
-position = Vector2(1292, 908)
+position = Vector2(-75, 17)
 
 [node name="LinePos4" type="Node2D" parent="Locker/ActivityManager/LineNode"]
-position = Vector2(1259, 908)
+position = Vector2(149, 17)
 
 [node name="ActNode" type="Node2D" parent="Locker/ActivityManager"]
 
@@ -216,7 +240,7 @@ position = Vector2(59, 3)
 position = Vector2(16, 3)
 
 [node name="LinePos4" type="Node2D" parent="Locker/ActivityManager/ActNode"]
-position = Vector2(-28, 3)
+position = Vector2(268, 3)
 
 [node name="Sprite2D" type="Sprite2D" parent="Locker"]
 position = Vector2(-21.8001, -26.8)
@@ -252,6 +276,20 @@ scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
 hframes = 3
 frame = 2
+
+[node name="Sprite2D7" type="Sprite2D" parent="Locker"]
+position = Vector2(256, -26.8)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D6" type="Sprite2D" parent="Locker"]
+position = Vector2(312, -26.8)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 1
 
 [node name="Pool" type="Area2D" parent="."]
 position = Vector2(513, 336)
