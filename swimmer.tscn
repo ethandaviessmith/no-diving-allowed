@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=13 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="2_q2u11"]
@@ -59,13 +59,45 @@ _data = {
 &"swim": SubResource("Animation_w3fy5")
 }
 
-[node name="Swimmer" type="CharacterBody2D"]
+[sub_resource type="Gradient" id="Gradient_q2u11"]
+offsets = PackedFloat32Array(0, 0.158482, 0.779018, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.113667, 0.367242, 0.707878, 1, 0.113671, 0.367329, 0.707998, 0.950852, 0.113725, 0.368627, 0.709804, 0.215686)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_mest2"]
+gradient = SubResource("Gradient_q2u11")
+
+[sub_resource type="Curve" id="Curve_w3fy5"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.456175, 0.231041), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_r5jdi"]
+curve = SubResource("Curve_w3fy5")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_q6fjm"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 19.18
+angle_min = 80.0
+angle_max = 100.0
+direction = Vector3(1, -29.663, 0)
+spread = 54.643
+initial_velocity_min = 41.67
+initial_velocity_max = 160.87
+gravity = Vector3(0, 460.415, 0)
+damping_min = 0.8
+damping_max = 1.2
+scale_min = 4.0
+scale_max = 5.4
+scale_curve = SubResource("CurveTexture_r5jdi")
+color_ramp = SubResource("GradientTexture1D_mest2")
+
+[node name="Swimmer" type="CharacterBody2D" groups=["swimmer"]]
 y_sort_enabled = true
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_2pdhi")
-mood_color_great = Color(0.0918188, 0.563222, 0.389423, 1)
-mood_color_good = Color(0.469954, 0.447358, 0.36948, 1)
+mood_color_great = Color(0.212695, 0.424158, 0.970611, 1)
+mood_color_good = Color(0.132411, 0.526883, 0.326739, 1)
 mood_color_bad = Color(0.632349, 0.217379, 0.203615, 1)
 
 [node name="MoodBar" type="ColorRect" parent="."]
@@ -107,6 +139,14 @@ autostart = true
 libraries = {
 &"": SubResource("AnimationLibrary_r5jdi")
 }
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+position = Vector2(0, -27)
+amount = 40
+lifetime = 0.51
+speed_scale = 0.4
+explosiveness = 0.2
+process_material = SubResource("ParticleProcessMaterial_q6fjm")
 
 [connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]

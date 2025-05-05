@@ -2,6 +2,7 @@ class_name Pool extends Node2D
 
 @export var max_guests := 8
 var guests := 0
+@onready var poolArea2D:Area2D = $Pool
 
 func _on_spawn_timer_timeout():
 	if guests < max_guests: # Capacity Check
@@ -27,7 +28,6 @@ var base_payment = 10
 #var tip = int(base_payment * swimmer.mood)
 #add_money(tip)
 
-
 @export var swimmer_scene: PackedScene
 @export var entrance_point: Node2D
 @export var exit_point: Node2D
@@ -39,6 +39,13 @@ var spawn_timer: float = 0.0
 @export var spawn_rate: float = 1.8
 var spawn_variation_strength := 1.0
 var spawn_period := 10.0
+
+func _ready():
+	for swimmer in get_tree().get_nodes_in_group("swimmer"):
+		# OR if placing as direct children:
+		# for swimmer in get_children():
+		if swimmer is Swimmer:
+			swimmer.set_pool(self, swimmer.schedule)
 
 func _process(delta):
 	# Periodically try to add a new swimmer
@@ -68,12 +75,9 @@ func add_swimmer():
 	get_parent().add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
-	swimmer.pool = self
-	swimmer.schedule = Util.make_swim_schedule()
-	
-	swimmer.left_pool.connect(_on_swimmer_left_pool.bind(swimmer))
+	swimmer.set_pool(self, Util.make_swim_schedule())
 
-func _on_swimmer_left_pool(swimmer):
+func on_swimmer_left_pool(swimmer):
 	swimmers_in_scene.erase(swimmer)
 	swimmer.queue_free() # Or pool for reuse (object pooling)
 

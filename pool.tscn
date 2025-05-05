@@ -1,15 +1,16 @@
-[gd_scene load_steps=17 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=18 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
-[ext_resource type="Script" uid="uid://j4oxuphwcgj3" path="res://life_guard.gd" id="2_q638n"]
+[ext_resource type="Texture2D" uid="uid://k17axm8huqrd" path="res://assets/concrete_texture.jpg" id="3_dhh87"]
 [ext_resource type="PackedScene" uid="uid://cvsf3liqe130j" path="res://swimmer.tscn" id="4_76ob0"]
 [ext_resource type="PackedScene" uid="uid://7lsyicgsj11u" path="res://interactable.tscn" id="5_7g16q"]
-[ext_resource type="Texture2D" uid="uid://q07o81h47myt" path="res://assets/pool_scratch.png" id="6_3nhhx"]
 [ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="6_7g16q"]
 [ext_resource type="Texture2D" uid="uid://8sb0shwr4jh3" path="res://assets/pool_tile.png" id="7_08ey2"]
+[ext_resource type="Texture2D" uid="uid://64kfbt3a7w03" path="res://assets/props.png" id="7_dhh87"]
 [ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
+[ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mdob2"]
 size = Vector2(51, 20)
@@ -19,7 +20,7 @@ size = Vector2(51, 20)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ryjux"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
-size = Vector2(741, 455)
+size = Vector2(743.5, 473.5)
 
 [sub_resource type="Curve2D" id="Curve2D_3nhhx"]
 _data = {
@@ -36,46 +37,49 @@ swimmer_scene = ExtResource("4_76ob0")
 entrance_point = NodePath("Entrance")
 exit_point = NodePath("Exit")
 
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_left = 180.0
+offset_top = 172.0
+offset_right = 1634.11
+offset_bottom = 1016.0
+texture = ExtResource("3_dhh87")
+stretch_mode = 1
+
 [node name="ColorRect2" type="ColorRect" parent="."]
 texture_filter = 1
 offset_left = 179.0
 offset_top = 171.0
 offset_right = 1637.0
 offset_bottom = 1014.0
-color = Color(0.717647, 0.780392, 0.952941, 0.901961)
+color = Color(0.819608, 0.72549, 0.631373, 0.396078)
 metadata/_edit_use_anchors_ = true
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 
 [node name="StolenPool" type="Sprite2D" parent="."]
-position = Vector2(562, 368)
+position = Vector2(562, 465.5)
 texture = ExtResource("7_08ey2")
 
 [node name="StolenPool2" type="Sprite2D" parent="."]
-position = Vector2(930, 368)
+position = Vector2(930, 465.5)
 texture = ExtResource("7_08ey2")
 
 [node name="StolenPool3" type="Sprite2D" parent="."]
-position = Vector2(563, 601.5)
+position = Vector2(563, 699)
 texture = ExtResource("7_08ey2")
 
 [node name="StolenPool4" type="Sprite2D" parent="."]
-position = Vector2(931, 601.5)
+position = Vector2(931, 699)
 texture = ExtResource("7_08ey2")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="Waves" type="ColorRect" parent="."]
 material = ExtResource("7_ryjux")
-offset_left = 356.0
-offset_top = 241.0
-offset_right = 738.525
-offset_bottom = 727.43
+offset_left = 367.0
+offset_top = 338.0
+offset_right = 749.525
+offset_bottom = 824.43
 scale = Vector2(2.012, 1)
 metadata/_edit_use_anchors_ = true
-
-[node name="PoolScratch" type="Sprite2D" parent="."]
-position = Vector2(1292, 647)
-scale = Vector2(1.32, 1.64)
-texture = ExtResource("6_3nhhx")
 
 [node name="Entrance" type="Area2D" parent="."]
 position = Vector2(1442, 1015)
@@ -115,32 +119,46 @@ line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 wander_area = NodePath("../../LockerRoom")
 
-[node name="LineNode" type="Node" parent="Shower/ActivityManager"]
+[node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
+position = Vector2(-83, -4)
 
 [node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1497, 604)
+position = Vector2(100, 0)
 
 [node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1448, 607)
+position = Vector2(51, 3)
 
 [node name="LinePos3" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1402, 608)
+position = Vector2(5, 4)
 
 [node name="LinePos4" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1400, 661)
+position = Vector2(3, 57)
 
 [node name="LinePos5" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1453, 660)
+position = Vector2(56, 56)
 
 [node name="LinePos6" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(1500, 659)
+position = Vector2(103, 55)
 
 [node name="ActNode" type="Node2D" parent="Shower/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/ActNode"]
+position = Vector2(-131, -89)
 
 [node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/ActNode"]
-position = Vector2(0, -121)
+position = Vector2(-1, -88)
+
+[node name="Sprite2D" type="Sprite2D" parent="Shower"]
+position = Vector2(-136, -133)
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("7_dhh87")
+hframes = 3
+
+[node name="Sprite2D2" type="Sprite2D" parent="Shower"]
+position = Vector2(-6, -133)
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("7_dhh87")
+hframes = 3
 
 [node name="LockerDebug" type="Node2D" parent="."]
 position = Vector2(1289, 828)
@@ -189,91 +207,113 @@ position = Vector2(1259, 908)
 [node name="ActNode" type="Node2D" parent="Locker/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="Locker/ActivityManager/ActNode"]
-position = Vector2(128, 11)
+position = Vector2(98, 4)
 
 [node name="LinePos2" type="Node2D" parent="Locker/ActivityManager/ActNode"]
-position = Vector2(85, 8)
+position = Vector2(59, 3)
 
 [node name="LinePos3" type="Node2D" parent="Locker/ActivityManager/ActNode"]
-position = Vector2(41, 4)
+position = Vector2(16, 3)
 
 [node name="LinePos4" type="Node2D" parent="Locker/ActivityManager/ActNode"]
-position = Vector2(-24, 5)
+position = Vector2(-28, 3)
+
+[node name="Sprite2D" type="Sprite2D" parent="Locker"]
+position = Vector2(-21.8001, -26.8)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D2" type="Sprite2D" parent="Locker"]
+position = Vector2(34.2, -26.8)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D3" type="Sprite2D" parent="Locker"]
+position = Vector2(90.2, -26.8)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D4" type="Sprite2D" parent="Locker"]
+position = Vector2(16, 66)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 2
+
+[node name="Sprite2D5" type="Sprite2D" parent="Locker"]
+position = Vector2(245, 66)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("7_dhh87")
+hframes = 3
+frame = 2
 
 [node name="Pool" type="Area2D" parent="."]
 position = Vector2(513, 336)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
-position = Vector2(248, 141)
+position = Vector2(233.25, 244.25)
 shape = SubResource("RectangleShape2D_08ey2")
 
 [node name="PoolLaps" type="Node2D" parent="."]
-position = Vector2(1149, 330)
+position = Vector2(1160, 410)
 
 [node name="ActivityManager" type="Node2D" parent="PoolLaps"]
-position = Vector2(606, 18)
+position = Vector2(-33, 9)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
-activity_paths_path = NodePath("Node2D")
+activity_paths_path = NodePath("PathNode2D")
 
-[node name="LineNode" type="Node" parent="PoolLaps/ActivityManager"]
+[node name="LineNode" type="Node2D" parent="PoolLaps/ActivityManager"]
+position = Vector2(-131, 85)
 
 [node name="LinePos1" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(1090, 375)
+position = Vector2(94, -1)
 
 [node name="LinePos2" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(1041, 378)
+position = Vector2(45, 2)
 
 [node name="LinePos3" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(995, 379)
+position = Vector2(-1, 3)
 
 [node name="LinePos4" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(993, 432)
+position = Vector2(-3, 56)
 
 [node name="LinePos5" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(1046, 431)
+position = Vector2(50, 55)
 
 [node name="LinePos6" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
-position = Vector2(1093, 430)
+position = Vector2(97, 54)
 
-[node name="ActNode" type="Node" parent="PoolLaps/ActivityManager"]
+[node name="PathNode2D" type="Node2D" parent="PoolLaps/ActivityManager"]
+position = Vector2(22, 3)
 
-[node name="ActPos1" type="Node2D" parent="PoolLaps/ActivityManager/ActNode"]
-position = Vector2(904, 340)
-
-[node name="ActPos2" type="Node2D" parent="PoolLaps/ActivityManager/ActNode"]
-position = Vector2(832, 302)
-
-[node name="ActPos3" type="Node2D" parent="PoolLaps/ActivityManager/ActNode"]
-position = Vector2(788, 302)
-
-[node name="ActPos4" type="Node2D" parent="PoolLaps/ActivityManager/ActNode"]
-position = Vector2(723, 335)
-
-[node name="Node2D" type="Node2D" parent="PoolLaps/ActivityManager"]
-position = Vector2(-612, -39)
-
-[node name="Path2D" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
+[node name="Path2D" type="Path2D" parent="PoolLaps/ActivityManager/PathNode2D"]
 position = Vector2(-613, 48)
 curve = SubResource("Curve2D_3nhhx")
 
-[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D"]
+[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/PathNode2D/Path2D"]
 position = Vector2(-138, -61)
 rotation = -0.0949517
 loop = false
 
-[node name="Path2D2" type="Path2D" parent="PoolLaps/ActivityManager/Node2D"]
+[node name="Path2D2" type="Path2D" parent="PoolLaps/ActivityManager/PathNode2D"]
 position = Vector2(-613, 103)
 scale = Vector2(1, 1.10732)
 curve = SubResource("Curve2D_3nhhx")
 
-[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/Node2D/Path2D2"]
+[node name="PathFollow2D" type="PathFollow2D" parent="PoolLaps/ActivityManager/PathNode2D/Path2D2"]
 position = Vector2(-138, -61)
 rotation = -0.0949517
 loop = false
 
 [node name="PoolSwim" type="Node2D" parent="."]
-position = Vector2(903, 341)
+position = Vector2(666, 553)
 
 [node name="ActivityManager" type="Node2D" parent="PoolSwim"]
 script = ExtResource("9_87cwm")
@@ -281,39 +321,39 @@ line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
-[node name="LineNode" type="Node" parent="PoolSwim/ActivityManager"]
+[node name="LineNode" type="Node2D" parent="PoolSwim/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(872, 538)
+position = Vector2(44, 10)
 
 [node name="LinePos2" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(823, 541)
+position = Vector2(-5, 13)
 
 [node name="LinePos3" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(777, 542)
+position = Vector2(-51, 14)
 
 [node name="LinePos4" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(775, 595)
+position = Vector2(-53, 67)
 
 [node name="LinePos5" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(828, 594)
+position = Vector2(0, 66)
 
 [node name="LinePos6" type="Node2D" parent="PoolSwim/ActivityManager/LineNode"]
-position = Vector2(875, 593)
+position = Vector2(47, 65)
 
-[node name="ActNode" type="Node" parent="PoolSwim/ActivityManager"]
+[node name="ActNode" type="Node2D" parent="PoolSwim/ActivityManager"]
 
 [node name="ActPos1" type="Node2D" parent="PoolSwim/ActivityManager/ActNode"]
-position = Vector2(686, 503)
+position = Vector2(-40, 172)
 
 [node name="ActPos2" type="Node2D" parent="PoolSwim/ActivityManager/ActNode"]
-position = Vector2(614, 465)
+position = Vector2(-112, 134)
 
 [node name="ActPos3" type="Node2D" parent="PoolSwim/ActivityManager/ActNode"]
-position = Vector2(570, 465)
+position = Vector2(-156, 134)
 
 [node name="ActPos4" type="Node2D" parent="PoolSwim/ActivityManager/ActNode"]
-position = Vector2(505, 498)
+position = Vector2(-221, 167)
 
 [node name="PoolPlay" type="Node2D" parent="."]
 position = Vector2(1028, 530)
@@ -324,46 +364,116 @@ line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
-[node name="LineNode" type="Node" parent="PoolPlay/ActivityManager"]
+[node name="LineNode" type="Node2D" parent="PoolPlay/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(1072, 613)
+position = Vector2(-8, 192)
 
 [node name="LinePos2" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(1023, 616)
+position = Vector2(-57, 195)
 
 [node name="LinePos3" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(977, 617)
+position = Vector2(-103, 196)
 
 [node name="LinePos4" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(975, 670)
+position = Vector2(-105, 249)
 
 [node name="LinePos5" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(1028, 669)
+position = Vector2(-52, 248)
 
 [node name="LinePos6" type="Node2D" parent="PoolPlay/ActivityManager/LineNode"]
-position = Vector2(1075, 668)
+position = Vector2(-5, 247)
 
-[node name="ActNode" type="Node" parent="PoolPlay/ActivityManager"]
+[node name="ActNode" type="Node2D" parent="PoolPlay/ActivityManager"]
 
 [node name="ActPos1" type="Node2D" parent="PoolPlay/ActivityManager/ActNode"]
-position = Vector2(886, 578)
+position = Vector2(-21, 94)
 
 [node name="ActPos2" type="Node2D" parent="PoolPlay/ActivityManager/ActNode"]
-position = Vector2(814, 540)
+position = Vector2(-93, 56)
 
 [node name="ActPos3" type="Node2D" parent="PoolPlay/ActivityManager/ActNode"]
-position = Vector2(770, 540)
+position = Vector2(-137, 56)
 
 [node name="ActPos4" type="Node2D" parent="PoolPlay/ActivityManager/ActNode"]
-position = Vector2(705, 573)
+position = Vector2(-202, 89)
+
+[node name="Lounger" type="Node2D" parent="."]
+position = Vector2(838, 220)
+
+[node name="ActivityManager" type="Node2D" parent="Lounger"]
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+
+[node name="LineNode" type="Node2D" parent="Lounger/ActivityManager"]
+position = Vector2(-19, 186)
+
+[node name="LinePos1" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(484, -178)
+
+[node name="LinePos2" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(435, -175)
+
+[node name="LinePos3" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(389, -174)
+
+[node name="LinePos4" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(391, -121)
+
+[node name="LinePos5" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(444, -122)
+
+[node name="LinePos6" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
+position = Vector2(491, -123)
+
+[node name="ActNode" type="Node2D" parent="Lounger/ActivityManager"]
+
+[node name="ActPos1" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
+position = Vector2(57, 64)
+
+[node name="ActPos2" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
+position = Vector2(199, 57)
+
+[node name="ActPos3" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
+position = Vector2(129, 63)
+
+[node name="ActPos4" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
+position = Vector2(277, 58)
+
+[node name="Sprite2D" type="Sprite2D" parent="Lounger"]
+position = Vector2(57, 33)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("10_3nhhx")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D2" type="Sprite2D" parent="Lounger"]
+position = Vector2(198, 27)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("10_3nhhx")
+hframes = 3
+frame = 2
+
+[node name="Sprite2D3" type="Sprite2D" parent="Lounger"]
+position = Vector2(130, 32)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("10_3nhhx")
+hframes = 3
+frame = 1
+
+[node name="Sprite2D4" type="Sprite2D" parent="Lounger"]
+position = Vector2(276, 28)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("10_3nhhx")
+hframes = 3
+frame = 2
 
 [node name="LifeGuard" parent="." instance=ExtResource("1_03hax")]
 position = Vector2(515, 926)
-script = ExtResource("2_q638n")
 
 [node name="Swimmer" parent="." node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
-position = Vector2(408, 404)
+position = Vector2(315, 396)
 pool = NodePath("..")
 schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
 
@@ -378,10 +488,10 @@ position = Vector2(1047, 924)
 position = Vector2(1268, 675)
 
 [node name="DirtArea2" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(1541, 442)
+position = Vector2(1487, 539)
 
 [node name="DirtArea3" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(1560, 797)
+position = Vector2(1572, 743)
 
 [node name="LockerRoom" type="Area2D" parent="." groups=["wander"]]
 position = Vector2(1425, 882)
@@ -389,40 +499,3 @@ position = Vector2(1425, 882)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LockerRoom"]
 position = Vector2(-23, 61.75)
 shape = SubResource("RectangleShape2D_3nhhx")
-
-[node name="Lounger" type="Node2D" parent="."]
-position = Vector2(1192, 348)
-
-[node name="ActivityManager" type="Node2D" parent="Lounger"]
-script = ExtResource("9_87cwm")
-line_positions = NodePath("LineNode")
-activity_position_path = NodePath("ActNode")
-
-[node name="LineNode" type="Node2D" parent="Lounger/ActivityManager"]
-position = Vector2(-19, 186)
-
-[node name="LinePos1" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(212, -68)
-
-[node name="LinePos2" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(163, -65)
-
-[node name="LinePos3" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(117, -64)
-
-[node name="LinePos4" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(119, -11)
-
-[node name="LinePos5" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(172, -12)
-
-[node name="LinePos6" type="Node2D" parent="Lounger/ActivityManager/LineNode"]
-position = Vector2(219, -13)
-
-[node name="ActNode" type="Node" parent="Lounger/ActivityManager"]
-
-[node name="ActPos1" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
-position = Vector2(1244, 398)
-
-[node name="ActPos2" type="Node2D" parent="Lounger/ActivityManager/ActNode"]
-position = Vector2(1386, 391)

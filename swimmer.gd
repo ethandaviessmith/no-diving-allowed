@@ -14,10 +14,11 @@ var activity_start_time: float = 0
 var activity_duration: float = 0
 @onready var wait_timer: Timer = $WaitTimer
 @onready var state_label: Label = $Label
+@onready var splash: GPUParticles2D = $GPUParticles2D
 
 
 var speed: float = 120
-var swim_speed: float = 80
+var swim_speed: float = 180
 var base_speed := 120
 var wander_points: Array[Vector2] = []
 var wander_index: int = 0
@@ -48,9 +49,30 @@ var _queued_path_follow: PathFollow2D = null
 var sprite_frame
 signal left_pool
 
+
+var is_swimming := false
+
+func _on_pool_entered(body):
+	if body == self:
+		is_swimming = true
+		splash.visible = true
+
+func _on_pool_exited(body):
+	if body == self:
+		is_swimming = false
+		splash.visible = false
+
+func set_pool(_pool, s):
+	pool = _pool
+	schedule = s if s != null else Util.make_swim_schedule()
+	pool.poolArea2D.body_entered.connect(_on_pool_entered)
+	pool.poolArea2D.body_exited.connect(_on_pool_exited)
+	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
+
 func _ready():
 	if schedule.is_empty():
 		schedule = Util.make_swim_schedule() # manual swimmers
+	splash.visible = false
 	update_state_label()
 	sprite_frame = randi() % 4
 	$Sprite2D.frame = sprite_frame

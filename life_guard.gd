@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var speed := 200
 
 func _ready() -> void:
-	$Sprite2D.frame = randi() % $Sprite2D.hframes
+	$Sprite2D.frame = randi() % 4
 
 func _physics_process(delta):
 	var dir = Vector2.ZERO
