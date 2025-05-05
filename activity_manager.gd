@@ -13,9 +13,32 @@ var current_swimmers: Array[Swimmer] = []
 var line_queue: Array = []
 
 
+@export var bar_clean_path: NodePath
+var bar_clean: TextureProgressBar
 
+@export var clean_tick: float = 0.01
+@export var max_clean: float = 1.0
+var clean: float = max_clean
 
+func _process(delta):
+	var was_clean = clean
+	if is_being_used():
+		if randf() < 0.05: # 5% chance per tick
+			clean = max(0.0, clean - clean_tick)
+	if clean != was_clean:
+		update_clean_bar()
+
+func get_clean_ratio() -> float:
+	return clean / max_clean if max_clean > 0.0 else 1.0
+
+func is_being_used() -> bool:
+	for swimmer in current_swimmers:
+		if swimmer != null and swimmer.state == Swimmer.State.ACT:
+			return true
+	return false
+	
 func _ready():
+	
 	line_nodes = nodes_from_path(line_positions)
 	activity_positions = nodes_from_path(activity_areas_path)
 	if activity_positions.is_empty():
@@ -28,8 +51,14 @@ func _ready():
 		current_swimmers[i] = null
 	if wander_area != NodePath():
 		wander_area_ref = get_node_or_null(wander_area)
+	if bar_clean_path:
+		bar_clean = get_node_or_null(bar_clean_path)
+		update_clean_bar()
 
-
+func update_clean_bar():
+	if bar_clean:
+		Util.set_mood_progress(bar_clean, clean, max_clean)
+		
 func nodes_from_path(path: NodePath) -> Array:
 	var result: Array = []
 	if path != NodePath():

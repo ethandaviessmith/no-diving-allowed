@@ -65,7 +65,7 @@ _data = {
 offsets = PackedFloat32Array(0, 0.158482, 0.779018, 1)
 colors = PackedColorArray(1, 1, 1, 1, 0.113667, 0.367242, 0.707878, 1, 0.113671, 0.367329, 0.707998, 0.950852, 0.113725, 0.368627, 0.709804, 0.215686)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_mest2"]
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_w3fy5"]
 gradient = SubResource("Gradient_q2u11")
 
 [sub_resource type="Curve" id="Curve_w3fy5"]
@@ -91,7 +91,7 @@ damping_max = 1.2
 scale_min = 4.0
 scale_max = 5.4
 scale_curve = SubResource("CurveTexture_r5jdi")
-color_ramp = SubResource("GradientTexture1D_mest2")
+color_ramp = SubResource("GradientTexture1D_w3fy5")
 
 [node name="Swimmer" type="CharacterBody2D" groups=["swimmer"]]
 collision_mask = 0
@@ -145,7 +145,7 @@ process_material = SubResource("ParticleProcessMaterial_q6fjm")
 
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 texture_filter = 1
-position = Vector2(-1, -79)
+position = Vector2(0, -91)
 texture = ExtResource("3_mest2")
 
 [node name="MoodBar" type="ColorRect" parent="."]
@@ -157,40 +157,40 @@ offset_bottom = -87.0
 color = Color(0.572442, 0.380153, 0.670682, 1)
 
 [node name="HappyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -8.0
-offset_top = -91.0
-offset_right = 30.0
-offset_bottom = -83.0
+offset_left = -7.0
+offset_top = -103.0
+offset_right = 31.0
+offset_bottom = -95.0
 scale = Vector2(0.5, 0.5)
 value = 100.0
 nine_patch_stretch = true
 texture_progress = ExtResource("4_w3fy5")
 
 [node name="EnergyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -8.0
-offset_top = -84.0
-offset_right = 30.0
-offset_bottom = -76.0
+offset_left = -7.0
+offset_top = -96.0
+offset_right = 31.0
+offset_bottom = -88.0
 scale = Vector2(0.5, 0.5)
 value = 100.0
 nine_patch_stretch = true
 texture_progress = ExtResource("4_w3fy5")
 
 [node name="SafetyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -8.0
-offset_top = -77.0
-offset_right = 30.0
-offset_bottom = -69.0
+offset_left = -7.0
+offset_top = -89.0
+offset_right = 31.0
+offset_bottom = -81.0
 scale = Vector2(0.5, 0.5)
 value = 100.0
 nine_patch_stretch = true
 texture_progress = ExtResource("4_w3fy5")
 
 [node name="CleanProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -8.0
-offset_top = -70.0
-offset_right = 30.0
-offset_bottom = -62.0
+offset_left = -7.0
+offset_top = -82.0
+offset_right = 31.0
+offset_bottom = -74.0
 scale = Vector2(0.5, 0.5)
 value = 100.0
 nine_patch_stretch = true

@@ -27,15 +27,15 @@ var wander_pause_range := Vector2(0.5, 2.5)
 var pause_timer := 0.0
 var wandering_paused := false
 
-var happiness: float = 0.8
-var max_happy:float = 1.0
-var energy: float = 10.0
-var max_energy: float = 10.0
-var safety: float = 1.0
-var max_safety: float = 1.0
-var cleanliness: float = 1.0
-var max_clean: float = 1.0
+@export var happy: float = 0.8
+@export var energy: float = 10.0
+@export var safety: float = 0.8
+@export var clean: float = 0.2
 @export var personality_type: PersonalityType
+var max_happy:float = 1.0
+var max_energy: float = 10.0
+var max_safety: float = 1.0
+var max_clean: float = 1.0
 var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
 
 @export var mood_color_great: Color
@@ -222,6 +222,18 @@ func _do_perform_activity():
 		var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
 		if path_follow:
 			target_activity.swimmer_attach_to_path(self, path_follow)
+	if node is Node2D:
+		for c in node.get_children():
+			if c is GPUParticles2D:
+				c.emitting = true
+				self._current_activity_particles = c
+				break
+
+var _current_activity_particles
+func _end_perform_activity():
+	if self._current_activity_particles:
+		self._current_activity_particles.emitting = false
+		self._current_activity_particles = null
 
 func get_in_line(line_pos: Vector2):
 	state = State.IN_LINE
@@ -279,19 +291,19 @@ func update_state_label():
 
 func update_mood():
 	# Just as an example, tweak to fit your liking
-	if happiness > 0.75 and energy > 6.0 and safety > 0.7 and cleanliness > 0.8:
+	if happy > 0.75 and energy > 6.0 and safety > 0.7 and clean > 0.8:
 		mood = Mood.GREAT
-	elif happiness > 0.5 and energy > 3.0 and safety > 0.5:
+	elif happy > 0.5 and energy > 3.0 and safety > 0.5:
 		mood = Mood.GOOD
-	elif happiness < 0.25 or energy < 2.0 or safety < 0.3:
+	elif happy < 0.25 or energy < 2.0 or safety < 0.3:
 		mood = Mood.BAD
 	else:
 		mood = Mood.ISSUE
 	update_mood_bar_color()
-	set_mood_progress(bar_happy, happiness, max_happy)
-	set_mood_progress(bar_energy, energy, max_energy)
-	set_mood_progress(bar_safety, safety, max_safety)
-	set_mood_progress(bar_clean, cleanliness, max_clean)
+	Util.set_mood_progress(bar_happy, happy, max_happy)
+	Util.set_mood_progress(bar_energy, energy, max_energy)
+	Util.set_mood_progress(bar_safety, safety, max_safety)
+	Util.set_mood_progress(bar_clean, clean, max_clean)
 
 
 func update_mood_bar_color():
@@ -301,18 +313,9 @@ func update_mood_bar_color():
 		Mood.BAD: mood_bar.color = mood_color_bad
 		Mood.ISSUE: mood_bar.color = mood_color_issue
 
-func set_mood_progress(bar: TextureProgressBar, value: float, max: float):
-	var ratio = value / max
-	bar.value = ratio * bar.max_value
-	if ratio > 0.66:
-		bar.modulate = Color("62ff49") # green
-	elif ratio > 0.33:
-		bar.modulate = Color("ffdd57") # yellow
-	else:
-		bar.modulate = Color("ff495b") # red
 
-func change_happiness(amount: float): 
-	happiness = clamp(happiness + amount, 0.0, 1.0)
+func change_happy(amount: float): 
+	happy = clamp(happy + amount, 0.0, 1.0)
 
 func drain_energy(amount: float = 1.0): 
 	energy = max(energy - amount, 0.0)
@@ -323,8 +326,13 @@ func restore_energy(amount: float = 1.0):
 func change_safety(amount: float):
 	safety = clamp(safety + amount, 0.0, 1.0)
 
-func change_cleanliness(amount: float):
-	cleanliness = clamp(cleanliness + amount, 0.0, 1.0)
+func change_clean(amount: float):
+	var ratio := 1.0
+	if target_activity and "get_clean_ratio" in target_activity:
+		var clean_ratio = target_activity.get_clean_ratio()
+		if amount > 0: ratio = lerp(0.5, 1.5, clean_ratio)
+		else: ratio = lerp(1.5, 0.5, clean_ratio)
+	clean = clamp(clean + amount * ratio, 0.0, 1.0)
 
 func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[PersonalityType] = []) -> float:
 	if personality_type in less:
@@ -342,21 +350,22 @@ func _on_mood_timer_timeout() -> void:
 			var amt = 0.2
 			match curr_action:
 				Util.ACT_LOCKER, Util.ACT_SHOWER:
-					change_cleanliness(_personality_val(amt, [PersonalityType.CHILD]))
+					change_clean(_personality_val(amt, [PersonalityType.CHILD]))
 				Util.ACT_LAPS, Util.ACT_SWIM, Util.ACT_PLAY:
 					drain_energy(_personality_val(amt, [], [PersonalityType.LEISURE]))
 				Util.ACT_SUNBATHE:
 					restore_energy(0.1)
-			# Activity random negative cleanliness
+			# Activity random negative clean
 			if randf() < 0.25 + _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.3):
-				change_cleanliness(_personality_val(-0.04, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
+				change_clean(_personality_val(-0.04, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
 		State.IN_LINE, State.WANDERING:
-			# Random down in happiness, small chance
+			# Random down in happy, small chance
 			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.1):
-				change_happiness(-0.04)
+				change_happy(-0.04)
 	update_mood()
 
 func _on_wait_timer_timeout() -> void:
+	_end_perform_activity()
 	if is_on_lane: end_lap_movement()
 	state = State.IDLE
 	if target_activity and target_activity.has_method("notify_done"):

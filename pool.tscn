@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=25 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -7,7 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://7lsyicgsj11u" path="res://interactable.tscn" id="5_7g16q"]
 [ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="6_7g16q"]
 [ext_resource type="Texture2D" uid="uid://8sb0shwr4jh3" path="res://assets/pool_tile.png" id="7_08ey2"]
+[ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="7_48tf8"]
 [ext_resource type="Texture2D" uid="uid://64kfbt3a7w03" path="res://assets/props.png" id="7_dhh87"]
+[ext_resource type="Texture2D" uid="uid://dmq4ril00ymqj" path="res://assets/debug_bar_border.png" id="7_k0w2f"]
 [ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
@@ -18,6 +20,36 @@ size = Vector2(51, 20)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w78qj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ryjux"]
+
+[sub_resource type="Gradient" id="Gradient_dhh87"]
+offsets = PackedFloat32Array(0, 0.158482, 0.779018, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.113667, 0.367242, 0.707878, 1, 0.113671, 0.367329, 0.707998, 0.950852, 0.113725, 0.368627, 0.709804, 0.215686)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_mest2"]
+gradient = SubResource("Gradient_dhh87")
+
+[sub_resource type="Curve" id="Curve_48tf8"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.456175, 0.231041), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_r5jdi"]
+curve = SubResource("Curve_48tf8")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_k0w2f"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 10.0
+angle_min = -322.7
+angle_max = -193.5
+direction = Vector3(0, 1, 0)
+spread = 22.266
+initial_velocity_min = 41.67
+initial_velocity_max = 160.87
+gravity = Vector3(0, 0, 0)
+scale_min = 4.0
+scale_max = 5.4
+scale_curve = SubResource("CurveTexture_r5jdi")
+color_ramp = SubResource("GradientTexture1D_mest2")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
 size = Vector2(743.5, 473.5)
@@ -129,6 +161,7 @@ shape = SubResource("RectangleShape2D_w78qj")
 script = ExtResource("9_87cwm")
 line_positions = NodePath(".")
 activity_position_path = NodePath(".")
+wander_area = NodePath("../../LockerRoom")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="Shower" type="Area2D" parent="."]
@@ -143,6 +176,7 @@ script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 wander_area = NodePath("../../LockerRoom")
+bar_clean_path = NodePath("CleanProgressBar")
 
 [node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
 position = Vector2(-83, -4)
@@ -168,10 +202,51 @@ position = Vector2(103, 55)
 [node name="ActNode" type="Node2D" parent="Shower/ActivityManager"]
 
 [node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/ActNode"]
-position = Vector2(-131, -89)
+position = Vector2(-130, -104)
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos1"]
+z_index = 1
+position = Vector2(-3, -65)
+emitting = false
+amount = 50
+lifetime = 0.5
+speed_scale = 0.8
+explosiveness = 0.19
+visibility_rect = Rect2(-50, -10, 100, 100)
+trail_enabled = true
+trail_lifetime = 0.05
+trail_sections = 6
+process_material = SubResource("ParticleProcessMaterial_k0w2f")
 
 [node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/ActNode"]
-position = Vector2(-1, -88)
+position = Vector2(0, -103)
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos2"]
+z_index = 1
+position = Vector2(-3, -65)
+emitting = false
+amount = 50
+lifetime = 0.5
+speed_scale = 0.8
+explosiveness = 0.19
+visibility_rect = Rect2(-50, -10, 100, 100)
+trail_enabled = true
+trail_lifetime = 0.05
+trail_sections = 6
+process_material = SubResource("ParticleProcessMaterial_k0w2f")
+
+[node name="CleanProgressBar" type="TextureProgressBar" parent="Shower/ActivityManager"]
+modulate = Color(0.157268, 0.399016, 0.0942399, 1)
+texture_filter = 1
+offset_left = -158.0
+offset_top = -210.0
+offset_right = -60.0
+offset_bottom = -184.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_over = ExtResource("7_k0w2f")
+texture_progress = ExtResource("7_48tf8")
 
 [node name="Sprite2D" type="Sprite2D" parent="Shower"]
 position = Vector2(-136, -133)
@@ -514,6 +589,7 @@ position = Vector2(515, 926)
 position = Vector2(315, 396)
 pool = NodePath("..")
 schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
+clean = 1.0
 
 [node name="SpawnTimer" type="Timer" parent="."]
 

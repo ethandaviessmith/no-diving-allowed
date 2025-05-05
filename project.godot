@@ -13,7 +13,7 @@ config_version=5
 config/name="No Diving Allowed"
 run/main_scene="uid://cc6p5v7grul0p"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://b04o1mwy35ysn"
 
 [display]
 

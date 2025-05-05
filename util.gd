@@ -18,7 +18,7 @@ const POOL_EXIT := [ACT_SHOWER, ACT_LOCKER, ACT_EXIT]
 const ACTIVITY_DURATION := {
 	ACT_ENTRANCE: 0.2,
 	ACT_LOCKER: 1.5,
-	ACT_SHOWER: 8.0,
+	ACT_SHOWER: 0.54,
 	ACT_LAPS: 12.0,
 	ACT_SWIM: 12.0,
 	ACT_PLAY: 12.0,
@@ -54,3 +54,14 @@ static func get_area_shape(area: Area2D):
 		if child is CollisionShape2D and child.shape is RectangleShape2D:
 			return child.shape
 	return null
+
+
+static func set_mood_progress(bar: TextureProgressBar, value: float, max: float):
+	var ratio = value / max
+	bar.value = ratio * bar.max_value
+	if ratio > 0.66:
+		bar.modulate = Color("62ff49") # green
+	elif ratio > 0.33:
+		bar.modulate = Color("ffdd57") # yellow
+	else:
+		bar.modulate = Color("ff495b") # red
