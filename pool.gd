@@ -3,6 +3,8 @@ class_name Pool extends Node2D
 @export var max_guests := 8
 var guests := 0
 @onready var poolArea2D:Area2D = $Pool
+@onready var poolSwimmers: Node2D = $PoolSwimmers
+@onready var poolDirt: Node2D = $PoolDirt
 
 func _on_spawn_timer_timeout():
 	if guests < max_guests: # Capacity Check
@@ -31,7 +33,7 @@ var base_payment = 10
 @export var swimmer_scene: PackedScene
 @export var entrance_point: Node2D
 @export var exit_point: Node2D
-@export var max_swimmers := 12
+@export var max_swimmers := 18
 
 
 var swimmers_in_scene: Array = []
@@ -72,7 +74,7 @@ func get_elastic_spawn_rate() -> float:
 
 func add_swimmer():
 	var swimmer:Swimmer = swimmer_scene.instantiate()
-	get_parent().add_child(swimmer)
+	poolSwimmers.add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
 	swimmer.set_pool(self, Util.make_swim_schedule())

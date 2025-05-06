@@ -14,10 +14,8 @@ var activity_start_time: float = 0
 var activity_duration: float = 0
 @onready var wait_timer: Timer = $WaitTimer
 @onready var state_label: Label = $Label
-@onready var splash: GPUParticles2D = $GPUParticles2D
+@onready var splash: GPUParticles2D = $SwimmingGPUParticles2D
 
-
-var speed: float = 120
 var swim_speed: float = 180
 var base_speed := 120
 var wander_points: Array[Vector2] = []
@@ -54,13 +52,18 @@ var path_follow: PathFollow2D = null
 var path_direction: int = 1
 var path_progress: float = 0.0
 var is_on_lane: bool = false
+const path_buffer := 0.00
 
 var _queued_path_follow: PathFollow2D = null
 var sprite_frame
 signal left_pool
-
-
 var is_swimming := false
+@export var puddle_scene: PackedScene # Drag your Dirt scene in the editor
+@onready var drip_particles: GPUParticles2D = $DrippingGPUParticles2D
+var is_wet: bool = false
+var wet_timer: Timer = null
+var in_puddle: Area2D = null
+var puddle_slow := 0.5
 
 func _on_pool_entered(body):
 	if body == self:
@@ -73,6 +76,8 @@ func _on_pool_exited(body):
 		is_swimming = false
 		splash.visible = false
 		$Sprite2D.frame = sprite_frame
+		is_wet = true
+		start_wet_timer()
 
 func set_pool(_pool, s):
 	pool = _pool
@@ -126,7 +131,8 @@ func _process(delta: float) -> void:
 
 	global_position = path_follow.global_position # Follows path
 
-const path_buffer := 0.00
+func _get_walk_speed() -> float:
+	return base_speed * puddle_slow if in_puddle else base_speed
 
 func start_lap_movement():
 	is_on_lane = true
@@ -185,9 +191,9 @@ func _step_move():
 					move_target = wander_points[wander_index]
 		else:
 			var dist = global_position.distance_to(move_target)
-			var speed = randf_range(wander_speed_range.x, wander_speed_range.y)
-			if dist > 6:
-				velocity = (move_target - global_position).normalized() * speed
+			var wander_speed = randf_range(wander_speed_range.x, wander_speed_range.y)
+			if dist > 2:
+				velocity = (move_target - global_position).normalized() * wander_speed
 				move_and_slide()
 				if velocity.x != 0:
 					$Sprite2D.flip_h = velocity.x < 0
@@ -199,8 +205,8 @@ func _step_move():
 				_check_wander()
 	else:
 		var dist = global_position.distance_to(move_target)
-		velocity = (move_target - global_position).normalized() * base_speed
-		if dist > 6:
+		velocity = (move_target - global_position).normalized() * _get_walk_speed()
+		if dist > 2:
 			move_and_slide()
 			if velocity.x != 0:
 				$Sprite2D.flip_h = velocity.x < 0
@@ -362,13 +368,54 @@ func _on_mood_timer_timeout() -> void:
 			# Random down in happy, small chance
 			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.1):
 				change_happy(-0.04)
+	if in_puddle:
+		safety -= 0.2
+	else: safety += 0.05
 	update_mood()
 
 func _on_wait_timer_timeout() -> void:
 	_end_perform_activity()
 	if is_on_lane: end_lap_movement()
+	if curr_action == Util.ACT_SHOWER:
+			is_wet = true
+			start_wet_timer()
 	state = State.IDLE
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self) # tells manager to pop next in line, etc
 	curr_action = null
 	start_next_action()
+	
+func start_wet_timer():
+	if wet_timer: wet_timer.queue_free()
+	wet_timer = Timer.new()
+	wet_timer.wait_time = 0.7 # Set duration as fits your design
+	wet_timer.one_shot = false
+	wet_timer.autostart = true
+	add_child(wet_timer)
+	wet_timer.timeout.connect(_on_wet_tick)
+	drip_particles.emitting = true
+
+func _on_wet_tick():
+	if not is_wet:
+		return
+	# Small random chance to spawn a puddle at swimmer's feet
+	var base_chance = 0.2
+	var bonus = 0.4 if in_puddle else 0
+	if randf() < base_chance: 
+		_spawn_puddle()
+
+	# End wet effect randomly (or by timer duration)
+	if randf() < 0.27:
+		is_wet = false
+		drip_particles.emitting = false
+		wet_timer.queue_free()
+
+func _spawn_puddle():
+	if in_puddle and is_instance_valid(in_puddle):
+		in_puddle.make_bigger()
+	else:
+		var node = puddle_scene.instantiate()
+		if node.has_method("setup"):
+			node.setup(node.DirtType.PUDDLE)
+		node.position = position + Vector2(randf_range(-10,10), randf_range(0,10))
+		pool.poolDirt.add_child(node)

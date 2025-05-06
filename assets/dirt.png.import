@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t8hi4cjwx7yo"
-path="res://.godot/imported/interactables3.png-39ff06cf818632a28ed7526f6015968a.ctex"
+uid="uid://c6sw4aofd3gty"
+path="res://.godot/imported/dirt.png-0a1ee02e0310eb6b032db25fe6920ea9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/interactables3.png"
-dest_files=["res://.godot/imported/interactables3.png-39ff06cf818632a28ed7526f6015968a.ctex"]
+source_file="res://assets/dirt.png"
+dest_files=["res://.godot/imported/dirt.png-0a1ee02e0310eb6b032db25fe6920ea9.ctex"]
 
 [params]
 

@@ -65,11 +65,21 @@ size = Vector2(346.5, 61.5)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point", "exit_point")]
 script = ExtResource("1_bslhr")
+max_guests = 12
 swimmer_scene = ExtResource("4_76ob0")
 entrance_point = NodePath("Entrance")
 exit_point = NodePath("Exit")
 
-[node name="CementTextureRect" type="TextureRect" parent="."]
+[node name="Visuals" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TileMapLayer" type="TileMapLayer" parent="Visuals"]
+
+[node name="CementTextureRect" type="TextureRect" parent="Visuals"]
+layout_mode = 0
 offset_left = 180.0
 offset_top = 172.0
 offset_right = 1634.11
@@ -78,8 +88,9 @@ texture = ExtResource("3_dhh87")
 stretch_mode = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="CementColorRect" type="ColorRect" parent="."]
+[node name="CementColorRect" type="ColorRect" parent="Visuals"]
 texture_filter = 1
+layout_mode = 0
 offset_left = 179.0
 offset_top = 171.0
 offset_right = 1637.0
@@ -87,9 +98,8 @@ offset_bottom = 1014.0
 color = Color(0.819608, 0.72549, 0.631373, 0.396078)
 metadata/_edit_use_anchors_ = true
 
-[node name="TileMapLayer" type="TileMapLayer" parent="."]
-
-[node name="LockerRoomColourRect2" type="ColorRect" parent="."]
+[node name="LockerRoomColourRect2" type="ColorRect" parent="Visuals"]
+layout_mode = 0
 offset_left = 1327.0
 offset_top = 434.0
 offset_right = 1635.0
@@ -97,7 +107,8 @@ offset_bottom = 802.0
 color = Color(0.827451, 1, 1, 0.490196)
 metadata/_edit_use_anchors_ = true
 
-[node name="LockerRoomColourRect" type="ColorRect" parent="."]
+[node name="LockerRoomColourRect" type="ColorRect" parent="Visuals"]
+layout_mode = 0
 offset_left = 1229.0
 offset_top = 802.0
 offset_right = 1634.0
@@ -105,7 +116,8 @@ offset_bottom = 1016.0
 color = Color(1, 1, 0.772549, 0.490196)
 metadata/_edit_use_anchors_ = true
 
-[node name="PoolEdgeColourRect" type="ColorRect" parent="."]
+[node name="PoolEdgeColourRect" type="ColorRect" parent="Visuals"]
+layout_mode = 0
 offset_left = 356.0
 offset_top = 330.0
 offset_right = 1139.0
@@ -113,30 +125,33 @@ offset_bottom = 836.0
 color = Color(1, 1, 1, 0.490196)
 metadata/_edit_use_anchors_ = true
 
-[node name="StolenPool" type="Sprite2D" parent="."]
+[node name="StolenPool" type="Sprite2D" parent="Visuals"]
 position = Vector2(562, 465.5)
 texture = ExtResource("7_08ey2")
 
-[node name="StolenPool2" type="Sprite2D" parent="."]
+[node name="StolenPool2" type="Sprite2D" parent="Visuals"]
 position = Vector2(930, 465.5)
 texture = ExtResource("7_08ey2")
 
-[node name="StolenPool3" type="Sprite2D" parent="."]
+[node name="StolenPool3" type="Sprite2D" parent="Visuals"]
 position = Vector2(563, 699)
 texture = ExtResource("7_08ey2")
 
-[node name="StolenPool4" type="Sprite2D" parent="."]
+[node name="StolenPool4" type="Sprite2D" parent="Visuals"]
 position = Vector2(931, 699)
 texture = ExtResource("7_08ey2")
 
-[node name="WavesColourRect" type="ColorRect" parent="."]
+[node name="WavesColourRect" type="ColorRect" parent="Visuals"]
 material = ExtResource("7_ryjux")
+layout_mode = 0
 offset_left = 367.0
 offset_top = 341.0
 offset_right = 744.525
 offset_bottom = 823.43
 scale = Vector2(2.012, 1)
 metadata/_edit_use_anchors_ = true
+
+[node name="PoolDirt" type="Node2D" parent="."]
 
 [node name="Entrance" type="Area2D" parent="."]
 position = Vector2(1442, 1015)
@@ -257,26 +272,6 @@ hframes = 3
 position = Vector2(-6, -133)
 texture = ExtResource("7_dhh87")
 hframes = 3
-
-[node name="LockerDebug" type="Node2D" parent="."]
-position = Vector2(1289, 828)
-
-[node name="ActivityManager" type="Node2D" parent="LockerDebug"]
-position = Vector2(-1, 25)
-script = ExtResource("9_87cwm")
-line_positions = NodePath("LineNode")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../LockerRoom")
-
-[node name="LineNode" type="Node" parent="LockerDebug/ActivityManager"]
-
-[node name="LinePos1" type="Node2D" parent="LockerDebug/ActivityManager/LineNode"]
-position = Vector2(1351, 904)
-
-[node name="ActNode" type="Node2D" parent="LockerDebug/ActivityManager"]
-
-[node name="LinePos1" type="Node2D" parent="LockerDebug/ActivityManager/ActNode"]
-position = Vector2(128, 11)
 
 [node name="Locker" type="Node2D" parent="."]
 position = Vector2(1289, 828)
@@ -582,30 +577,33 @@ texture = ExtResource("10_3nhhx")
 hframes = 3
 frame = 2
 
-[node name="LifeGuard" parent="." instance=ExtResource("1_03hax")]
-position = Vector2(515, 926)
+[node name="DirtArea" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(787, 887)
 
-[node name="Swimmer" parent="." node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
-position = Vector2(315, 396)
-pool = NodePath("..")
-schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
-clean = 1.0
+[node name="DirtArea2" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(834, 968)
+
+[node name="DirtArea3" parent="." instance=ExtResource("6_7g16q")]
+position = Vector2(738, 967)
 
 [node name="SpawnTimer" type="Timer" parent="."]
 
 [node name="GameTimer" type="Timer" parent="."]
 
+[node name="PoolSwimmers" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Swimmer" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
+position = Vector2(315, 396)
+pool = NodePath("../..")
+schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
+clean = 1.0
+
+[node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
+position = Vector2(515, 926)
+
 [node name="Mop" parent="." instance=ExtResource("5_7g16q")]
-position = Vector2(1047, 924)
-
-[node name="DirtArea" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(1268, 675)
-
-[node name="DirtArea2" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(1487, 539)
-
-[node name="DirtArea3" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(1572, 743)
+position = Vector2(658, 923)
 
 [node name="LockerRoom" type="Area2D" parent="." groups=["wander"]]
 position = Vector2(1425, 882)
