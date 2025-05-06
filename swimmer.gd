@@ -254,7 +254,9 @@ func try_leave_line_and_use_activity(activity_manager):
 
 
 func _setup_wander_and_go_with_area(area: Area2D):
-	var shape = Util.get_area_shape(area)
+	var attrs = Util.get_area_shape_and_offset(area)
+	var shape = attrs.shape
+	var offset = attrs.offset
 	clear_wander()
 	if shape == null:
 		wander_points = [area.global_position]
@@ -262,7 +264,7 @@ func _setup_wander_and_go_with_area(area: Area2D):
 	wander_points.clear()
 	var count = randi_range(3, 6)
 	for i in count:
-		wander_points.append(Util.rand_point_within_shape(shape, area.global_position))
+		wander_points.append(Util.rand_point_within_shape(shape, area.global_position + offset))
 
 func _check_wander():
 	var target_point = wander_points[wander_index]
@@ -355,7 +357,7 @@ func _on_mood_timer_timeout() -> void:
 		State.ACT:
 			var amt = 0.2
 			match curr_action:
-				Util.ACT_LOCKER, Util.ACT_SHOWER:
+				Util.ACT_SHOWER:
 					change_clean(_personality_val(amt, [PersonalityType.CHILD]))
 				Util.ACT_LAPS, Util.ACT_SWIM, Util.ACT_PLAY:
 					drain_energy(_personality_val(amt, [], [PersonalityType.LEISURE]))

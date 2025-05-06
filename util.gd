@@ -17,7 +17,7 @@ const POOL_EXIT := [ACT_SHOWER, ACT_LOCKER, ACT_EXIT]
 
 const ACTIVITY_DURATION := {
 	ACT_ENTRANCE: 0.2,
-	ACT_LOCKER: 1.5,
+	ACT_LOCKER: 11.5,
 	ACT_SHOWER: 0.54,
 	ACT_LAPS: 12.0,
 	ACT_SWIM: 12.0,
@@ -49,6 +49,12 @@ static func rand_point_within_shape(shape: Shape2D, origin: Vector2) -> Vector2:
 		return origin + Vector2(cos(angle), sin(angle)) * radius
 	return origin # fallback
 
+static func get_area_shape_and_offset(area: Area2D):
+	for child in area.get_children():
+		if child is CollisionShape2D and child.shape:
+			return {"shape": child.shape, "offset": child.position}
+	return {"shape": null, "offset": Vector2.ZERO}
+	
 static func get_area_shape(area: Area2D):
 	for child in area.get_children():
 		if child is CollisionShape2D and child.shape is RectangleShape2D:

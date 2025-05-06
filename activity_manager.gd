@@ -4,9 +4,9 @@ class_name ActivityManager extends Node2D
 @export var activity_position_path: NodePath 
 @export var activity_areas_path: NodePath
 @export var activity_paths_path: NodePath
-@export var wander_area: NodePath
+@export var wander_area: Area2D
 
-@onready var wander_area_ref: Node = null
+#@onready var wander_area_ref = null
 @onready var line_nodes: Array = []
 @onready var activity_positions: Array = []
 var current_swimmers: Array[Swimmer] = []
@@ -49,8 +49,8 @@ func _ready():
 	current_swimmers.resize(activity_positions.size())
 	for i in current_swimmers.size():
 		current_swimmers[i] = null
-	if wander_area != NodePath():
-		wander_area_ref = get_node_or_null(wander_area)
+	#if wander_area != NodePath():
+		#wander_area_ref = get_node_or_null(wander_area)
 	if bar_clean_path:
 		bar_clean = get_node_or_null(bar_clean_path)
 		update_clean_bar()
@@ -111,8 +111,8 @@ func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 
 
 func send_swimmer_to_wander(swimmer):
-	if wander_area_ref:
-		swimmer._setup_wander_and_go_with_area(wander_area_ref)
+	if wander_area:
+		swimmer._setup_wander_and_go_with_area(wander_area)
 	else:
 		Log.pr("Missing Wander Area", name)
 		pass #swimmer._setup_wander_and_go(swimmer.curr_action)

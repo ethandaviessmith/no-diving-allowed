@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=27 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -62,6 +62,12 @@ point_count = 5
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3nhhx"]
 size = Vector2(346.5, 61.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_evgcl"]
+size = Vector2(286, 74)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k0w2f"]
+size = Vector2(175, 410)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point", "exit_point")]
 script = ExtResource("1_bslhr")
@@ -153,13 +159,22 @@ metadata/_edit_use_anchors_ = true
 
 [node name="PoolDirt" type="Node2D" parent="."]
 
+[node name="DirtArea" parent="PoolDirt" instance=ExtResource("6_7g16q")]
+position = Vector2(787, 887)
+
+[node name="DirtArea2" parent="PoolDirt" instance=ExtResource("6_7g16q")]
+position = Vector2(834, 968)
+
+[node name="DirtArea3" parent="PoolDirt" instance=ExtResource("6_7g16q")]
+position = Vector2(738, 967)
+
 [node name="Entrance" type="Area2D" parent="."]
 position = Vector2(1442, 1015)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Entrance"]
 shape = SubResource("RectangleShape2D_mdob2")
 
-[node name="ActivityManager" type="Node2D" parent="Entrance"]
+[node name="ActivityManager" type="Node2D" parent="Entrance" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath(".")
 activity_position_path = NodePath(".")
@@ -172,7 +187,7 @@ position = Vector2(1539, 1010)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Exit"]
 shape = SubResource("RectangleShape2D_w78qj")
 
-[node name="ActivityManager" type="Node2D" parent="Exit"]
+[node name="ActivityManager" type="Node2D" parent="Exit" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath(".")
 activity_position_path = NodePath(".")
@@ -185,12 +200,12 @@ position = Vector2(1567, 629)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Shower"]
 shape = SubResource("RectangleShape2D_ryjux")
 
-[node name="ActivityManager" type="Node2D" parent="Shower"]
+[node name="ActivityManager" type="Node2D" parent="Shower" node_paths=PackedStringArray("wander_area")]
 position = Vector2(-4, 1)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../LockerRoom")
+wander_area = NodePath("../../ShowerRoom")
 bar_clean_path = NodePath("CleanProgressBar")
 
 [node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
@@ -274,9 +289,10 @@ texture = ExtResource("7_dhh87")
 hframes = 3
 
 [node name="Locker" type="Node2D" parent="."]
+y_sort_enabled = true
 position = Vector2(1289, 828)
 
-[node name="ActivityManager" type="Node2D" parent="Locker"]
+[node name="ActivityManager" type="Node2D" parent="Locker" node_paths=PackedStringArray("wander_area")]
 position = Vector2(-1, 25)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
@@ -371,11 +387,12 @@ shape = SubResource("RectangleShape2D_08ey2")
 [node name="PoolLaps" type="Node2D" parent="."]
 position = Vector2(1160, 410)
 
-[node name="ActivityManager" type="Node2D" parent="PoolLaps"]
+[node name="ActivityManager" type="Node2D" parent="PoolLaps" node_paths=PackedStringArray("wander_area")]
 position = Vector2(-33, 9)
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_paths_path = NodePath("PathNode2D")
+wander_area = NodePath("../../PoolSide")
 
 [node name="LineNode" type="Node2D" parent="PoolLaps/ActivityManager"]
 position = Vector2(-131, 85)
@@ -423,10 +440,11 @@ loop = false
 [node name="PoolSwim" type="Node2D" parent="."]
 position = Vector2(666, 553)
 
-[node name="ActivityManager" type="Node2D" parent="PoolSwim"]
+[node name="ActivityManager" type="Node2D" parent="PoolSwim" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../PoolSide")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="LineNode" type="Node2D" parent="PoolSwim/ActivityManager"]
@@ -466,10 +484,11 @@ position = Vector2(-221, 167)
 [node name="PoolPlay" type="Node2D" parent="."]
 position = Vector2(1028, 530)
 
-[node name="ActivityManager" type="Node2D" parent="PoolPlay"]
+[node name="ActivityManager" type="Node2D" parent="PoolPlay" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../PoolSide")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="LineNode" type="Node2D" parent="PoolPlay/ActivityManager"]
@@ -577,15 +596,6 @@ texture = ExtResource("10_3nhhx")
 hframes = 3
 frame = 2
 
-[node name="DirtArea" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(787, 887)
-
-[node name="DirtArea2" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(834, 968)
-
-[node name="DirtArea3" parent="." instance=ExtResource("6_7g16q")]
-position = Vector2(738, 967)
-
 [node name="SpawnTimer" type="Timer" parent="."]
 
 [node name="GameTimer" type="Timer" parent="."]
@@ -609,5 +619,19 @@ position = Vector2(658, 923)
 position = Vector2(1425, 882)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LockerRoom"]
-position = Vector2(-23, 61.75)
+position = Vector2(16, 87)
 shape = SubResource("RectangleShape2D_3nhhx")
+
+[node name="ShowerRoom" type="Area2D" parent="." groups=["wander"]]
+position = Vector2(1425, 882)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ShowerRoom"]
+position = Vector2(53, -143)
+shape = SubResource("RectangleShape2D_evgcl")
+
+[node name="PoolSide" type="Area2D" parent="." groups=["wander"]]
+position = Vector2(1425, 882)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolSide"]
+position = Vector2(-190.5, -343)
+shape = SubResource("RectangleShape2D_k0w2f")
