@@ -1,6 +1,6 @@
 extends Area2D
 @export var num_dots := 12
-@export var dot_radius := 6
+@export var dot_radius := 4
 @export var growth_color: Color = Color.YELLOW
 @export var cast_color: Color = Color.DODGER_BLUE
 

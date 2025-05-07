@@ -9,6 +9,8 @@ var clean_timer = null
 var held_item: Node = null
 var held_item_offset
 
+@onready var WhistleAudioStream: AudioStreamPlayer2D = $WhistleAudioStream
+
 func _ready() -> void:
 	$Sprite2D.frame = randi() % 4
 	held_item_offset = $HeldItem.position.x
@@ -110,13 +112,15 @@ var aoe_timer := 0.0
 var charge_radius := MIN_RADIUS
 @onready var aoe = preload("res://whistle_aoe.tscn") # Make this scene first!
 var whistle_aoe : Area2D = null
-const MAX_AOE := 200.0
-const MIN_CAST_AOE := 0.5 # percentage of final size when casting
 
 var cast_dir = Vector2.ZERO
 var casting = false
 var locked = false
 var cast_unpress_timer = 0.0
+
+var lock_delay_timer: float = 0.0
+var can_release_whistle: bool = false
+
 
 func start_charge():
 	if not is_instance_valid(whistle_aoe):
@@ -167,26 +171,30 @@ func _process(delta):
 			whistle_aoe.set_mode(false)
 			whistle_aoe.show()
 	else:
-		# Reset casting state on whistle release
-		cast_dir = Vector2.ZERO
-		casting = false
-		locked = false
-		cast_unpress_timer = 0.0
-		# Show only outline
+		_reset_cast_state()
 		if is_instance_valid(whistle_aoe):
 			whistle_aoe.set_mode(true)
 
 func release_whistle():
 	if is_instance_valid(whistle_aoe):
-		# Place at world root so movement no longer impacts it
 		var old_global_pos = whistle_aoe.global_position
 		whistle_aoe.get_parent().remove_child(whistle_aoe)
 		get_tree().current_scene.add_child(whistle_aoe)
 		whistle_aoe.global_position = old_global_pos
 		whistle_aoe.release_and_fade()
 		whistle_aoe = null
-		charging = false
-		casting = false
-		locked = false
-		cast_dir = Vector2.ZERO
-		cast_unpress_timer = 0.0
+	if WhistleAudioStream:
+		var t = inverse_lerp(MIN_RADIUS, MAX_RADIUS, charge_radius) # t: 0 at MIN_RADIUS, 1 at MAX_RADIUS
+		# Set slowest pitch when fully charged, normal when smallest
+		var pitch = lerp(0.7, 1.05, 1.0 - t) # big radius = low pitch/long, small = normal
+		pitch += randf_range(-0.02, 0.02)
+		WhistleAudioStream.pitch_scale = pitch
+		WhistleAudioStream.play()
+	_reset_cast_state()
+
+func _reset_cast_state():
+	cast_dir = Vector2.ZERO
+	casting = false
+	locked = false
+	charging = false
+	cast_unpress_timer = 0.0
