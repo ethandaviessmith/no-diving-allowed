@@ -105,7 +105,7 @@ func _ready():
 
 func _process(delta: float) -> void:
 	if state == State.IDLE and schedule.size() == 0:
-		left_pool.emit(self)
+		left_pool.emit()
 		var tween = create_tween()
 		tween.tween_property(self, "modulate:a", 0, 0.4)
 		tween.tween_property(self, "scale", scale * Vector2(1.0, 0.8), 0.35)
@@ -312,6 +312,10 @@ func update_mood():
 	Util.set_mood_progress(bar_energy, energy, max_energy)
 	Util.set_mood_progress(bar_safety, safety, max_safety)
 	Util.set_mood_progress(bar_clean, clean, max_clean)
+
+func get_mood_rank() -> float:
+	var energy_rank = 1.0 - clamp(energy / max_energy, 0.0, 1.0) # flipped
+	return (clamp(happy,0.0,max_happy) + clamp(safety,0.0,max_safety) + clamp(clean,0.0,max_clean) + energy_rank) / 4.0
 
 
 func update_mood_bar_color():

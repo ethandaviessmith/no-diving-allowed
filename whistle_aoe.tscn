@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://ca8oib4wep4yf"]
+
+[ext_resource type="Script" uid="uid://bwc0rtdsls0dl" path="res://whistle_aoe.gd" id="1_o5j8m"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ujbx6"]
+
+[node name="WhistleAOE" type="Area2D"]
+script = ExtResource("1_o5j8m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ujbx6")
+
+[node name="Spinning Dots" type="Node2D" parent="."]

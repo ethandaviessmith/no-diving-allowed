@@ -14,17 +14,6 @@ func spawn_guest():
 	var s = preload("res://swimmer.tscn").instantiate()
 	s.global_position = $EntranceArea.global_position
 	add_child(s)
-	guests += 1
-	s.connect("ready_to_leave", Callable(self, "_on_guest_leave").bind(s))
-
-func _on_guest_leave(swimmer):
-	# animate out etc
-	guests -= 1
-	swimmer.queue_free()
-	# Spawn new only if >1min left - example using another Timer
-	if $GameTimer.time_left > 60:
-		spawn_guest()
-
 
 var base_payment = 10
 #var tip = int(base_payment * swimmer.mood)
@@ -42,12 +31,36 @@ var spawn_timer: float = 0.0
 var spawn_variation_strength := 1.0
 var spawn_period := 10.0
 
+## clock
+@export var day_start_hour := 9
+@export var day_end_hour := 15
+@export var day_duration_secs := 60.0
+
+var current_hour := day_start_hour
+var current_minute := 0.0
+var clock_time := 0.0 # seconds since start of day
+
+@onready var hour_hand = $PoolUI/ClockContainer/HourHand
+@onready var minute_hand = $PoolUI/ClockContainer/MinuteHand
+@onready var time_icon = $PoolUI/ClockContainer/TimeIcon
+@onready var animation_player = $PoolUI/ClockContainer/TimeIcon/AnimationPlayer
+
+var TOD_HOURS = {9:"morning", 11:"noon", 13:"afternoon", 15:"closing"}
+var tod_phase:int = 0                       # index/order in TOD_HOURS
+var tod_states = ["morning", "noon", "afternoon", "closing"]
+var next_state_hour := 9
+
+
 func _ready():
 	for swimmer in get_tree().get_nodes_in_group("swimmer"):
-		# OR if placing as direct children:
-		# for swimmer in get_children():
 		if swimmer is Swimmer:
 			swimmer.set_pool(self, swimmer.schedule)
+	_show_time_icon("morning")
+	_update_hands(0.0)
+	current_hour = day_start_hour
+	tod_phase = 0
+	next_state_hour = int(tod_states[1])
+	update_money_label()
 
 func _process(delta):
 	# Periodically try to add a new swimmer
@@ -59,6 +72,13 @@ func _process(delta):
 		spawn_timer = 0.0
 		add_swimmer()
 		
+	clock_time += delta * ((day_end_hour - day_start_hour) * 60) / day_duration_secs
+	var hour_offset = clamp(clock_time / ((day_end_hour-day_start_hour)*60),0,1)
+	current_hour = day_start_hour + int(hour_offset * (day_end_hour-day_start_hour))
+	current_minute = fmod((hour_offset * (day_end_hour-day_start_hour)*60), 60)
+	_update_hands(hour_offset)
+	_check_time_of_day_triggers(current_hour)
+
 func get_elastic_spawn_rate() -> float:
 	var t := Time.get_unix_time_from_system()
 	var t_mod := float(int(t) % int(spawn_period)) # Ensure both int
@@ -79,9 +99,16 @@ func add_swimmer():
 	swimmers_in_scene.append(swimmer)
 	swimmer.set_pool(self, Util.make_swim_schedule())
 
+
+var min_admission = 4.0
 func on_swimmer_left_pool(swimmer):
+	var mood_rank = swimmer.get_mood_rank()
+	var max_tip = 10.0
+	var donation = round(lerp(min_admission, max_tip * randf(), mood_rank))
+	change_money(donation)
+	
 	swimmers_in_scene.erase(swimmer)
-	swimmer.queue_free() # Or pool for reuse (object pooling)
+	swimmer.queue_free()
 
 
 @export var swim_managers = [Util.ACT_LAPS, Util.ACT_PLAY,Util.ACT_SWIM]
@@ -93,4 +120,43 @@ func getActivityManager(curr_action) -> ActivityManager:
 	var act_mng:ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
 	
 	return act_mng
-	
+
+
+## Clock
+func _update_hands(hour_offset: float):
+	var total_hours = day_end_hour - day_start_hour # Should be 6 for 9am–3pm
+	var hour_angle = -90 + hour_offset * 180
+	hour_hand.rotation_degrees = hour_angle
+
+	var minute_angle = fmod(hour_offset * 360.0 * total_hours, 360.0)
+	minute_hand.rotation_degrees = minute_angle
+
+func _check_time_of_day_triggers(hr:int):
+	if hr != next_state_hour and hr in TOD_HOURS:
+		_show_time_icon(TOD_HOURS[hr])
+		# Find next TOD phase
+		var next_index = tod_states.find(TOD_HOURS[hr]) + 1
+		next_state_hour = int(tod_states[next_index]) if next_index < tod_states.size() else 999 # Avoid re-trigger
+
+func _show_time_icon(state:String):
+	match state:
+		"morning": time_icon.texture = preload("res://assets/day_icons1.png")
+		"noon": time_icon.texture = preload("res://assets/day_icons2.png")
+		"afternoon": time_icon.texture = preload("res://assets/day_icons3.png")
+		"closing": time_icon.texture = preload("res://assets/day_icons4.png")
+	time_icon.modulate = Color(1,1,1,1)
+	time_icon.global_position.y =  $PoolUI/ClockContainer.position.y - 60 # tweak for float-up start position
+	#animation_player.play("float_fade") # assumes you set keyframes: floats up & fades out for 1 sec
+
+
+var money := 0
+@onready var money_label := $PoolUI/MoneyContainer/MoneyLabel
+
+func change_money(amount: int):
+	money += amount
+	update_money_label()
+@onready var anim_player = $PoolUI/MoneyContainer/AnimationPlayer
+
+func update_money_label():
+	money_label.text = "$" + str(money)
+	anim_player.play("money_change")

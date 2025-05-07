@@ -14,14 +14,10 @@ func _ready() -> void:
 	held_item_offset = $HeldItem.position.x
 
 func _physics_process(delta):
-	var dir = Vector2.ZERO
-	if Input.is_action_pressed("ui_right"): dir.x += 1
-	if Input.is_action_pressed("ui_left"): dir.x -= 1
-	if Input.is_action_pressed("ui_down"): dir.y += 1
-	if Input.is_action_pressed("ui_up"): dir.y -= 1
-	velocity = dir.normalized() * (slow_speed if cleaning else speed)
-	
-	move_and_slide()
+	if not charging:
+		var dir =  get_input_dir()
+		velocity = dir * (slow_speed if cleaning else speed)
+		move_and_slide()
 	
 	#if dir.x != 0 and sign(scale.x) != sign(dir.x):
 		#scale.x *= -1
@@ -36,6 +32,22 @@ func _input(event):
 			start_cleaning()
 	if event.is_action_released("interact") and cleaning:
 		stop_cleaning()
+	
+	if event.is_action_pressed("whistle"):
+		start_charge()
+	if charging and (event.is_action("ui_right", true) or event.is_action("ui_left", true) or event.is_action("ui_down", true) or event.is_action("ui_up", true)):
+		direction = get_input_dir() 
+		# Only read in if dir is NOT zero; stick once
+	if event.is_action_released("whistle") and charging:
+		release_whistle()
+
+func get_input_dir():
+	var dir = Vector2.ZERO
+	if Input.is_action_pressed("ui_right"): dir.x += 1
+	if Input.is_action_pressed("ui_left"): dir.x -= 1
+	if Input.is_action_pressed("ui_down"): dir.y += 1
+	if Input.is_action_pressed("ui_up"): dir.y -= 1
+	return dir.normalized()
 
 func start_cleaning():
 	cleaning = true
@@ -84,3 +96,97 @@ func interact_with_area():
 	for area in interact_zone.get_overlapping_areas():
 		if area.is_in_group("clean") and held_item != null and held_item.is_in_group("mop"):
 			area.start_clean()
+
+
+const MIN_RADIUS = 16
+const MAX_RADIUS = 128
+const CAST_SPEED = 250 # px/sec or adjust to suit game
+const LOCK_DELAY = 0.2
+
+var charging := false
+var direction := Vector2.ZERO
+var cast_position := Vector2.ZERO
+var aoe_timer := 0.0
+var charge_radius := MIN_RADIUS
+@onready var aoe = preload("res://whistle_aoe.tscn") # Make this scene first!
+var whistle_aoe : Area2D = null
+const MAX_AOE := 200.0
+const MIN_CAST_AOE := 0.5 # percentage of final size when casting
+
+var cast_dir = Vector2.ZERO
+var casting = false
+var locked = false
+var cast_unpress_timer = 0.0
+
+func start_charge():
+	if not is_instance_valid(whistle_aoe):
+		whistle_aoe = aoe.instantiate()
+		whistle_aoe.position = Vector2.ZERO
+		add_child(whistle_aoe)
+	else:
+		whistle_aoe.position = Vector2.ZERO
+		whistle_aoe.show()
+
+	charging = true
+	aoe_timer = 0.0
+	charge_radius = MIN_RADIUS
+	direction = Vector2.ZERO
+	cast_position = position
+
+func _process(delta):
+	if charging:
+		var input_dir = direction
+
+		if not locked:
+			if input_dir != Vector2.ZERO:
+				cast_dir = input_dir.normalized()
+				cast_unpress_timer = 0.0
+				casting = true
+			elif casting:
+				# Already casting, but no input
+				cast_unpress_timer += delta
+				if cast_unpress_timer >= LOCK_DELAY:
+					locked = true
+					casting = false # no longer moving/locked into place
+			else:
+				# Not moving and never casting, gradual growth in current position
+				charge_radius = clamp(charge_radius + MAX_RADIUS * delta * 0.8, MIN_RADIUS, MAX_RADIUS)
+				cast_position = global_position
+
+		if casting and not locked:
+			# Move and shrink with casting input pressed
+			cast_position += -cast_dir * CAST_SPEED * delta
+			charge_radius = max(MAX_RADIUS * 0.5, charge_radius - MAX_RADIUS * delta)
+		elif locked:
+			# Not casting anymore, after delay — size can grow again
+			charge_radius = clamp(charge_radius + MAX_RADIUS * delta * 0.8, MIN_RADIUS, MAX_RADIUS)
+			# Stay at the locked position, don't move further
+		if is_instance_valid(whistle_aoe):
+			whistle_aoe.global_position = cast_position
+			whistle_aoe.set_radius(charge_radius)
+			whistle_aoe.set_mode(false)
+			whistle_aoe.show()
+	else:
+		# Reset casting state on whistle release
+		cast_dir = Vector2.ZERO
+		casting = false
+		locked = false
+		cast_unpress_timer = 0.0
+		# Show only outline
+		if is_instance_valid(whistle_aoe):
+			whistle_aoe.set_mode(true)
+
+func release_whistle():
+	if is_instance_valid(whistle_aoe):
+		# Place at world root so movement no longer impacts it
+		var old_global_pos = whistle_aoe.global_position
+		whistle_aoe.get_parent().remove_child(whistle_aoe)
+		get_tree().current_scene.add_child(whistle_aoe)
+		whistle_aoe.global_position = old_global_pos
+		whistle_aoe.release_and_fade()
+		whistle_aoe = null
+		charging = false
+		casting = false
+		locked = false
+		cast_dir = Vector2.ZERO
+		cast_unpress_timer = 0.0

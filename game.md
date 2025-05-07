@@ -32,7 +32,7 @@ when interactible is considered gross, status icon appears above swimmer
 
 life guard has things to do
 using activities adds grime, pool activity adds debris
-is_wet chance to spill water 
+/ is_wet chance to spill water 
 will_run toggle on swimmers
 grime or wet with will_run chance to cause accident (slip and fall)
 
