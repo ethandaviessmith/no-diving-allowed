@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh1r7hwc7hkof"
-path="res://.godot/imported/day_icons1.png-3d88cce9022803d1cea11bbd9caa2987.ctex"
+uid="uid://la6iiuo7tlie"
+path="res://.godot/imported/mood_icons_trash.png-2b91739357fdf9d9bd317999f3743f74.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/day_icons1.png"
-dest_files=["res://.godot/imported/day_icons1.png-3d88cce9022803d1cea11bbd9caa2987.ctex"]
+source_file="res://assets/mood_icons_trash.png"
+dest_files=["res://.godot/imported/mood_icons_trash.png-2b91739357fdf9d9bd317999f3743f74.ctex"]
 
 [params]
 

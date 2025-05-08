@@ -4,7 +4,6 @@
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
 [ext_resource type="Texture2D" uid="uid://cucgt0jp6yk1r" path="res://assets/clock.png" id="3_75hua"]
 [ext_resource type="Texture2D" uid="uid://k17axm8huqrd" path="res://assets/concrete_texture.jpg" id="3_dhh87"]
-[ext_resource type="Texture2D" uid="uid://dh1r7hwc7hkof" path="res://assets/day_icons1.png" id="4_75hua"]
 [ext_resource type="PackedScene" uid="uid://cvsf3liqe130j" path="res://swimmer.tscn" id="4_76ob0"]
 [ext_resource type="PackedScene" uid="uid://7lsyicgsj11u" path="res://interactable.tscn" id="5_7g16q"]
 [ext_resource type="Texture2D" uid="uid://8i8u87jidq14" path="res://assets/icon_money.png" id="5_mef4y"]
@@ -14,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://64kfbt3a7w03" path="res://assets/props.png" id="7_dhh87"]
 [ext_resource type="Texture2D" uid="uid://dmq4ril00ymqj" path="res://assets/debug_bar_border.png" id="7_k0w2f"]
 [ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
+[ext_resource type="Texture2D" uid="uid://b245abhhqfvbe" path="res://assets/brick_wall_texture.jpg" id="7_xv5nx"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
 
@@ -186,14 +186,19 @@ frame = 2
 
 [node name="TimeIcon" type="Sprite2D" parent="PoolUI/ClockContainer"]
 position = Vector2(0, -47)
-texture = ExtResource("4_75hua")
+
+[node name="Panel" type="Panel" parent="PoolUI"]
+offset_left = 1487.0
+offset_top = 25.0
+offset_right = 1655.0
+offset_bottom = 111.0
 
 [node name="MoneyContainer" type="Node2D" parent="PoolUI"]
-position = Vector2(64, 88)
+position = Vector2(1504, 43)
 
 [node name="MoneyIcon" type="Sprite2D" parent="PoolUI/MoneyContainer"]
 texture_filter = 1
-position = Vector2(27, 3)
+position = Vector2(25, 6)
 scale = Vector2(1.5, 1.5)
 texture = ExtResource("5_mef4y")
 
@@ -222,6 +227,22 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="TileMapLayer" type="TileMapLayer" parent="Visuals"]
+
+[node name="CementTextureRect2" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -1.04947
+anchor_top = -0.71718
+anchor_right = 155.275
+anchor_bottom = 107.808
+offset_left = 183.979
+offset_top = 28.6872
+offset_right = 1626.0
+offset_bottom = 872.687
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="CementTextureRect" type="TextureRect" parent="Visuals"]
 layout_mode = 0

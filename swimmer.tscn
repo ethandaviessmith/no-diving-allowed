@@ -154,7 +154,7 @@ speed_scale = 0.4
 explosiveness = 0.2
 process_material = SubResource("ParticleProcessMaterial_q6fjm")
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
+[node name="DebugBar" type="Sprite2D" parent="."]
 texture_filter = 1
 position = Vector2(0, -91)
 texture = ExtResource("3_mest2")
@@ -206,6 +206,10 @@ scale = Vector2(0.5, 0.5)
 value = 100.0
 nine_patch_stretch = true
 texture_progress = ExtResource("4_w3fy5")
+
+[node name="MoodIconStack" type="Node2D" parent="."]
+position = Vector2(0, -69)
+scale = Vector2(0.5, 0.5)
 
 [connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]

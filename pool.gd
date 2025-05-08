@@ -140,10 +140,10 @@ func _check_time_of_day_triggers(hr:int):
 
 func _show_time_icon(state:String):
 	match state:
-		"morning": time_icon.texture = preload("res://assets/day_icons1.png")
-		"noon": time_icon.texture = preload("res://assets/day_icons2.png")
-		"afternoon": time_icon.texture = preload("res://assets/day_icons3.png")
-		"closing": time_icon.texture = preload("res://assets/day_icons4.png")
+		"morning": time_icon.texture = preload("res://assets/icons1.png")
+		"noon": time_icon.texture = preload("res://assets/icons2.png")
+		"afternoon": time_icon.texture = preload("res://assets/icons3.png")
+		"closing": time_icon.texture = preload("res://assets/icons4.png")
 	time_icon.modulate = Color(1,1,1,1)
 	time_icon.global_position.y =  $PoolUI/ClockContainer.position.y - 60 # tweak for float-up start position
 	#animation_player.play("float_fade") # assumes you set keyframes: floats up & fades out for 1 sec

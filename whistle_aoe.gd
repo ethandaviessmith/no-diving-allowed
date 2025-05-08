@@ -70,3 +70,10 @@ func draw_sphere(pos: Vector2, radius: float, base_color: Color):
 	var highlight_offset = Vector2(-radius * 0.18, -radius * 0.20)
 	var highlight_color = base_color.lightened(0.85)
 	draw_circle(pos + highlight_offset, radius * 0.28, highlight_color)
+
+func get_swimmers_in_area() -> Array:
+	var swimmers := []
+	for body in get_overlapping_bodies():
+		if body.is_in_group("swimmer"): # Use node groups for filter!
+			swimmers.append(body)
+	return swimmers

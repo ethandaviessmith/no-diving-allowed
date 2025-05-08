@@ -8,7 +8,7 @@ var cleaning_tween: Tween = null
 var size: int = 0
 const TYPE_DATA = {
 	DirtType.DIRT: { "start": 0, "min": 0, "max": 5 },
-	DirtType.PUDDLE: { "start": 7, "min": 7, "max": 10 }
+	DirtType.PUDDLE: { "start": 6, "min": 6, "max": 10 }
 }
 var _can_clean := true
 var _clean_cooldown := 1.0
@@ -20,13 +20,15 @@ func _ready():
 	if not sprite:
 		sprite = $Sprite2D
 	self.add_to_group("clean")
-	if size == 0:
-		type = randi() % DirtType.size()
-		var min = TYPE_DATA[type]["min"]
-		var max = TYPE_DATA[type]["max"]
-		size = randi_range(min, max)
-		Log.pr(type, size)
+	rotation = deg_to_rad(randf_range(-40, 40))
 	_update_frame()
+	if type == DirtType.PUDDLE:
+		var t = Timer.new()
+		t.one_shot = false
+		t.autostart = true
+		add_child(t)
+		t.timeout.connect(func(): if size - TYPE_DATA[type]["min"] < 3: shrink(1.0))
+		t.start(15)
 
 func start_clean():
 	if not _can_clean:
@@ -73,7 +75,7 @@ func interact():
 		make_bigger()
 		
 func _on_body_entered(body):
-	if body.is_in_group("swimmer") and body.is_wet:
+	if body.is_in_group("swimmer"):# and body.is_wet:
 		body.in_puddle = self
 
 func _on_body_exited(body):

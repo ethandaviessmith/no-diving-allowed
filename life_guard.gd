@@ -177,6 +177,9 @@ func _process(delta):
 
 func release_whistle():
 	if is_instance_valid(whistle_aoe):
+		var swimmers = whistle_aoe.get_swimmers_in_area()
+		for swimmer in swimmers:
+			swimmer.whistled_at()
 		var old_global_pos = whistle_aoe.global_position
 		whistle_aoe.get_parent().remove_child(whistle_aoe)
 		get_tree().current_scene.add_child(whistle_aoe)

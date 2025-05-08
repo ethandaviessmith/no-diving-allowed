@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://caenmd6anf11e"
-path="res://.godot/imported/day_icons4.png-6befb7ae0dc92288f28f085e97b82528.ctex"
+uid="uid://bwkgb0yox53sj"
+path="res://.godot/imported/icons6.png-b12c0dffa6b0f3b911040b531dd67b81.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/day_icons4.png"
-dest_files=["res://.godot/imported/day_icons4.png-6befb7ae0dc92288f28f085e97b82528.ctex"]
+source_file="res://assets/icons6.png"
+dest_files=["res://.godot/imported/icons6.png-b12c0dffa6b0f3b911040b531dd67b81.ctex"]
 
 [params]
 

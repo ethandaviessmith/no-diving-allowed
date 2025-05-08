@@ -17,14 +17,14 @@ const POOL_EXIT := [ACT_SHOWER, ACT_LOCKER, ACT_EXIT]
 
 const ACTIVITY_DURATION := {
 	ACT_ENTRANCE: 0.2,
-	ACT_LOCKER: 4.5,
-	ACT_SHOWER: 2.5,
+	ACT_LOCKER: 4.0,
+	ACT_SHOWER: 5.0,
 	ACT_LAPS: 12.0,
 	ACT_SWIM: 12.0,
 	ACT_PLAY: 12.0,
 	ACT_SUNBATHE: 12.0,
 	ACT_WANDER: 8.0,
-} 
+}
 
 static func make_swim_schedule() -> Array:
 	var schedule = Util.POOL_ENTER.duplicate()
