@@ -82,14 +82,14 @@ func _on_pool_exited(body):
 
 func set_pool(_pool, s):
 	pool = _pool
-	schedule = s if s != null else Util.make_swim_schedule()
+	schedule = s if s != null else Util.get_schedule_enterpool()
 	pool.poolArea2D.body_entered.connect(_on_pool_entered)
 	pool.poolArea2D.body_exited.connect(_on_pool_exited)
 	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
 
 func _ready():
 	if schedule.is_empty():
-		schedule = Util.make_swim_schedule() # manual swimmers
+		schedule = Util.get_schedule_enterpool() # manual swimmers
 	splash.visible = false
 	update_state_label()
 	sprite_frame = randi() % 4
@@ -110,17 +110,27 @@ func _physics_process(delta):
 
 func _process(delta: float) -> void:
 	if state == State.IDLE and schedule.size() == 0:
+		if energy + happy < 0.4 or happy < 0.2:
+			schedule = Util.get_schedule_exit(self)
+		elif energy < 0.5:
+			schedule = Util.get_schedule_lowenergy(self)
+		elif happy < 0.5:
+			schedule = Util.get_schedule_lowhappy(self)
+		else:
+			schedule = Util.get_schedule_random_pool(self)
+		start_next_action()
+	check_mood_actions()
+	update_mood()
+	process_lane_follow(delta)
+	update_state_label()
+
+func leave_pool():
 		left_pool.emit()
 		var tween = create_tween()
 		tween.tween_property(self, "modulate:a", 0, 0.4)
 		tween.tween_property(self, "scale", scale * Vector2(1.0, 0.8), 0.35)
 		tween.set_parallel(true)
 		tween.connect("finished", Callable(self, "queue_free"))
-	
-	check_mood_actions()
-	update_mood()
-	process_lane_follow(delta)
-	update_state_label()
 
 func process_lane_follow(delta: float):
 		if !is_on_lane:
@@ -141,6 +151,10 @@ func process_lane_follow(delta: float):
 
 func _get_walk_speed() -> float:
 	return (base_speed * 2 if is_running else base_speed) * (puddle_slow if in_puddle else 1)
+
+func _get_wander_speed() -> float:
+	var speed = randf_range(wander_speed_range.x, wander_speed_range.y)
+	return (speed * 2 if is_running else speed) * (puddle_slow if in_puddle else 1)
 
 func start_lap_movement():
 	is_on_lane = true
@@ -179,8 +193,15 @@ func start_next_action():
 				state = State.IN_LINE
 				activity_manager.try_queue_swimmer(self)
 			else:
-				state = State.WANDERING
-				#_setup_wander_and_go(curr_action)
+				state = State.WANDERING # waiting for line
+	else:
+		var area = pool.get_action_wander_area(curr_action)
+		if area:
+			schedule.remove_at(0)
+			state = State.WANDERING
+			wandering_paused = true
+			var count = randi_range(1, 2) if energy > 0.5 else randi_range(2, 5)
+			_setup_wander_and_go_with_area(area, count)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH
@@ -188,7 +209,6 @@ func begin_approach_to_activity(activity_manager: ActivityManager):
 
 func _step_move():
 	if state == State.WANDERING:
-		# Handle wait-at-point:
 		if wandering_paused:
 			pause_timer -= get_physics_process_delta_time()
 			if pause_timer <= 0:
@@ -197,7 +217,7 @@ func _step_move():
 					move_target = wander_points[wander_index]
 		else:
 			var dist = global_position.distance_to(move_target)
-			var wander_speed = randf_range(wander_speed_range.x, wander_speed_range.y)
+			var wander_speed =  _get_walk_speed() if wander_index == 0 else _get_wander_speed() # First point walk then wander
 			if dist > 2:
 				velocity = (move_target - global_position).normalized() * wander_speed
 				move_and_slide()
@@ -205,7 +225,6 @@ func _step_move():
 					$Sprite2D.flip_h = velocity.x < 0
 			else:
 				velocity = Vector2.ZERO
-				# Arrived at point, so pause a bit before next:
 				wandering_paused = true
 				pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
 				_check_wander()
@@ -216,12 +235,11 @@ func _step_move():
 			move_and_slide()
 			if velocity.x != 0:
 				$Sprite2D.flip_h = velocity.x < 0
-		# Handle arrival as before:
 		elif state == State.APPROACH:
 			state = State.ACT
 			_do_perform_activity()
 		elif state == State.IN_LINE:
-			pass # line move, if any other custom arrivals
+			pass
 
 func _do_perform_activity():
 	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
@@ -259,7 +277,7 @@ func try_leave_line_and_use_activity(activity_manager):
 	move_target = activity_manager.get_interaction_pos(self)
 
 
-func _setup_wander_and_go_with_area(area: Area2D):
+func _setup_wander_and_go_with_area(area: Area2D, count:int = 3):
 	var attrs = Util.get_area_shape_and_offset(area)
 	var shape = attrs.shape
 	var offset = attrs.offset
@@ -268,7 +286,6 @@ func _setup_wander_and_go_with_area(area: Area2D):
 		wander_points = [area.global_position]
 		return
 	wander_points.clear()
-	var count = randi_range(3, 6)
 	for i in count:
 		wander_points.append(Util.rand_point_within_shape(shape, area.global_position + offset))
 
@@ -302,7 +319,9 @@ func update_state_label():
 	state_label.text = txt
 
 func whistled_at():
-	clear_moodicons()
+	for type in misbehaves.keys():
+		remove_misbehave(type)
+	
 	if curr_action == Util.ACT_SUNBATHE and state == State.SLEEP:
 		finish_activity()
 	change_safety(0.8)
@@ -355,7 +374,7 @@ func change_clean(amount: float):
 		else: ratio = lerp(1.5, 0.5, clean_ratio)
 	clean = clamp(clean + amount * ratio, 0.0, 1.0)
 	if clean == max_clean:
-		remove_moodicon_named("trash")
+		remove_misbehave(Misbehave.TRASH)
 
 func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[PersonalityType] = []) -> float:
 	if personality_type in less:
@@ -397,7 +416,8 @@ func _on_mood_timer_timeout() -> void:
 		change_safety(0.05)
 		if safety == max_safety:
 			if randf() < 0.5:
-				
+				# lost possible bad mood icon?
+				pass
 			pass
 			
 	update_mood()
@@ -411,11 +431,14 @@ func _on_wait_timer_timeout() -> void:
 			is_wet = true
 			start_wet_timer()
 	if curr_action == Util.ACT_SUNBATHE and state == State.SLEEP:
-		if randf() < 0.8: # 80% chance, tune as needed
+		if randf() < 0.8: # 80% chance, to keep on sleeping
 			return
 	finish_activity()
 
 func finish_activity():
+	if curr_action == Util.ACT_EXIT:
+		leave_pool()
+		return
 	state = State.IDLE
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self) # tells manager to pop next in line, etc
@@ -499,7 +522,7 @@ func get_current_context() -> String:
 	return "unknown"
 
 func throw_trash():
-	show_moodicon_named("trash")
+	add_misbehave(Misbehave.TRASH)
 	print("%s throws trash!" % name)
 	change_clean(-0.05)
 	_spawn_dirt()
@@ -509,18 +532,18 @@ func toggle_run():
 	set_run(not is_running)
 
 func set_run(is_run:bool):
-	show_moodicon_named("run") if is_run else remove_moodicon_named("run")
+	add_misbehave(Misbehave.RUN) if is_run else remove_misbehave(Misbehave.RUN)
 	is_running = is_run
 	print("%s is now %s" % [name, "RUNNING" if is_running else "walking"])
 
 func splashplay():
-	show_moodicon_named("splash")
+	add_misbehave(Misbehave.SPLASH)
 	print("%s splashes loudly!" % name)
 	change_happy(0.02)
 	# Option: SFX, particles, fountain
 
 func horseplay():
-	show_moodicon_named("bad")
+	add_misbehave(Misbehave.BAD)
 	print("%s starts horseplay!" % name)
 	var affected_others = find_swimmers_nearby()
 	if affected_others.size() > 0:
@@ -530,7 +553,7 @@ func horseplay():
 			print("%s made %s unhappy!" % [name, victim.name])
 
 func fall_asleep():
-	show_moodicon_named("sleep")
+	add_misbehave(Misbehave.SLEEP)
 	print("%s falls asleep on lounger." % name)
 	energy = min(max_energy, energy + 1)
 	state = State.SLEEP
@@ -541,49 +564,48 @@ func find_swimmers_nearby() -> Array:
 		if o != self and global_position.distance_to(o.global_position) < 80.0:
 			others.append(o)
 	return others
-
-
+	
 @onready var mood_icon_stack := $MoodIconStack
-
-const MOOD_ICONS = {
-	"bad": preload("res://assets/icons5.png"),
-	"run": preload("res://assets/icons6.png"),
-	"trash": preload("res://assets/icons7.png"),
-	"splash": preload("res://assets/icons8.png"),
-	"sleep": preload("res://assets/icons9.png"),
+enum Misbehave { BAD, RUN, TRASH, SPLASH, SLEEP }
+const MISBEHAVE_ICONS = {
+	Misbehave.BAD:    preload("res://assets/icons5.png"),
+	Misbehave.RUN:    preload("res://assets/icons6.png"),
+	Misbehave.TRASH:  preload("res://assets/icons7.png"),
+	Misbehave.SPLASH: preload("res://assets/icons8.png"),
+	Misbehave.SLEEP:  preload("res://assets/icons9.png"),
 }
+var misbehaves = {} # Misbehave enum : start_time
+const MISBEHAVE_ICON_OFFSET = 32
+const MISBEHAVE_DURATION = 60
 
-func show_moodicon_named(icon_key: String):
-	var tex: Texture2D = MOOD_ICONS.get(icon_key)
-	if not tex:
-		return # fail silently if key missing
-	for c in mood_icon_stack.get_children(): # prevent duplicates
-		if c is Sprite2D and c.texture == tex:
-			return
-	var sprite := Sprite2D.new()
-	sprite.texture = tex
-	sprite.modulate.a = 1.0
-	sprite.position = Vector2(24 * mood_icon_stack.get_child_count(), 0)
-	mood_icon_stack.add_child(sprite)
+func add_misbehave(type: Misbehave):
+	if misbehaves.has(type): return
+	misbehaves[type] = Time.get_ticks_msec() / 1000.0
+	var icon = Sprite2D.new()
+	icon.texture = MISBEHAVE_ICONS[type]
+	icon.name = str(type)
+	icon.position.x = mood_icon_stack.get_child_count() * MISBEHAVE_ICON_OFFSET
+	mood_icon_stack.add_child(icon)
 
-	#var tween = create_tween()
-	#tween.tween_property(sprite, "position", sprite.position + Vector2(0, -32), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	#tween.tween_property(sprite, "modulate:a", 0.0, 0.5)
-	#tween.connect("finished", func(): sprite.queue_free())
+func has_misbehave(type: Misbehave) -> bool:
+	return misbehaves.has(type)
 
-func clear_moodicons():
-	for item in mood_icon_stack.get_children():
-		item.queue_free()
+func remove_misbehave(type: Misbehave):
+	if misbehaves.has(type):
+		misbehaves.erase(type)
+		var icon = mood_icon_stack.get_node_or_null(str(type))
+		if icon:
+			icon.queue_free()
+		_update_misbehave_icon_positions()
 
-func remove_moodicon_named(icon_key: String):
-	var tex: Texture2D = MOOD_ICONS.get(icon_key)
-	if not tex:
-		return
-	for c in mood_icon_stack.get_children():
-		if c is Sprite2D and c.texture == tex:
-			c.queue_free()
-			return
-func remove_random_moodicon():
-	var icons = mood_icon_stack.get_children()
-	if icons.size() > 0:
-		icons[randi() % icons.size()].queue_free()
+func _update_misbehave_icon_positions():
+	var i = 0
+	for icon in mood_icon_stack.get_children():
+		icon.position.x = i * MISBEHAVE_ICON_OFFSET
+		i += 1
+
+func process_misbehaves():
+	var now = Time.get_ticks_msec() / 1000.0
+	for type in misbehaves.keys():
+		if now - misbehaves[type] > MISBEHAVE_DURATION:
+			remove_misbehave(type)

@@ -97,7 +97,7 @@ func add_swimmer():
 	poolSwimmers.add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
-	swimmer.set_pool(self, Util.make_swim_schedule())
+	swimmer.set_pool(self, Util.get_schedule_enterpool())
 
 
 var min_admission = 4.0
@@ -106,9 +106,7 @@ func on_swimmer_left_pool(swimmer):
 	var max_tip = 10.0
 	var donation = round(lerp(min_admission, max_tip * randf(), mood_rank))
 	change_money(donation)
-	
 	swimmers_in_scene.erase(swimmer)
-	swimmer.queue_free()
 
 
 @export var swim_managers = [Util.ACT_LAPS, Util.ACT_PLAY,Util.ACT_SWIM]
@@ -121,6 +119,13 @@ func getActivityManager(curr_action) -> ActivityManager:
 	
 	return act_mng
 
+@export var wander_areas := {
+	Util.WANDER_POOL: NodePath("PoolSide"),
+}
+func get_action_wander_area(curr_action):
+	if wander_areas.has(curr_action):
+		return get_node_or_null(wander_areas.get(curr_action))
+	return null
 
 ## Clock
 func _update_hands(hour_offset: float):

@@ -103,11 +103,13 @@ func interact_with_area():
 const MIN_RADIUS = 16
 const MAX_RADIUS = 128
 const CAST_SPEED = 250 # px/sec or adjust to suit game
+const MAX_CAST_SPEED = 350
 const LOCK_DELAY = 0.2
 
 var charging := false
 var direction := Vector2.ZERO
 var cast_position := Vector2.ZERO
+var cast_speed := CAST_SPEED
 var aoe_timer := 0.0
 var charge_radius := MIN_RADIUS
 @onready var aoe = preload("res://whistle_aoe.tscn") # Make this scene first!
@@ -133,7 +135,7 @@ func start_charge():
 
 	charging = true
 	aoe_timer = 0.0
-	charge_radius = MIN_RADIUS
+	charge_radius = MIN_RADIUS * 3
 	direction = Vector2.ZERO
 	cast_position = position
 
@@ -159,8 +161,10 @@ func _process(delta):
 
 		if casting and not locked:
 			# Move and shrink with casting input pressed
-			cast_position += -cast_dir * CAST_SPEED * delta
-			charge_radius = max(MAX_RADIUS * 0.5, charge_radius - MAX_RADIUS * delta)
+			cast_speed = min(cast_speed + CAST_SPEED * delta, MAX_CAST_SPEED)
+			cast_position += -cast_dir * cast_speed * delta
+			#charge_radius = max(MAX_RADIUS * 0.5, charge_radius - MAX_RADIUS * delta)
+			charge_radius = MIN_RADIUS * 3
 		elif locked:
 			# Not casting anymore, after delay — size can grow again
 			charge_radius = clamp(charge_radius + MAX_RADIUS * delta * 0.8, MIN_RADIUS, MAX_RADIUS)
@@ -196,6 +200,7 @@ func release_whistle():
 	_reset_cast_state()
 
 func _reset_cast_state():
+	charge_radius = MIN_RADIUS * 3
 	cast_dir = Vector2.ZERO
 	casting = false
 	locked = false

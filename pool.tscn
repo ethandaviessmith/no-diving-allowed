@@ -688,10 +688,11 @@ position = Vector2(-202, 89)
 [node name="Lounger" type="Node2D" parent="."]
 position = Vector2(838, 220)
 
-[node name="ActivityManager" type="Node2D" parent="Lounger"]
+[node name="ActivityManager" type="Node2D" parent="Lounger" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../PoolSide")
 
 [node name="LineNode" type="Node2D" parent="Lounger/ActivityManager"]
 position = Vector2(-19, 186)
@@ -775,7 +776,7 @@ position = Vector2(515, 926)
 [node name="Swimmer2" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(1452, 898)
 pool = NodePath("../..")
-schedule = ["Exit"]
+schedule = ["WanderPool", "Exit"]
 clean = 1.0
 
 [node name="Mop" parent="." instance=ExtResource("5_7g16q")]
@@ -796,8 +797,8 @@ position = Vector2(53, -143)
 shape = SubResource("RectangleShape2D_evgcl")
 
 [node name="PoolSide" type="Area2D" parent="." groups=["wander"]]
-position = Vector2(1425, 882)
+position = Vector2(1133, 603)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PoolSide"]
-position = Vector2(-190.5, -343)
+position = Vector2(98, -20)
 shape = SubResource("RectangleShape2D_k0w2f")
