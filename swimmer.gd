@@ -16,6 +16,7 @@ var activity_duration: float = 0
 @onready var state_label: Label = $Label
 @onready var splash: GPUParticles2D = $SwimmingGPUParticles2D
 @onready var mood_icon: Sprite2D = $MoodIcon
+@onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 
 var swim_speed: float = 180
 var base_speed := 120
@@ -54,9 +55,9 @@ var path_direction: int = 1
 var path_progress: float = 0.0
 var is_on_lane: bool = false
 const path_buffer := 0.00
-
 var _queued_path_follow: PathFollow2D = null
 var sprite_frame
+
 signal left_pool
 var is_swimming := false
 @export var puddle_scene: PackedScene # Drag your Dirt scene in the editor
@@ -88,6 +89,9 @@ func set_pool(_pool, s):
 	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
 
 func _ready():
+	#navigation_agent.set_target_position(Vector2(200, 200)) # must be on mesh!
+	navigation_agent.velocity_computed.connect(_on_agent_velocity_computed)
+	
 	if schedule.is_empty():
 		schedule = Util.get_schedule_enterpool() # manual swimmers
 	splash.visible = false
@@ -103,6 +107,47 @@ func _ready():
 		$Sprite2D.scale.x = 0.9
 	elif personality_type == PersonalityType.LEISURE:
 		$Sprite2D.scale.x = 1.1
+	print("Process Mode:", navigation_agent.process_mode)
+
+func _on_agent_velocity_computed(suggested_velocity: Vector2):
+	#print('Suggested:', suggested_velocity, 'Finished:', navigation_agent.is_navigation_finished(), 'At:', navigation_agent.get_next_path_position())
+	velocity = suggested_velocity
+	move_and_slide()
+	if velocity.x != 0:
+		$Sprite2D.flip_h = velocity.x < 0
+
+func _step_move():
+	if state == State.WANDERING:
+		if wandering_paused:
+			pause_timer -= get_physics_process_delta_time()
+			if pause_timer <= 0:
+				wandering_paused = false
+				if wander_index < wander_points.size():
+					move_target = wander_points[wander_index]
+					navigation_agent.set_target_position(move_target)
+		else:
+			var wander_speed = _get_walk_speed() if wander_index == 0 else _get_wander_speed()
+			if not navigation_agent.is_navigation_finished():
+				var dir = (navigation_agent.get_next_path_position() - global_position).normalized()
+				navigation_agent.set_velocity(dir * wander_speed)
+			else:
+				velocity = Vector2.ZERO
+				wandering_paused = true
+				pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
+				_check_wander()
+
+	else:
+		if navigation_agent.get_target_position() != move_target:
+			navigation_agent.set_target_position(move_target)
+		if not navigation_agent.is_navigation_finished():
+			var dir = (navigation_agent.get_next_path_position() - global_position).normalized()
+			navigation_agent.set_velocity(dir * _get_walk_speed())
+
+	if navigation_agent.is_navigation_finished():
+		if state == State.APPROACH:
+			state = State.ACT
+			_do_perform_activity()
+
 
 func _physics_process(delta):
 	if state == State.APPROACH or state == State.WANDERING or state == State.IN_LINE:
@@ -206,40 +251,6 @@ func start_next_action():
 func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH
 	move_target = activity_manager.get_interaction_pos(self)
-
-func _step_move():
-	if state == State.WANDERING:
-		if wandering_paused:
-			pause_timer -= get_physics_process_delta_time()
-			if pause_timer <= 0:
-				wandering_paused = false
-				if wander_index < wander_points.size():
-					move_target = wander_points[wander_index]
-		else:
-			var dist = global_position.distance_to(move_target)
-			var wander_speed =  _get_walk_speed() if wander_index == 0 else _get_wander_speed() # First point walk then wander
-			if dist > 2:
-				velocity = (move_target - global_position).normalized() * wander_speed
-				move_and_slide()
-				if velocity.x != 0:
-					$Sprite2D.flip_h = velocity.x < 0
-			else:
-				velocity = Vector2.ZERO
-				wandering_paused = true
-				pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
-				_check_wander()
-	else:
-		var dist = global_position.distance_to(move_target)
-		velocity = (move_target - global_position).normalized() * _get_walk_speed()
-		if dist > 2:
-			move_and_slide()
-			if velocity.x != 0:
-				$Sprite2D.flip_h = velocity.x < 0
-		elif state == State.APPROACH:
-			state = State.ACT
-			_do_perform_activity()
-		elif state == State.IN_LINE:
-			pass
 
 func _do_perform_activity():
 	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)

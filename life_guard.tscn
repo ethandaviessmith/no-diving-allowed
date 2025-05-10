@@ -174,3 +174,7 @@ libraries = {
 
 [node name="WhistleAudioStream" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("3_ujx44")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="."]
+position = Vector2(0, -16)
+radius = 25.0

@@ -197,6 +197,13 @@ func release_whistle():
 		pitch += randf_range(-0.02, 0.02)
 		WhistleAudioStream.pitch_scale = pitch
 		WhistleAudioStream.play()
+		
+	var nav_obstacle = $NavigationObstacle2D
+	if nav_obstacle:
+		var tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(nav_obstacle, "scale", Vector2.ONE * 3.0, 0.05)
+		tween.tween_interval(0.2)
+		tween.tween_property(nav_obstacle, "scale", Vector2.ONE, 0.05)
 	_reset_cast_state()
 
 func _reset_cast_state():

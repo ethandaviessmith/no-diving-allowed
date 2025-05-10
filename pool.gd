@@ -3,7 +3,7 @@ class_name Pool extends Node2D
 @export var max_guests := 8
 var guests := 0
 @onready var poolArea2D:Area2D = $Pool
-@onready var poolSwimmers: Node2D = $PoolSwimmers
+@onready var poolSwimmers: Node2D = $NavigationRegion2D/PoolSwimmers
 @onready var poolDirt: Node2D = $PoolDirt
 
 func _on_spawn_timer_timeout():

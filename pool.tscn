@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=34 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://b245abhhqfvbe" path="res://assets/brick_wall_texture.jpg" id="7_xv5nx"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
+[ext_resource type="NavigationPolygon" uid="uid://bpvlggtathyb6" path="res://pool_navigation_region.tres" id="15_xv5nx"]
 
 [sub_resource type="Animation" id="Animation_xv5nx"]
 length = 0.001
@@ -152,10 +153,10 @@ point_count = 5
 size = Vector2(346.5, 61.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_evgcl"]
-size = Vector2(286, 74)
+size = Vector2(263, 44)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k0w2f"]
-size = Vector2(175, 410)
+size = Vector2(172.5, 365)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point", "exit_point")]
 script = ExtResource("1_bslhr")
@@ -228,7 +229,7 @@ offset_bottom = 40.0
 
 [node name="TileMapLayer" type="TileMapLayer" parent="Visuals"]
 
-[node name="CementTextureRect2" type="TextureRect" parent="Visuals"]
+[node name="OutsideWallTextureRect" type="TextureRect" parent="Visuals"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -1.04947
@@ -315,6 +316,66 @@ offset_top = 341.0
 offset_right = 744.525
 offset_bottom = 823.43
 scale = Vector2(2.012, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="WallTextureRect" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 33.175
+anchor_top = 10.85
+anchor_right = 36.55
+anchor_bottom = 29.35
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="WallTextureRect4" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 33.175
+anchor_top = 10.85
+anchor_right = 77.425
+anchor_bottom = 22.725
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="WallTextureRect3" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 30.6
+anchor_top = 20.05
+anchor_right = 32.6
+anchor_bottom = 47.175
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="WallTextureRect2" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 33.175
+anchor_top = 17.2
+anchor_right = 36.55
+anchor_bottom = 26.45
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="PoolDirt" type="Node2D" parent="."]
@@ -759,23 +820,34 @@ frame = 2
 
 [node name="SpawnTimer" type="Timer" parent="."]
 
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="SpawnTimer"]
+process_mode = 4
+visible = false
+position = Vector2(182, 175)
+navigation_polygon = ExtResource("15_xv5nx")
+
 [node name="GameTimer" type="Timer" parent="."]
 
-[node name="PoolSwimmers" type="Node2D" parent="."]
-y_sort_enabled = true
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
+position = Vector2(182, 175)
+navigation_polygon = ExtResource("15_xv5nx")
 
-[node name="Swimmer" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
+[node name="PoolSwimmers" type="Node2D" parent="NavigationRegion2D"]
+y_sort_enabled = true
+position = Vector2(-182, -175)
+
+[node name="Swimmer" parent="NavigationRegion2D/PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(315, 396)
-pool = NodePath("../..")
+pool = NodePath("../../..")
 schedule = ["PoolLaps", "PoolSwim", "PoolLaps", "Exit"]
 clean = 1.0
 
-[node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
-position = Vector2(515, 926)
+[node name="LifeGuard" parent="NavigationRegion2D/PoolSwimmers" instance=ExtResource("1_03hax")]
+position = Vector2(1533, 718)
 
-[node name="Swimmer2" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
+[node name="Swimmer2" parent="NavigationRegion2D/PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(1452, 898)
-pool = NodePath("../..")
+pool = NodePath("../../..")
 schedule = ["WanderPool", "Exit"]
 clean = 1.0
 
@@ -793,12 +865,12 @@ shape = SubResource("RectangleShape2D_3nhhx")
 position = Vector2(1425, 882)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ShowerRoom"]
-position = Vector2(53, -143)
+position = Vector2(69.5, -158)
 shape = SubResource("RectangleShape2D_evgcl")
 
 [node name="PoolSide" type="Area2D" parent="." groups=["wander"]]
 position = Vector2(1133, 603)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PoolSide"]
-position = Vector2(98, -20)
+position = Vector2(96.75, -42.5)
 shape = SubResource("RectangleShape2D_k0w2f")
