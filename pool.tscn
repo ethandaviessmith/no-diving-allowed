@@ -1,10 +1,11 @@
-[gd_scene load_steps=34 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=35 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
 [ext_resource type="Texture2D" uid="uid://cucgt0jp6yk1r" path="res://assets/clock.png" id="3_75hua"]
 [ext_resource type="Texture2D" uid="uid://k17axm8huqrd" path="res://assets/concrete_texture.jpg" id="3_dhh87"]
 [ext_resource type="PackedScene" uid="uid://cvsf3liqe130j" path="res://swimmer.tscn" id="4_76ob0"]
+[ext_resource type="Texture2D" uid="uid://bbu64j8peel5l" path="res://assets/icon_guests.png" id="5_5exe5"]
 [ext_resource type="PackedScene" uid="uid://7lsyicgsj11u" path="res://interactable.tscn" id="5_7g16q"]
 [ext_resource type="Texture2D" uid="uid://8i8u87jidq14" path="res://assets/icon_money.png" id="5_mef4y"]
 [ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="6_7g16q"]
@@ -211,7 +212,7 @@ offset_bottom = 28.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 28
-text = "$12"
+text = "$0"
 fit_content = true
 scroll_active = false
 vertical_alignment = 1
@@ -220,6 +221,29 @@ vertical_alignment = 1
 libraries = {
 &"": SubResource("AnimationLibrary_5exe5")
 }
+
+[node name="GuestContainer" type="Node2D" parent="PoolUI"]
+position = Vector2(1504, 80)
+
+[node name="Sprite2D" type="Sprite2D" parent="PoolUI/GuestContainer"]
+texture_filter = 1
+position = Vector2(23, 6)
+scale = Vector2(2, 2)
+texture = ExtResource("5_5exe5")
+
+[node name="GuestLabel" type="RichTextLabel" parent="PoolUI/GuestContainer"]
+offset_left = 65.0
+offset_top = -12.0
+offset_right = 170.0
+offset_bottom = 28.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 28
+text = "0
+"
+fit_content = true
+scroll_active = false
+vertical_alignment = 1
 
 [node name="Visuals" type="Control" parent="."]
 layout_mode = 3
@@ -266,7 +290,10 @@ color = Color(0.819608, 0.72549, 0.631373, 0.396078)
 metadata/_edit_use_anchors_ = true
 
 [node name="LockerRoomColourRect2" type="ColorRect" parent="Visuals"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.05
+anchor_bottom = -0.05
 offset_left = 1327.0
 offset_top = 434.0
 offset_right = 1635.0
@@ -820,13 +847,14 @@ frame = 2
 
 [node name="SpawnTimer" type="Timer" parent="."]
 
-[node name="NavigationRegion2D" type="NavigationRegion2D" parent="SpawnTimer"]
-process_mode = 4
-visible = false
-position = Vector2(182, 175)
-navigation_polygon = ExtResource("15_xv5nx")
-
 [node name="GameTimer" type="Timer" parent="."]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(182, 175)
+collision_priority = 2.0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D"]
+polygon = PackedVector2Array(1058, 842, 1452, 842, 1452, 665, 1336, 665, 1340, 581, 1452, 581, 1452, 354, 1414, 354, 1414, 309, 1343, 311, 1343, 354, 1284, 354, 1284, 311, 1212, 311, 1212, 354, 1172, 354, 1172, 408, 1144, 408, 1145, 259, 1499, 259, 1499, 865, 1041, 865, 1042, 629, 1058, 625, 1062, 580, 1143, 580, 1143, 512, 1173, 512, 1173, 580, 1232, 581, 1233, 664, 1058, 664)
 
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
 position = Vector2(182, 175)

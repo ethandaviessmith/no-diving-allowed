@@ -55,6 +55,7 @@ func _ready():
 	for swimmer in get_tree().get_nodes_in_group("swimmer"):
 		if swimmer is Swimmer:
 			swimmer.set_pool(self, swimmer.schedule)
+			swimmers_in_scene.append(swimmer)
 	_show_time_icon("morning")
 	_update_hands(0.0)
 	current_hour = day_start_hour
@@ -98,6 +99,7 @@ func add_swimmer():
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
 	swimmer.set_pool(self, Util.get_schedule_enterpool())
+	update_swimmer_count()
 
 
 var min_admission = 4.0
@@ -107,6 +109,7 @@ func on_swimmer_left_pool(swimmer):
 	var donation = round(lerp(min_admission, max_tip * randf(), mood_rank))
 	change_money(donation)
 	swimmers_in_scene.erase(swimmer)
+	update_swimmer_count()
 
 
 @export var swim_managers = [Util.ACT_LAPS, Util.ACT_PLAY,Util.ACT_SWIM]
@@ -156,12 +159,16 @@ func _show_time_icon(state:String):
 
 var money := 0
 @onready var money_label := $PoolUI/MoneyContainer/MoneyLabel
+@onready var guest_label = $PoolUI/GuestContainer/GuestLabel
+@onready var anim_player = $PoolUI/MoneyContainer/AnimationPlayer
 
 func change_money(amount: int):
 	money += amount
 	update_money_label()
-@onready var anim_player = $PoolUI/MoneyContainer/AnimationPlayer
 
 func update_money_label():
 	money_label.text = "$" + str(money)
 	anim_player.play("money_change")
+
+func update_swimmer_count():
+	guest_label.text = "%d" % swimmers_in_scene.size()

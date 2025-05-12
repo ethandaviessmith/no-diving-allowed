@@ -105,6 +105,10 @@ puddle_scene = ExtResource("2_r5jdi")
 avoidance_enabled = true
 radius = 20.0
 max_speed = 200.0
+debug_enabled = true
+debug_use_custom = true
+debug_path_custom_color = Color(0.775304, 0, 0.364134, 1)
+debug_path_custom_line_width = 3.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1, -13)

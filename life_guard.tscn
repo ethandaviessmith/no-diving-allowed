@@ -5,8 +5,8 @@
 [ext_resource type="AudioStream" uid="uid://c6jobiw8jiknw" path="res://assets/pea_whistle.wav" id="3_ujx44"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4mq66"]
-radius = 14.0
-height = 52.0
+radius = 9.0
+height = 26.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4mq66"]
 radius = 33.0606
@@ -148,7 +148,7 @@ offset_bottom = -64.0
 color = Color(0.245382, 0.559757, 0.701337, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -26)
+position = Vector2(0, -10)
 shape = SubResource("CapsuleShape2D_4mq66")
 
 [node name="InteractZone" type="Area2D" parent="."]

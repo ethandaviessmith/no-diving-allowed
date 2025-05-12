@@ -23,7 +23,7 @@ Guard Chair - shows colour coding of swimmers moods (view hidden safety risks)
 whistle - distance option to sometimes resolve issue
 
 
-#TODO
+#Ideas
 swimmer has schedule based on mood
 e.g. enter then, no schedule checks energy adds tasks
 
@@ -33,9 +33,24 @@ when interactible is considered gross, status icon appears above swimmer
 life guard has things to do
 using activities adds grime, pool activity adds debris
 / is_wet chance to spill water 
-will_run toggle on swimmers
+/ will_run toggle on swimmers
 grime or wet with will_run chance to cause accident (slip and fall)
 
-whistle (starts as small cricle that grows, circle grows around player, or arrows used to throw circle (becomes smaller on throw) to whistle far away)
+/ whistle (starts as small cricle that grows, circle grows around player, or arrows used to throw circle (becomes smaller on throw) to whistle far away)
+swimmer who heard whistle recently won't cause mischief
+- will have a shorter perform_activity timer
 
-swimmer who heard whistle recently won't cause mischief, and will have a shorter perform_activity timer
+
+## How to get this into a game state
+
+Earn x dollars by day x
+lifeguard affects swimmer happiness (that affects donation $)
+- optional reviews
+
+# higher priority todo list
+stop swimmers from diving in shallow end
+swimmers get injured (drown from low energy while swimming, run puddle)
+life saver to pull swimmers out of water
+use first aid on swimmers
+
+swimming mechanic
