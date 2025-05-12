@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=17 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="2_q2u11"]
@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="4_w3fy5"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
+radius = 5.0
+height = 12.0
 
 [sub_resource type="Gradient" id="Gradient_q2u11"]
 offsets = PackedFloat32Array(0, 0.158482, 0.779018, 1)
@@ -52,6 +54,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [0]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:skew")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
 
 [sub_resource type="Animation" id="Animation_q2u11"]
 resource_name = "idle"
@@ -67,6 +93,33 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_r5jdi"]
+resource_name = "jump"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1, 0.5), Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:skew")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.0666667, 0.533333, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.502655, 0.0]
 }
 
 [sub_resource type="Animation" id="Animation_w3fy5"]
@@ -89,6 +142,7 @@ tracks/0/keys = {
 _data = {
 &"RESET": SubResource("Animation_mest2"),
 &"idle": SubResource("Animation_q2u11"),
+&"jump": SubResource("Animation_r5jdi"),
 &"swim": SubResource("Animation_w3fy5")
 }
 
@@ -102,16 +156,16 @@ mood_color_bad = Color(0.632349, 0.217379, 0.203615, 1)
 puddle_scene = ExtResource("2_r5jdi")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_postprocessing = 2
 avoidance_enabled = true
 radius = 20.0
 max_speed = 200.0
-debug_enabled = true
 debug_use_custom = true
-debug_path_custom_color = Color(0.775304, 0, 0.364134, 1)
-debug_path_custom_line_width = 3.0
+debug_path_custom_color = Color(0.776471, 0, 0.0156863, 0.639216)
+debug_path_custom_line_width = 2.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-1, -13)
+position = Vector2(0, -5)
 shape = SubResource("CapsuleShape2D_2pdhi")
 
 [node name="Label" type="Label" parent="."]

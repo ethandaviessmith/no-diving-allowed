@@ -3,7 +3,7 @@ class_name Pool extends Node2D
 @export var max_guests := 8
 var guests := 0
 @onready var poolArea2D:Area2D = $Pool
-@onready var poolSwimmers: Node2D = $NavigationRegion2D/PoolSwimmers
+@onready var poolSwimmers: Node2D = $PoolSwimmers
 @onready var poolDirt: Node2D = $PoolDirt
 
 func _on_spawn_timer_timeout():
@@ -21,7 +21,7 @@ var base_payment = 10
 
 @export var swimmer_scene: PackedScene
 @export var entrance_point: Node2D
-@export var exit_point: Node2D
+#@export var exit_point: Node2D
 @export var max_swimmers := 18
 
 
@@ -98,7 +98,7 @@ func add_swimmer():
 	poolSwimmers.add_child(swimmer)
 	swimmer.global_position = entrance_point.global_position
 	swimmers_in_scene.append(swimmer)
-	swimmer.set_pool(self, Util.get_schedule_enterpool())
+	swimmer.set_pool(self, Util.get_schedule_enter(swimmer))
 	update_swimmer_count()
 
 
@@ -112,19 +112,83 @@ func on_swimmer_left_pool(swimmer):
 	update_swimmer_count()
 
 
-@export var swim_managers = [Util.ACT_LAPS, Util.ACT_PLAY,Util.ACT_SWIM]
-func getActivityManager(curr_action) -> ActivityManager:
+#func getActivityManager(curr_action) -> ActivityManager:
+	#var act_mng:ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
+	#return act_mng
+
+@export var activity_managers := {
+	Util.ACT_ENTRANCE: NodePath("Entrance/ActivityManager"),
+	Util.ACT_LOCKER: NodePath("Locker/ActivityManager"),
+	Util.ACT_SHOWER: NodePath("Shower/ActivityManager"),
+	Util.ACT_SUNBATHE: NodePath("Lounger/ActivityManager"),
+	#Util.ACT_WANDER: NodePath("Wander/ActivityManager"),
+	Util.ACT_EXIT: NodePath("Exit/ActivityManager"),
+
+	Util.ACT_POOL_LAPS: NodePath("PoolLaps/ActivityManager"),
+	Util.ACT_POOL_SWIM: NodePath("PoolSwim/ActivityManager"),
+	Util.ACT_POOL_PLAY: NodePath("PoolPlay/ActivityManager"),
+	Util.ACT_POOL_ENTER: [
+		{name = "PoolStairs", node = NodePath("PoolStairsIn/ActivityManager")},
+		{name = "PoolJump1", node = NodePath("PoolJump1/ActivityManager")},
+		{name = "PoolJump2", node = NodePath("PoolJump2/ActivityManager")}
+	],
+	Util.ACT_POOL_EXIT:  [
+		{name = "PoolStairs", node = NodePath("PoolStairsOut/ActivityManager")},
+		{name = "PoolLadder1", node = NodePath("PoolLadder1/ActivityManager")},
+	],
+}
+func getActivityManager(curr_action: String, swimmer: Node = null) -> ActivityManager:
+	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT] and swimmer:
+		var a = get_randomized_activity_manager(curr_action)
+		if "Ladder" in a.name:
+			Log.pr("here")
+		return a
 	
-	if swim_managers.has(curr_action):
-		pass
-	
-	var act_mng:ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
-	
-	return act_mng
+	var entry = activity_managers.get(curr_action)
+	if typeof(entry) == TYPE_ARRAY:
+		entry = entry[0]
+	if entry is Dictionary:
+		var path: NodePath = entry.node
+		if not has_node(path):
+			Log.pr("missing activityManager", path)
+			return null
+		return get_node(path)
+	if entry is NodePath:
+		if not has_node(entry):
+			Log.pr("missing activityManager", entry)
+			return null
+		return get_node(entry)
+	Log.pr("missing activityManager", curr_action)
+	return null
+
+func get_randomized_activity_manager(act_key: String) -> ActivityManager:
+	var options = activity_managers.get(act_key, [])
+	if options.is_empty():
+		Log.pr("missing activityManager", act_key)
+		return null
+
+	var prefer_a = []
+	var prefer_b = []
+	for opt in options:
+		var node = get_node_or_null(opt.node)
+		if node == null:
+			continue
+		if "Stairs" in opt.name:
+			prefer_a.append(node)
+		elif "Ladder" in opt.name or "Jump" in opt.name:
+			prefer_b.append(node)
+	# 50/50
+	if prefer_a.size() > 0 and (randf() < 0.5 or prefer_b.size() == 0):
+		return prefer_a[randi() % prefer_a.size()]
+	elif prefer_b.size() > 0:
+		return prefer_b[randi() % prefer_b.size()]
+	Log.pr("missing suitable ActivityManager for", act_key)
+	return null
 
 @export var wander_areas := {
 	Util.WANDER_POOL: NodePath("PoolSide"),
 }
+
 func get_action_wander_area(curr_action):
 	if wander_areas.has(curr_action):
 		return get_node_or_null(wander_areas.get(curr_action))

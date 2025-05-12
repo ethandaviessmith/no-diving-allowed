@@ -6,12 +6,10 @@ class_name ActivityManager extends Node2D
 @export var activity_paths_path: NodePath
 @export var wander_area: Area2D
 
-#@onready var wander_area_ref = null
 @onready var line_nodes: Array = []
 @onready var activity_positions: Array = []
 var current_swimmers: Array[Swimmer] = []
 var line_queue: Array = []
-
 
 @export var bar_clean_path: NodePath
 var bar_clean: TextureProgressBar
@@ -38,7 +36,6 @@ func is_being_used() -> bool:
 	return false
 	
 func _ready():
-	
 	line_nodes = nodes_from_path(line_positions)
 	activity_positions = nodes_from_path(activity_areas_path)
 	if activity_positions.is_empty():
@@ -49,8 +46,6 @@ func _ready():
 	current_swimmers.resize(activity_positions.size())
 	for i in current_swimmers.size():
 		current_swimmers[i] = null
-	#if wander_area != NodePath():
-		#wander_area_ref = get_node_or_null(wander_area)
 	if bar_clean_path:
 		bar_clean = get_node_or_null(bar_clean_path)
 		update_clean_bar()
@@ -78,18 +73,28 @@ func has_available_line_position() -> bool:
 
 
 func try_queue_swimmer(swimmer):
+	# Random free activity slot
+	var free_indices = []
 	for i in activity_positions.size():
 		if current_swimmers[i] == null:
-			current_swimmers[i] = swimmer
-			swimmer.target_activity = self
-			swimmer.begin_approach_to_activity(self)
-			return true
+			free_indices.append(i)
+	# If there's a free spot: assign it
+	if not free_indices.is_empty():
+		var choice = free_indices[randi() % free_indices.size()]
+		current_swimmers[choice] = swimmer
+		swimmer.target_activity = self
+		swimmer.begin_approach_to_activity(self)
+		return true
+
+	# Otherwise if line is available, use it
 	if has_available_line_position():
 		line_queue.append(swimmer)
 		swimmer.get_in_line(line_nodes[line_queue.size() - 1].global_position)
-	else:
-		swimmer.state = swimmer.State.WANDERING
-		send_swimmer_to_wander(swimmer)
+		return true
+
+	# Otherwise: send wandering
+	swimmer.state = swimmer.State.WANDERING
+	send_swimmer_to_wander(swimmer)
 	return false
 
 func get_activity_node(swimmer):
@@ -97,6 +102,20 @@ func get_activity_node(swimmer):
 		if current_swimmers[i] == swimmer:
 			return activity_positions[i]
 	return null
+
+func get_tween_target_for_swimmer(swimmer: Swimmer) -> Vector2:
+	var node = get_activity_node(swimmer)
+	if not node:
+		return global_position
+	if node.get_child_count() > 0:
+		# Use the first child Node2D as target
+		for child in node.get_children():
+			if child is Node2D:
+				return child.global_position
+	# Fallback: current position node
+	if node is Node2D:
+		return node.global_position
+	return node.global_position
 
 func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 	swimmer.path_follow = path_follow           # Keep a reference for back-and-forth logic
@@ -107,9 +126,6 @@ func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 	swimmer.global_position = path_follow.global_position
 	swimmer.start_lap_movement() # Let join logic trigger movement state
 
-
-
-
 func send_swimmer_to_wander(swimmer):
 	if wander_area:
 		var count = randi_range(3, 6) if swimmer.energy > 0.5 else randi_range(2, 4)
@@ -117,7 +133,6 @@ func send_swimmer_to_wander(swimmer):
 	else:
 		Log.pr("Missing Wander Area", name)
 		pass #swimmer._setup_wander_and_go(swimmer.curr_action)
-
 
 func assign_swimmer_to_slot(swimmer:Swimmer) -> int:
 	for i in current_swimmers.size():

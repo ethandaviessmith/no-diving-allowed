@@ -49,6 +49,7 @@ lifeguard affects swimmer happiness (that affects donation $)
 
 # higher priority todo list
 stop swimmers from diving in shallow end
+  - 
 swimmers get injured (drown from low energy while swimming, run puddle)
 life saver to pull swimmers out of water
 use first aid on swimmers

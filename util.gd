@@ -3,70 +3,89 @@ class_name Util extends Node
 const ACT_ENTRANCE := "Entrance"
 const ACT_LOCKER := "Locker"
 const ACT_SHOWER := "Shower"
-const ACT_LAPS := "PoolLaps"
-const ACT_SWIM := "PoolSwim"
-const ACT_PLAY := "PoolPlay"
 const ACT_SUNBATHE := "Lounger"
-const ACT_EXIT := "Exit"
 const ACT_WANDER := "Wander"
+const ACT_EXIT := "Exit"
+
+const ACT_POOL_LAPS := "PoolLaps"
+const ACT_POOL_SWIM := "PoolSwim"
+const ACT_POOL_PLAY := "PoolPlay"
+const ACT_POOL_ENTER := "PoolEnter"
+const ACT_POOL_EXIT := "PoolExit"
 
 const WANDER_POOL := "WanderPool"
 
 const POOL_ENTER := [ACT_ENTRANCE, ACT_LOCKER, ACT_SHOWER, WANDER_POOL]
 const POOL_EXIT := [ACT_SHOWER, ACT_LOCKER, ACT_EXIT]
-const POOL_ACTIVITIES := [ACT_LAPS, ACT_SWIM, ACT_PLAY, ACT_SUNBATHE]
-const POOL_LOW_HAPPY := [ACT_LAPS, ACT_PLAY, WANDER_POOL]
-const POOL_LOW_ENERGY := [ACT_SWIM, ACT_SUNBATHE, WANDER_POOL]
+const POOL_ACTIVITIES := [ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_POOL_PLAY, ACT_SUNBATHE]
+const POOL_IN_POOL := [ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_POOL_PLAY]
+const POOL_LOW_HAPPY := [ACT_POOL_LAPS, ACT_POOL_PLAY, WANDER_POOL]
+const POOL_LOW_ENERGY := [ACT_POOL_SWIM, ACT_SUNBATHE, WANDER_POOL]
 
 
 const ACTIVITY_DURATION := {
 	ACT_ENTRANCE: 0.2,
 	ACT_LOCKER: 4.0,
 	ACT_SHOWER: 5.0,
-	ACT_LAPS: 12.0,
-	ACT_SWIM: 12.0,
-	ACT_PLAY: 12.0,
+	ACT_POOL_LAPS: 12.0,
+	ACT_POOL_SWIM: 12.0,
+	ACT_POOL_PLAY: 12.0,
 	ACT_SUNBATHE: 12.0,
 	ACT_WANDER: 8.0,
 }
 
-static func make_swim_schedule() -> Array:
-	var schedule = Util.POOL_ENTER.duplicate()
-	var activities = Util.POOL_ACTIVITIES.duplicate()
-	activities.shuffle()
-	
-	for i in range(randi() % 2 + 1):
-		schedule.append(activities[i])
+#static func make_swim_schedule() -> Array:
+	#var schedule = Util.POOL_ENTER.duplicate()
+	#var activities = Util.POOL_ACTIVITIES.duplicate()
+	#activities.shuffle()
+	#
+	#for i in range(randi() % 2 + 1):
+		#schedule.append(activities[i])
+#
+	#schedule.append_array(Util.POOL_EXIT)
+	#return schedule
 
-	schedule.append_array(Util.POOL_EXIT)
-	return schedule
-
-static func get_schedule_enterpool():
-	return POOL_ENTER.duplicate()
+static func get_schedule_enter(swimmer):
+	return Util.add_schedule(swimmer, POOL_ENTER.duplicate())
 
 static func get_schedule_exit(swimmer):
 	var out = POOL_EXIT.duplicate()
 	if randf() < swimmer.energy:
 		out.insert(0, WANDER_POOL)
-	return out
+	return Util.add_schedule(swimmer, out)
 
 static func get_schedule_lowenergy(swimmer):
 	var opts = POOL_LOW_ENERGY.duplicate()
-	return Util._pick_rand(opts, 2)
+	return Util.add_schedule(swimmer, Util._pick_rand(opts, 2))
 
 static func get_schedule_lowhappy(swimmer):
-	var opts =  POOL_LOW_HAPPY.duplicate()
-	return Util._pick_rand(opts, 2)
+	var opts = POOL_LOW_HAPPY.duplicate()
+	return Util.add_schedule(swimmer, Util._pick_rand(opts, 2))
 
 static func get_schedule_random_pool(swimmer):
-	return Util._pick_rand(POOL_ACTIVITIES, 3)
+	return Util.add_schedule(swimmer, Util._pick_rand(POOL_ACTIVITIES, 3))
 
-# Helper for 'n' unique shuffled randoms
 static func _pick_rand(source:Array, n:int) -> Array:
 	var opts = source.duplicate()
 	opts.shuffle()
 	return opts.slice(0, n)
 
+static func add_schedule(swimmer, activities):
+	var schedule = []
+	var was_in_pool = swimmer.is_swimming
+	for i in activities.size():
+		var next_act = activities[i]
+
+		# Check for required pool transitions
+		var next_is_in_pool = next_act in POOL_IN_POOL
+		if not was_in_pool and next_is_in_pool:
+			schedule.append(ACT_POOL_ENTER)
+		if was_in_pool and not next_is_in_pool:
+			schedule.append(ACT_POOL_EXIT)
+		
+		schedule.append(next_act)
+		was_in_pool = next_is_in_pool
+	return schedule
 
 
 static func rand_point_within_shape(shape: Shape2D, origin: Vector2) -> Vector2:
