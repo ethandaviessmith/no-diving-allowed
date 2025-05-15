@@ -18,6 +18,9 @@ var bar_clean: TextureProgressBar
 @export var max_clean: float = 1.0
 var clean: float = max_clean
 
+@export var activity: Util.Anim = Util.Anim.NA
+@export var finish_activity: Util.Anim = Util.Anim.NA
+
 func _process(delta):
 	var was_clean = clean
 	if is_being_used():

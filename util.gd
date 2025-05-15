@@ -34,17 +34,17 @@ const ACTIVITY_DURATION := {
 	ACT_WANDER: 8.0,
 }
 
-#static func make_swim_schedule() -> Array:
-	#var schedule = Util.POOL_ENTER.duplicate()
-	#var activities = Util.POOL_ACTIVITIES.duplicate()
-	#activities.shuffle()
-	#
-	#for i in range(randi() % 2 + 1):
-		#schedule.append(activities[i])
-#
-	#schedule.append_array(Util.POOL_EXIT)
-	#return schedule
+enum Anim {NA, JUMP, LAPS, SHOWER, ENTER_POOL}
+const ANIM_NAME_MAP = {
+	Anim.NA: "idle",
+	Anim.JUMP: "jump",
+	Anim.LAPS: "swim",
+	Anim.SHOWER: "shower",
+	Anim.ENTER_POOL: "enter_pool",
+	# sync with your actual animation names
+}
 
+#region SCHEDULE
 static func get_schedule_enter(swimmer):
 	return Util.add_schedule(swimmer, POOL_ENTER.duplicate())
 
@@ -87,6 +87,7 @@ static func add_schedule(swimmer, activities):
 		was_in_pool = next_is_in_pool
 	return schedule
 
+#endregion
 
 static func rand_point_within_shape(shape: Shape2D, origin: Vector2) -> Vector2:
 	if shape is RectangleShape2D:

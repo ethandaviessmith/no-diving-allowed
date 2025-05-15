@@ -40,9 +40,18 @@ func _input(event):
 	if charging and (event.is_action("ui_right", true) or event.is_action("ui_left", true) or event.is_action("ui_down", true) or event.is_action("ui_up", true)):
 		direction = get_input_dir() 
 		# Only read in if dir is NOT zero; stick once
+	#if event.is_action_pressed("whistle"):
+		## This allows rapid repeated blasts with double tap or repeated taps!
+		#if charging:
+			#repeat_whistle()
+		#else:
+			#start_charge()
 	if event.is_action_released("whistle") and charging:
 		release_whistle()
-
+#func repeat_whistle():
+	#release_whistle()  # quick blast
+	#start_charge()   
+	
 func get_input_dir():
 	var dir = Vector2.ZERO
 	if Input.is_action_pressed("ui_right"): dir.x += 1
@@ -193,7 +202,7 @@ func release_whistle():
 	if WhistleAudioStream:
 		var t = inverse_lerp(MIN_RADIUS, MAX_RADIUS, charge_radius) # t: 0 at MIN_RADIUS, 1 at MAX_RADIUS
 		# Set slowest pitch when fully charged, normal when smallest
-		var pitch = lerp(0.7, 1.05, 1.0 - t) # big radius = low pitch/long, small = normal
+		var pitch = lerp(0.85, 1.05, 1.0 - t) # big radius = low pitch/long, small = normal
 		pitch += randf_range(-0.02, 0.02)
 		WhistleAudioStream.pitch_scale = pitch
 		WhistleAudioStream.play()

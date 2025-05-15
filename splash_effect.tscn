@@ -1,0 +1,52 @@
+[gd_scene load_steps=6 format=3 uid="uid://c8h0hw4cv8j23"]
+
+[ext_resource type="Texture2D" uid="uid://cye0ah8puqpoa" path="res://assets/splash.png" id="1_g3guq"]
+[ext_resource type="Script" uid="uid://vtpqjfi26xfo" path="res://splash_effect.gd" id="2_y02cy"]
+
+[sub_resource type="Animation" id="Animation_lhuuy"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_y02cy"]
+resource_name = "splash"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0, 6]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jyo8g"]
+_data = {
+&"RESET": SubResource("Animation_lhuuy"),
+&"splash": SubResource("Animation_y02cy")
+}
+
+[node name="Sprite2D" type="Sprite2D"]
+z_index = 1
+texture = ExtResource("1_g3guq")
+hframes = 7
+script = ExtResource("2_y02cy")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_jyo8g")
+}

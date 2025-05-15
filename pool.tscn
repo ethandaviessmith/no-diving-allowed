@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=37 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
 [ext_resource type="NavigationPolygon" uid="uid://bpvlggtathyb6" path="res://pool_navigation_region.tres" id="15_xv5nx"]
+[ext_resource type="PackedScene" uid="uid://c8h0hw4cv8j23" path="res://splash_effect.tscn" id="18_5exe5"]
 
 [sub_resource type="Animation" id="Animation_xv5nx"]
 length = 0.001
@@ -140,14 +141,17 @@ scale_max = 5.4
 scale_curve = SubResource("CurveTexture_r5jdi")
 color_ramp = SubResource("GradientTexture1D_mest2")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
-size = Vector2(751.5, 473.5)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xv5nx"]
+size = Vector2(145, 51)
 
 [sub_resource type="Curve2D" id="Curve2D_3nhhx"]
 _data = {
 "points": PackedVector2Array(0, 0, 0, 0, -138, -61, 0, 0, 0, 0, 93, -83, 0, 0, 0, 0, 329, -55, 0, 0, 0, 0, 452, -74, 0, 0, 0, 0, 565, -63)
 }
 point_count = 5
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
+size = Vector2(741, 464)
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_xv5nx"]
 vertices = PackedVector2Array(922.992, 583.633, 947.023, 654.008, 198.57, 655, 180, 625.68, 179.023, 162.969, 946.578, 161.031, 925.008, 233.523, 175.633, 656.961)
@@ -163,14 +167,41 @@ size = Vector2(263, 44)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k0w2f"]
 size = Vector2(172.5, 365)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_xv5nx"]
-size = Vector2(145, 51)
-
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point")]
 script = ExtResource("1_bslhr")
 max_guests = 12
 swimmer_scene = ExtResource("4_76ob0")
 entrance_point = NodePath("Entrance")
+activity_managers = {
+"Entrance": NodePath("Entrance/ActivityManager"),
+"Exit": NodePath("Exit/ActivityManager"),
+"Locker": NodePath("Locker/ActivityManager"),
+"Lounger": NodePath("Lounger/ActivityManager"),
+"PoolEnter": [{
+&"name": "PoolStairs",
+&"node": NodePath("PoolStairsIn/ActivityManager")
+}, {
+&"name": "PoolJump1",
+&"node": NodePath("PoolJump1/ActivityManager")
+}, {
+&"name": "PoolJump2",
+&"node": NodePath("PoolJump2/ActivityManager")
+}],
+"PoolExit": [{
+&"name": "PoolStairs",
+&"node": NodePath("PoolStairsOut/ActivityManager")
+}, {
+&"name": "PoolLadder1",
+&"node": NodePath("PoolLadder1/ActivityManager")
+}, {
+&"name": "PoolLadder2",
+&"node": NodePath("")
+}],
+"PoolLaps": NodePath("PoolLaps/ActivityManager"),
+"PoolPlay": NodePath("PoolPlay/ActivityManager"),
+"PoolSwim": NodePath("PoolSwim/ActivityManager"),
+"Shower": NodePath("Shower/ActivityManager")
+}
 
 [node name="PoolUI" type="CanvasLayer" parent="."]
 
@@ -400,7 +431,21 @@ expand_mode = 1
 stretch_mode = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="PoolDirt" type="Node2D" parent="."]
+[node name="ColorRect" type="ColorRect" parent="Visuals"]
+layout_mode = 0
+offset_left = 1416.0
+offset_top = 1016.0
+offset_right = 1468.0
+offset_bottom = 1037.0
+color = Color(0.188188, 0.218596, 0.304759, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="Visuals"]
+layout_mode = 0
+offset_left = 1514.0
+offset_top = 1016.0
+offset_right = 1566.0
+offset_bottom = 1037.0
+color = Color(0.188188, 0.218596, 0.304759, 1)
 
 [node name="Entrance" type="Area2D" parent="."]
 position = Vector2(1442, 1015)
@@ -424,9 +469,12 @@ shape = SubResource("RectangleShape2D_w78qj")
 [node name="ActivityManager" type="Node2D" parent="Exit" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
 line_positions = NodePath(".")
-activity_position_path = NodePath(".")
+activity_position_path = NodePath("Node2D")
 wander_area = NodePath("../../LockerRoom")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="Node2D" type="Node2D" parent="Exit/ActivityManager"]
+position = Vector2(0, 17)
 
 [node name="Shower" type="Area2D" parent="."]
 position = Vector2(1567, 629)
@@ -441,6 +489,7 @@ line_positions = NodePath("LineNode")
 activity_position_path = NodePath("ActNode")
 wander_area = NodePath("../../ShowerRoom")
 bar_clean_path = NodePath("CleanProgressBar")
+activity = 3
 
 [node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
 position = Vector2(-83, -4)
@@ -521,14 +570,6 @@ hframes = 4
 position = Vector2(-6, -133)
 texture = ExtResource("7_dhh87")
 hframes = 4
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(676, 829)
-rotation = -3.14159
-scale = Vector2(0.64, 0.64)
-texture = ExtResource("7_dhh87")
-hframes = 4
-frame = 3
 
 [node name="Locker" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -619,10 +660,142 @@ texture = ExtResource("7_dhh87")
 hframes = 4
 frame = 1
 
+[node name="PoolStairsIn" type="Node2D" parent="."]
+position = Vector2(1140, 617)
+
+[node name="ActivityManager" type="Node2D" parent="PoolStairsIn" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../PoolSide")
+activity = 4
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="ActNode" type="Node2D" parent="PoolStairsIn/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
+position = Vector2(0, 48)
+
+[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D"]
+position = Vector2(-27, 0)
+
+[node name="Node2D2" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
+position = Vector2(0, 85)
+
+[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D2"]
+position = Vector2(-32, 0)
+
+[node name="Node2D3" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
+position = Vector2(0, 127)
+
+[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D3"]
+position = Vector2(-26, 0)
+
+[node name="Node2D4" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
+position = Vector2(0, 164)
+
+[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D4"]
+position = Vector2(-27, 0)
+
+[node name="PoolStairsOut" type="Node2D" parent="."]
+position = Vector2(1122, 509)
+
+[node name="ActivityManager" type="Node2D" parent="PoolStairsOut" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../Pool")
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="ActNode" type="Node2D" parent="PoolStairsOut/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
+position = Vector2(0, 48)
+
+[node name="Node2D2" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
+position = Vector2(0, 85)
+
+[node name="Node2D3" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
+position = Vector2(0, 127)
+
+[node name="Node2D4" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
+position = Vector2(0, 164)
+
+[node name="PoolJump1" type="Node2D" parent="."]
+position = Vector2(854, 856)
+
+[node name="ActivityManager" type="Node2D" parent="PoolJump1" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("Area2D")
+activity = 1
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="ActNode" type="Node2D" parent="PoolJump1/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
+position = Vector2(50, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D"]
+position = Vector2(0, -62)
+
+[node name="Node2D2" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
+position = Vector2(94, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D2"]
+position = Vector2(0, -64)
+
+[node name="Node2D3" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
+position = Vector2(139, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D3"]
+position = Vector2(0, -65)
+
+[node name="Area2D" type="Area2D" parent="PoolJump1/ActivityManager"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolJump1/ActivityManager/Area2D"]
+position = Vector2(88, 80)
+shape = SubResource("RectangleShape2D_xv5nx")
+
+[node name="PoolJump2" type="Node2D" parent="."]
+position = Vector2(465, 856)
+
+[node name="ActivityManager" type="Node2D" parent="PoolJump2" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("Area2D")
+activity = 1
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="Area2D" type="Area2D" parent="PoolJump2/ActivityManager"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolJump2/ActivityManager/Area2D"]
+position = Vector2(88, 80)
+shape = SubResource("RectangleShape2D_xv5nx")
+
+[node name="ActNode" type="Node2D" parent="PoolJump2/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
+position = Vector2(50, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D"]
+position = Vector2(0, -62)
+
+[node name="Node2D2" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
+position = Vector2(94, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D2"]
+position = Vector2(0, -64)
+
+[node name="Node2D3" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
+position = Vector2(139, 0)
+
+[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D3"]
+position = Vector2(0, -65)
+
 [node name="PoolLadder1" type="Node2D" parent="."]
 position = Vector2(365, 513)
 
 [node name="Sprite2D" type="Sprite2D" parent="PoolLadder1"]
+position = Vector2(-3, 0)
 rotation = -1.5708
 scale = Vector2(0.64, 0.64)
 texture = ExtResource("7_dhh87")
@@ -648,26 +821,43 @@ position = Vector2(-36, 0)
 [node name="LineNode" type="Node2D" parent="PoolLadder1/ActivityManager"]
 
 [node name="Node2D" type="Node2D" parent="PoolLadder1/ActivityManager/LineNode"]
-position = Vector2(34, 5)
+position = Vector2(6, 33)
 
 [node name="Node2D2" type="Node2D" parent="PoolLadder1/ActivityManager/LineNode"]
-position = Vector2(23, 27)
+position = Vector2(6, 75)
 
-[node name="Pool" type="Area2D" parent="."]
-position = Vector2(513, 336)
+[node name="PoolLadder2" type="Node2D" parent="."]
+position = Vector2(724, 820)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
-position = Vector2(237.25, 244.25)
-shape = SubResource("RectangleShape2D_08ey2")
+[node name="Sprite2D" type="Sprite2D" parent="PoolLadder2"]
+position = Vector2(0, 7)
+rotation = 3.14159
+scale = Vector2(0.64, 0.64)
+texture = ExtResource("7_dhh87")
+hframes = 4
+frame = 3
 
-[node name="WavesColourRect" type="ColorRect" parent="Pool"]
-material = ExtResource("7_ryjux")
-offset_left = -146.0
-offset_top = 5.0
-offset_right = 231.525
-offset_bottom = 487.43
-scale = Vector2(2.012, 1)
-metadata/_edit_use_anchors_ = true
+[node name="ActivityManager" type="Node2D" parent="PoolLadder2" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../Pool")
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="ActNode" type="Node2D" parent="PoolLadder2/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolLadder2/ActivityManager/ActNode"]
+
+[node name="ExitNode" type="Node2D" parent="PoolLadder2/ActivityManager/ActNode/Node2D"]
+position = Vector2(0, 33)
+
+[node name="LineNode" type="Node2D" parent="PoolLadder2/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="PoolLadder2/ActivityManager/LineNode"]
+position = Vector2(1, -36)
+
+[node name="Node2D2" type="Node2D" parent="PoolLadder2/ActivityManager/LineNode"]
+position = Vector2(54, -13)
 
 [node name="PoolLaps" type="Node2D" parent="."]
 position = Vector2(1160, 410)
@@ -680,7 +870,7 @@ activity_paths_path = NodePath("PathNode2D")
 wander_area = NodePath("../../PoolSide")
 
 [node name="LineNode" type="Node2D" parent="PoolLaps/ActivityManager"]
-position = Vector2(-131, 85)
+position = Vector2(-672, 87)
 
 [node name="LinePos1" type="Node2D" parent="PoolLaps/ActivityManager/LineNode"]
 position = Vector2(94, -1)
@@ -882,9 +1072,23 @@ texture = ExtResource("10_3nhhx")
 hframes = 3
 frame = 2
 
-[node name="SpawnTimer" type="Timer" parent="."]
+[node name="Pool" type="Area2D" parent="."]
+position = Vector2(513, 336)
 
-[node name="GameTimer" type="Timer" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
+position = Vector2(232.5, 245)
+shape = SubResource("RectangleShape2D_08ey2")
+
+[node name="WavesColourRect" type="ColorRect" parent="Pool"]
+material = ExtResource("7_ryjux")
+offset_left = -146.0
+offset_top = 5.0
+offset_right = 231.525
+offset_bottom = 487.43
+scale = Vector2(2.012, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="PoolDirt" type="Node2D" parent="."]
 
 [node name="PoolSwimmers" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -896,13 +1100,17 @@ schedule = ["PoolEnter", "PoolLaps", "PoolSwim", "PoolLaps", "PoolExit", "Exit"]
 clean = 1.0
 
 [node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
-position = Vector2(1533, 718)
+position = Vector2(1174, 954)
 
 [node name="Swimmer2" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
-position = Vector2(1452, 898)
+position = Vector2(410, 290)
 pool = NodePath("../..")
-schedule = ["WanderPool", "Exit"]
+schedule = ["WanderPool", "Shower", "Exit"]
 clean = 1.0
+
+[node name="SpawnTimer" type="Timer" parent="."]
+
+[node name="GameTimer" type="Timer" parent="."]
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 position = Vector2(182, 175)
@@ -912,7 +1120,6 @@ polygon = PackedVector2Array(1058, 842, 1452, 842, 1452, 665, 1336, 665, 1340, 5
 
 [node name="NavRegion_Pool" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
-visible = false
 position = Vector2(182, 175)
 navigation_polygon = SubResource("NavigationPolygon_xv5nx")
 enter_cost = 2.0
@@ -924,7 +1131,7 @@ position = Vector2(182, 175)
 navigation_polygon = ExtResource("15_xv5nx")
 
 [node name="Mop" parent="." instance=ExtResource("5_7g16q")]
-position = Vector2(658, 923)
+position = Vector2(1108, 937)
 
 [node name="LockerRoom" type="Area2D" parent="." groups=["wander"]]
 position = Vector2(1425, 882)
@@ -947,130 +1154,4 @@ position = Vector2(1133, 603)
 position = Vector2(96.75, -42.5)
 shape = SubResource("RectangleShape2D_k0w2f")
 
-[node name="PoolStairsIn" type="Node2D" parent="."]
-position = Vector2(1112, 490)
-
-[node name="ActivityManager" type="Node2D" parent="PoolStairsIn" node_paths=PackedStringArray("wander_area")]
-script = ExtResource("9_87cwm")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../PoolSide")
-metadata/_custom_type_script = "uid://dsegwpsafpulq"
-
-[node name="ActNode" type="Node2D" parent="PoolStairsIn/ActivityManager"]
-
-[node name="Node2D" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
-position = Vector2(0, 48)
-
-[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D"]
-position = Vector2(-27, 0)
-
-[node name="Node2D2" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
-position = Vector2(0, 85)
-
-[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D2"]
-position = Vector2(-32, 0)
-
-[node name="Node2D3" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
-position = Vector2(0, 127)
-
-[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D3"]
-position = Vector2(-26, 0)
-
-[node name="Node2D4" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode"]
-position = Vector2(0, 164)
-
-[node name="ExitNode" type="Node2D" parent="PoolStairsIn/ActivityManager/ActNode/Node2D4"]
-position = Vector2(-27, 0)
-
-[node name="PoolStairsOut" type="Node2D" parent="."]
-position = Vector2(1122, 509)
-
-[node name="ActivityManager" type="Node2D" parent="PoolStairsOut" node_paths=PackedStringArray("wander_area")]
-script = ExtResource("9_87cwm")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../Pool")
-metadata/_custom_type_script = "uid://dsegwpsafpulq"
-
-[node name="ActNode" type="Node2D" parent="PoolStairsOut/ActivityManager"]
-
-[node name="Node2D" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
-position = Vector2(0, 48)
-
-[node name="Node2D2" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
-position = Vector2(0, 85)
-
-[node name="Node2D3" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
-position = Vector2(0, 127)
-
-[node name="Node2D4" type="Node2D" parent="PoolStairsOut/ActivityManager/ActNode"]
-position = Vector2(0, 164)
-
-[node name="PoolJump1" type="Node2D" parent="."]
-position = Vector2(854, 856)
-
-[node name="ActivityManager" type="Node2D" parent="PoolJump1" node_paths=PackedStringArray("wander_area")]
-script = ExtResource("9_87cwm")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("Area2D")
-metadata/_custom_type_script = "uid://dsegwpsafpulq"
-
-[node name="ActNode" type="Node2D" parent="PoolJump1/ActivityManager"]
-
-[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
-position = Vector2(50, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D"]
-position = Vector2(0, -62)
-
-[node name="Node2D2" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
-position = Vector2(94, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D2"]
-position = Vector2(0, -64)
-
-[node name="Node2D3" type="Node2D" parent="PoolJump1/ActivityManager/ActNode"]
-position = Vector2(139, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump1/ActivityManager/ActNode/Node2D3"]
-position = Vector2(0, -65)
-
-[node name="Area2D" type="Area2D" parent="PoolJump1/ActivityManager"]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolJump1/ActivityManager/Area2D"]
-position = Vector2(88, 80)
-shape = SubResource("RectangleShape2D_xv5nx")
-
-[node name="PoolJump2" type="Node2D" parent="."]
-position = Vector2(465, 856)
-
-[node name="ActivityManager" type="Node2D" parent="PoolJump2" node_paths=PackedStringArray("wander_area")]
-script = ExtResource("9_87cwm")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("Area2D")
-metadata/_custom_type_script = "uid://dsegwpsafpulq"
-
-[node name="Area2D" type="Area2D" parent="PoolJump2/ActivityManager"]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolJump2/ActivityManager/Area2D"]
-position = Vector2(88, 80)
-shape = SubResource("RectangleShape2D_xv5nx")
-
-[node name="ActNode" type="Node2D" parent="PoolJump2/ActivityManager"]
-
-[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
-position = Vector2(50, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D"]
-position = Vector2(0, -62)
-
-[node name="Node2D2" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
-position = Vector2(94, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D2"]
-position = Vector2(0, -64)
-
-[node name="Node2D3" type="Node2D" parent="PoolJump2/ActivityManager/ActNode"]
-position = Vector2(139, 0)
-
-[node name="Node2D" type="Node2D" parent="PoolJump2/ActivityManager/ActNode/Node2D3"]
-position = Vector2(0, -65)
+[node name="Sprite2D" parent="." instance=ExtResource("18_5exe5")]

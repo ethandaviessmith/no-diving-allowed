@@ -1,6 +1,7 @@
 
 # No Diving Allowed
 
+# Day 1
 Overhead Pool simulation game
 
 Game loop consists of managing multiple aspects of a pool through interactions:
@@ -47,7 +48,8 @@ Earn x dollars by day x
 lifeguard affects swimmer happiness (that affects donation $)
 - optional reviews
 
-# higher priority todo list
+# todo list
+## higher priority
 stop swimmers from diving in shallow end
   - 
 swimmers get injured (drown from low energy while swimming, run puddle)
@@ -55,3 +57,19 @@ life saver to pull swimmers out of water
 use first aid on swimmers
 
 swimming mechanic
+
+# Known
+## behaviour issues
+actions based on moods
+pool laps activitymanager position, action PathFollow2D position binding
+entering pool
+dirt logic
+
+
+## Bugs
+
+# Dream list
+pool behaviour, deep end, shallow end
+tile based
+building the pool
+pool laps buoy (activity life guard does)

@@ -52,6 +52,8 @@ var next_state_hour := 9
 
 
 func _ready():
+	
+	
 	for swimmer in get_tree().get_nodes_in_group("swimmer"):
 		if swimmer is Swimmer:
 			swimmer.set_pool(self, swimmer.schedule)
@@ -111,11 +113,6 @@ func on_swimmer_left_pool(swimmer):
 	swimmers_in_scene.erase(swimmer)
 	update_swimmer_count()
 
-
-#func getActivityManager(curr_action) -> ActivityManager:
-	#var act_mng:ActivityManager = get_node_or_null("/root/Pool/" + curr_action + "/ActivityManager")
-	#return act_mng
-
 @export var activity_managers := {
 	Util.ACT_ENTRANCE: NodePath("Entrance/ActivityManager"),
 	Util.ACT_LOCKER: NodePath("Locker/ActivityManager"),
@@ -135,6 +132,7 @@ func on_swimmer_left_pool(swimmer):
 	Util.ACT_POOL_EXIT:  [
 		{name = "PoolStairs", node = NodePath("PoolStairsOut/ActivityManager")},
 		{name = "PoolLadder1", node = NodePath("PoolLadder1/ActivityManager")},
+		{name = "PoolLadder2", node = NodePath("PoolLadder2/ActivityManager")}
 	],
 }
 func getActivityManager(curr_action: String, swimmer: Node = null) -> ActivityManager:
@@ -158,7 +156,7 @@ func getActivityManager(curr_action: String, swimmer: Node = null) -> ActivityMa
 			Log.pr("missing activityManager", entry)
 			return null
 		return get_node(entry)
-	Log.pr("missing activityManager", curr_action)
+	#Log.pr("missing activityManager", curr_action)
 	return null
 
 func get_randomized_activity_manager(act_key: String) -> ActivityManager:
@@ -172,6 +170,7 @@ func get_randomized_activity_manager(act_key: String) -> ActivityManager:
 	for opt in options:
 		var node = get_node_or_null(opt.node)
 		if node == null:
+			Log.pr("node missing:", opt.name, opt.node)
 			continue
 		if "Stairs" in opt.name:
 			prefer_a.append(node)

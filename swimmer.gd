@@ -17,6 +17,7 @@ var activity_duration: float = 0
 @onready var splash: GPUParticles2D = $SwimmingGPUParticles2D
 @onready var mood_icon: Sprite2D = $MoodIcon
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
+@onready var anim: AnimationPlayer = $AnimationPlayer
 
 var swim_speed: float = 180
 var base_speed := 120
@@ -67,8 +68,6 @@ var wet_timer: Timer = null
 var in_puddle: Dirt = null
 var puddle_slow := 0.5
 
-var navmap_ground: RID
-var navmap_pool: RID
 
 func _on_pool_entered(body):
 	if body == self:
@@ -93,17 +92,14 @@ func set_pool(_pool, s):
 
 func set_is_swimming(flag: bool):
 	is_swimming = flag
-	# todo not sure if this does anything
-	#if is_swimming:
-		#navigation_agent.set_navigation_map(navmap_pool)
-	#else:
-		#navigation_agent.set_navigation_map(navmap_ground)
+	if is_swimming:
+		var splash = preload("res://splash_effect.tscn").instantiate()
+		get_parent().add_child(splash)
+		splash.global_position = global_position + Vector2(0.0, -35.0)
 
 
 func _ready():
 	navigation_agent.velocity_computed.connect(_on_agent_velocity_computed)
-	navmap_ground = get_node("/root/Pool/NavRegion_Ground").get_navigation_map()
-	navmap_pool = get_node("/root/Pool/NavRegion_Pool").get_navigation_map()
 	set_is_swimming(false)
 	
 	if schedule.is_empty():
@@ -111,6 +107,10 @@ func _ready():
 	splash.visible = false
 	update_state_label()
 	sprite_frame = randi() % 4
+	set_sprite()
+
+
+func set_sprite():
 	$Sprite2D.frame = sprite_frame
 	if personality_type == PersonalityType.RANDOM:
 		personality_type = PersonalityType.values()[randi() % PersonalityType.size()]
@@ -127,42 +127,51 @@ func _on_agent_velocity_computed(suggested_velocity: Vector2):
 	move_and_slide()
 	if velocity.x != 0:
 		$Sprite2D.flip_h = velocity.x < 0
-
+	
 func _step_move():
-	if state == State.WANDERING:
-		if wandering_paused:
-			pause_timer -= get_physics_process_delta_time()
-			if pause_timer <= 0:
-				wandering_paused = false
-				if wander_index < wander_points.size():
-					move_target = wander_points[wander_index]
-					navigation_agent.set_target_position(move_target)
-		else:
-			var wander_speed = _get_walk_speed() if wander_index == 0 else _get_wander_speed()
-			if not navigation_agent.is_navigation_finished():
-				var dir = (navigation_agent.get_next_path_position() - global_position).normalized()
-				navigation_agent.set_velocity(dir * wander_speed)
+	if _is_state(State.WANDERING):
+		_wander_move()
+	elif _is_state([State.APPROACH, State.IN_LINE]):
+		_standard_move()
+	if navigation_agent.is_navigation_finished():
+		if _is_state(State.APPROACH):
+			var dist = global_position.distance_to(move_target)
+			if dist > 50.0:
+				Log.pr("Too far from activity (%s px), resetting path: %s → %s" % [dist, global_position, move_target])
+				navigation_agent.set_target_position(move_target)
 			else:
-				velocity = Vector2.ZERO
-				wandering_paused = true
-				pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
-				_check_wander()
+				state = State.ACT
+				_do_perform_activity()
 
+func _standard_move():
+	if navigation_agent.get_target_position() != move_target:
+		navigation_agent.set_target_position(move_target)
+	if not navigation_agent.is_navigation_finished():
+		var dir = (navigation_agent.get_next_path_position() - global_position).normalized()
+		navigation_agent.set_velocity(dir * _get_walk_speed())
+		
+	if global_position != move_target and is_far_from_navigation_path(80.0):
+		navigation_agent.target_position = navigation_agent.target_position
+		Log.pr("nav", name, self, navigation_agent.target_position, move_target, global_position)
+
+func _wander_move():
+	if wandering_paused:
+		pause_timer -= get_physics_process_delta_time()
+		if pause_timer <= 0:
+			wandering_paused = false
+			if wander_index < wander_points.size():
+				move_target = wander_points[wander_index]
+				navigation_agent.set_target_position(move_target)
 	else:
-		if navigation_agent.get_target_position() != move_target:
-			navigation_agent.set_target_position(move_target)
+		var wander_speed = _get_walk_speed() if wander_index == 0 else _get_wander_speed()
 		if not navigation_agent.is_navigation_finished():
 			var dir = (navigation_agent.get_next_path_position() - global_position).normalized()
-			navigation_agent.set_velocity(dir * _get_walk_speed())
-			
-		if global_position != move_target and is_far_from_navigation_path(80.0):
-			navigation_agent.target_position = navigation_agent.target_position
-			Log.pr("nav", name, self, navigation_agent.target_position, move_target, global_position)
-				
-	if navigation_agent.is_navigation_finished():
-		if state == State.APPROACH:
-			state = State.ACT
-			_do_perform_activity()
+			navigation_agent.set_velocity(dir * wander_speed)
+		else:
+			velocity = Vector2.ZERO
+			wandering_paused = true
+			pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
+			_check_wander()
 
 
 func is_far_from_navigation_path(max_distance: float) -> bool:
@@ -181,8 +190,8 @@ func is_far_from_navigation_path(max_distance: float) -> bool:
 	return true 
 
 func _physics_process(delta):
-	if state == State.APPROACH or state == State.WANDERING or state == State.IN_LINE:
-		_step_move()
+	#if _is_state([State.APPROACH, State.WANDERING, State.IN_LINE]):
+	_step_move()
 
 func _process(delta: float) -> void:
 	if state == State.IDLE and schedule.size() == 0:
@@ -244,8 +253,11 @@ func end_lap_movement():
 	$AnimationPlayer.stop()
 	$Sprite2D.frame = 4
 
+func _is_state(states) -> bool:
+	return state in (states if states is Array else [states])
+
 func check_mood_actions():
-	if state == State.ACT:
+	if _is_state(State.ACT):
 		if curr_action == Util.ACT_SHOWER and clean == max_clean:
 			_on_wait_timer_timeout()
 	pass
@@ -289,7 +301,7 @@ func _do_perform_activity():
 	wait_timer.start(activity_duration)
 	update_state_label()
 	
-	var node = target_activity.get_activity_node(self)
+	var node = target_activity.get_activity_node(self) # PoolLaps
 	if node is Path2D:
 		var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
 		if path_follow:
@@ -300,6 +312,9 @@ func _do_perform_activity():
 				c.emitting = true
 				self._current_activity_particles = c
 				break
+	if curr_action == Util.ACT_SHOWER:
+		SFX.play_activity_sfx(self, "shower", SFX.sfx_samples["shower"], activity_duration, -10)
+	play_activity_manager_anim(target_activity, false)
 
 var _current_activity_particles
 func _end_perform_activity():
@@ -348,13 +363,13 @@ func clear_wander():
 	wander_points.clear()
 
 func get_state_duration_left() -> float:
-	if state == State.ACT:
+	if _is_state(State.ACT):
 		return max(0.0, (activity_start_time + activity_duration) - (Time.get_ticks_msec() / 1000.0))
 	return 0.0
 
 func update_state_label():
 	var dur = ""
-	if state == State.ACT:
+	if _is_state(State.ACT):
 		dur = "%.1f" % get_state_duration_left()
 	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
 	state_label.text = txt
@@ -363,7 +378,7 @@ func whistled_at():
 	for type in misbehaves.keys():
 		remove_misbehave(type)
 	
-	if curr_action == Util.ACT_SUNBATHE and state == State.SLEEP:
+	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
 		finish_activity()
 	change_safety(0.8)
 	set_run(false)
@@ -434,20 +449,21 @@ func _on_wait_timer_timeout() -> void:
 	if curr_action == Util.ACT_SHOWER:
 			is_wet = true
 			start_wet_timer()
-	if curr_action == Util.ACT_SUNBATHE and state == State.SLEEP:
+			SFX.stop_activity_sfx(self, "shower")
+	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
 		if randf() < 0.8: # 80% chance, to keep on sleeping
 			return
 			
 	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT] and target_activity:
-		$AnimationPlayer.play("jump")
 		var target_pos = target_activity.get_tween_target_for_swimmer(self)
+		if global_position.distance_to(target_pos) > 100:
+			Log.pr("Tween abort: swimmer too far from assigned slot (%s → %s)" % [global_position, target_pos])
 		var tween := create_tween()
 		tween.tween_property(self, "global_position", target_pos, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		await tween.finished
 		navigation_agent.target_position = navigation_agent.target_position
-		finish_activity()
-	else:
-		finish_activity()
+	play_activity_manager_anim(target_activity, true)
+	finish_activity()
 
 func finish_activity():
 	if curr_action == Util.ACT_EXIT:
@@ -458,6 +474,22 @@ func finish_activity():
 		target_activity.notify_done(self) # tells manager to pop next in line, etc
 	curr_action = null
 	start_next_action()
+
+func play_activity_manager_anim(am: ActivityManager, use_finish: bool) -> void:
+	if not am:
+		return
+	var anim_index: int = am.finish_activity if use_finish else am.activity
+	if anim_index != Util.Anim.NA:
+		var anim_name: String = Util.ANIM_NAME_MAP.get(anim_index, "idle")
+		anim.play(anim_name)
+	elif use_finish and am.activity:
+		anim.play(Util.ANIM_NAME_MAP.get(Util.Anim.NA))
+
+func play_dive_splash_sfx():
+	SFX.play("dive_splash")
+	
+func play_splash_sfx():
+	SFX.play("splash")
 
 #region Behaviour
 
@@ -484,9 +516,13 @@ func _on_mood_timer_timeout() -> void:
 			# Random up in happy, small chance
 			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3):
 				change_happy(0.04)
+			if randf() < 0.2:
+				pass
+				#SFX.play_interval_sfx("walk", 1.5, 2.0, self)
 	if randf() < 0.5:
-		if in_puddle and not state == State.IN_LINE:
+		if in_puddle and not _is_state(State.IN_LINE):
 			change_safety(-0.2)
+			SFX.play("puddle")
 	else: 
 		change_safety(0.05)
 		if safety == max_safety:
@@ -558,6 +594,7 @@ func try_misbehave():
 					splashplay()
 				else:
 					horseplay()
+				SFX.play("splash")
 			"on_lounger":
 				if  randf() > happy and randf() > 0.7:
 					fall_asleep()
@@ -565,18 +602,18 @@ func try_misbehave():
 func get_current_context() -> String:
 	if is_swimming and curr_action != Util.ACT_POOL_LAPS:
 		return "in_pool"
-	elif curr_action == Util.ACT_SUNBATHE and state == State.ACT:
+	elif curr_action == Util.ACT_SUNBATHE and _is_state(State.ACT):
 		return "on_lounger"
-	elif not is_swimming and (state == State.IDLE or state == State.APPROACH or state == State.WANDERING):
+	elif not is_swimming and _is_state([State.IDLE, State.APPROACH, State.WANDERING]):
 		return "walking_around"
-	elif not is_swimming and state == State.IN_LINE:
+	elif not is_swimming and _is_state(State.IN_LINE):
 		return "waiting"
 		pass
 	return "unknown"
 
 func throw_trash():
 	add_misbehave(Misbehave.TRASH)
-	print("%s throws trash!" % name)
+	#print("%s throws trash!" % name)
 	change_clean(-0.05)
 	_spawn_dirt()
 	# Optionally spawn litter signal/event
@@ -587,17 +624,17 @@ func toggle_run():
 func set_run(is_run:bool):
 	add_misbehave(Misbehave.RUN) if is_run else remove_misbehave(Misbehave.RUN)
 	is_running = is_run
-	print("%s is now %s" % [name, "RUNNING" if is_running else "walking"])
+	#print("%s is now %s" % [name, "RUNNING" if is_running else "walking"])
 
 func splashplay():
 	add_misbehave(Misbehave.SPLASH)
-	print("%s splashes loudly!" % name)
+	#print("%s splashes loudly!" % name)
 	change_happy(0.02)
 	# Option: SFX, particles, fountain
 
 func horseplay():
 	add_misbehave(Misbehave.BAD)
-	print("%s starts horseplay!" % name)
+	#print("%s starts horseplay!" % name)
 	var affected_others = find_swimmers_nearby()
 	if affected_others.size() > 0:
 		var victim = affected_others.pick_random()
@@ -607,7 +644,7 @@ func horseplay():
 
 func fall_asleep():
 	add_misbehave(Misbehave.SLEEP)
-	print("%s falls asleep on lounger." % name)
+	#print("%s falls asleep on lounger." % name)
 	energy = min(max_energy, energy + 1)
 	state = State.SLEEP
 
