@@ -1,0 +1,65 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0owmx3o1h005"]
+
+[ext_resource type="Script" uid="uid://u1rs33sjcsfe" path="res://context_buttons.gd" id="1_mrk6k"]
+[ext_resource type="Texture2D" uid="uid://b2j8emwm2y0ip" path="res://assets/icons11.png" id="2_fwfuy"]
+
+[node name="CanvasLayer" type="CanvasLayer"]
+scale = Vector2(1.5, 1.5)
+transform = Transform2D(1.5, 0, 0, 1.5, 0, 0)
+script = ExtResource("1_mrk6k")
+
+[node name="Panel" type="Panel" parent="."]
+offset_left = 31.0
+offset_top = 587.0
+offset_right = 178.0
+offset_bottom = 707.0
+
+[node name="ZButtonIcon" type="TextureRect" parent="."]
+offset_left = 41.6667
+offset_top = 599.333
+offset_right = 81.6667
+offset_bottom = 639.333
+texture = ExtResource("2_fwfuy")
+
+[node name="XButtonIcon" type="TextureRect" parent="."]
+offset_left = 41.6667
+offset_top = 654.333
+offset_right = 81.6667
+offset_bottom = 694.333
+texture = ExtResource("2_fwfuy")
+
+[node name="ZButtonLabel" type="Label" parent="."]
+offset_left = 90.6667
+offset_top = 612.333
+offset_right = 189.667
+offset_bottom = 629.333
+theme_override_font_sizes/font_size = 12
+text = "z button"
+
+[node name="XButtonLabel" type="Label" parent="."]
+offset_left = 90.6667
+offset_top = 668.333
+offset_right = 192.667
+offset_bottom = 685.333
+theme_override_font_sizes/font_size = 12
+text = "x button"
+
+[node name="Label" type="Label" parent="."]
+offset_left = 45.6667
+offset_top = 600.333
+offset_right = 54.6667
+offset_bottom = 613.333
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+text = "Z"
+
+[node name="Label2" type="Label" parent="."]
+offset_left = 45.6667
+offset_top = 655.333
+offset_right = 54.6667
+offset_bottom = 668.333
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+text = "x"

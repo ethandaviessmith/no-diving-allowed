@@ -20,3 +20,5 @@ desktop.ini
 *.obj
 *.bpm
 *.repl
+
+*.tmp

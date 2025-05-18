@@ -9,49 +9,42 @@ var clean_timer = null
 var held_item: Node = null
 var held_item_offset
 
-@onready var WhistleAudioStream: AudioStreamPlayer2D = $WhistleAudioStream
+@onready var whistle:Whistle = $Whistle
+@onready var context_buttons = $"../../PoolUI/CanvasLayer"
 
 func _ready() -> void:
 	$Sprite2D.frame = randi() % 4
 	held_item_offset = $HeldItem.position.x
 
 func _physics_process(delta):
-	if not charging:
-		var dir =  get_input_dir()
-		velocity = dir * (slow_speed if cleaning else speed)
+	if not whistle.charging:
+		velocity = get_input_dir() * (slow_speed if cleaning else speed)
 		move_and_slide()
 	
-	#if dir.x != 0 and sign(scale.x) != sign(dir.x):
-		#scale.x *= -1
 	if held_item:
 		held_item.global_position = $HeldItem.global_position
+
+func _process(delta):
+	update_context_buttons()
+
 
 func _input(event):
 	if event.is_action_pressed("grab"):
 		grab_item()
-	if event.is_action_pressed("interact") and held_item and held_item.is_in_group("mop"):
-		if not cleaning:
-			start_cleaning()
-	if event.is_action_released("interact") and cleaning:
-		stop_cleaning()
-	
-	if event.is_action_pressed("whistle"):
-		start_charge()
-	if charging and (event.is_action("ui_right", true) or event.is_action("ui_left", true) or event.is_action("ui_down", true) or event.is_action("ui_up", true)):
-		direction = get_input_dir() 
-		# Only read in if dir is NOT zero; stick once
-	#if event.is_action_pressed("whistle"):
-		## This allows rapid repeated blasts with double tap or repeated taps!
-		#if charging:
-			#repeat_whistle()
-		#else:
-			#start_charge()
-	if event.is_action_released("whistle") and charging:
-		release_whistle()
-#func repeat_whistle():
-	#release_whistle()  # quick blast
-	#start_charge()   
-	
+	if event.is_action_pressed("interact"):
+		if held_item and held_item.is_in_group("mop"):
+			if not cleaning:
+				start_cleaning()
+		else:
+			$Whistle.handle_whistle_pressed()
+	if event.is_action_released("interact"):
+		if held_item and held_item.is_in_group("mop") and cleaning:
+			stop_cleaning()
+		else:
+			$Whistle.handle_whistle_released()
+	update_context_buttons()
+
+
 func get_input_dir():
 	var dir = Vector2.ZERO
 	if Input.is_action_pressed("ui_right"): dir.x += 1
@@ -59,6 +52,40 @@ func get_input_dir():
 	if Input.is_action_pressed("ui_down"): dir.y += 1
 	if Input.is_action_pressed("ui_up"): dir.y -= 1
 	return dir.normalized()
+
+
+func update_context_buttons():
+# --- Z BUTTON LOGIC ---
+	if held_item:
+		context_buttons.set_z(context_buttons.ZIconType.CLEAN)
+	else:
+		if whistle.charging:
+			if not whistle.double_whistle_ready: 
+				context_buttons.set_z(ContextButtons.ZIconType.WHISTLE3)
+			else:
+				context_buttons.set_z(ContextButtons.ZIconType.WHISTLE2)
+		else:
+			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE)
+
+	# --- X BUTTON LOGIC ---
+	if held_item:
+		if held_item.is_in_group("mop"):
+			context_buttons.set_x(ContextButtons.XIconType.MOP)
+		else:
+			context_buttons.set_x(ContextButtons.XIconType.BLANK)
+	else:
+		if is_near_mop():
+			context_buttons.set_x(ContextButtons.XIconType.OPEN_HAND)
+		else:
+			context_buttons.set_x(ContextButtons.XIconType.HAND)
+
+# Example is_near_mop() implementation:
+func is_near_mop() -> bool:
+	for area in $InteractZone.get_overlapping_areas():
+		if area.is_in_group("mop"):
+			return true
+	return false
+
 
 func start_cleaning():
 	cleaning = true
@@ -107,118 +134,3 @@ func interact_with_area():
 	for area in interact_zone.get_overlapping_areas():
 		if area.is_in_group("clean") and held_item != null and held_item.is_in_group("mop"):
 			area.start_clean()
-
-
-const MIN_RADIUS = 16
-const MAX_RADIUS = 128
-const CAST_SPEED = 250 # px/sec or adjust to suit game
-const MAX_CAST_SPEED = 350
-const LOCK_DELAY = 0.2
-
-var charging := false
-var direction := Vector2.ZERO
-var cast_position := Vector2.ZERO
-var cast_speed := CAST_SPEED
-var aoe_timer := 0.0
-var charge_radius := MIN_RADIUS
-@onready var aoe = preload("res://whistle_aoe.tscn") # Make this scene first!
-var whistle_aoe : Area2D = null
-
-var cast_dir = Vector2.ZERO
-var casting = false
-var locked = false
-var cast_unpress_timer = 0.0
-
-var lock_delay_timer: float = 0.0
-var can_release_whistle: bool = false
-
-
-func start_charge():
-	if not is_instance_valid(whistle_aoe):
-		whistle_aoe = aoe.instantiate()
-		whistle_aoe.position = Vector2.ZERO
-		add_child(whistle_aoe)
-	else:
-		whistle_aoe.position = Vector2.ZERO
-		whistle_aoe.show()
-
-	charging = true
-	aoe_timer = 0.0
-	charge_radius = MIN_RADIUS * 3
-	direction = Vector2.ZERO
-	cast_position = position
-
-func _process(delta):
-	if charging:
-		var input_dir = direction
-
-		if not locked:
-			if input_dir != Vector2.ZERO:
-				cast_dir = input_dir.normalized()
-				cast_unpress_timer = 0.0
-				casting = true
-			elif casting:
-				# Already casting, but no input
-				cast_unpress_timer += delta
-				if cast_unpress_timer >= LOCK_DELAY:
-					locked = true
-					casting = false # no longer moving/locked into place
-			else:
-				# Not moving and never casting, gradual growth in current position
-				charge_radius = clamp(charge_radius + MAX_RADIUS * delta * 0.8, MIN_RADIUS, MAX_RADIUS)
-				cast_position = global_position
-
-		if casting and not locked:
-			# Move and shrink with casting input pressed
-			cast_speed = min(cast_speed + CAST_SPEED * delta, MAX_CAST_SPEED)
-			cast_position += -cast_dir * cast_speed * delta
-			#charge_radius = max(MAX_RADIUS * 0.5, charge_radius - MAX_RADIUS * delta)
-			charge_radius = MIN_RADIUS * 3
-		elif locked:
-			# Not casting anymore, after delay — size can grow again
-			charge_radius = clamp(charge_radius + MAX_RADIUS * delta * 0.8, MIN_RADIUS, MAX_RADIUS)
-			# Stay at the locked position, don't move further
-		if is_instance_valid(whistle_aoe):
-			whistle_aoe.global_position = cast_position
-			whistle_aoe.set_radius(charge_radius)
-			whistle_aoe.set_mode(false)
-			whistle_aoe.show()
-	else:
-		_reset_cast_state()
-		if is_instance_valid(whistle_aoe):
-			whistle_aoe.set_mode(true)
-
-func release_whistle():
-	if is_instance_valid(whistle_aoe):
-		var swimmers = whistle_aoe.get_swimmers_in_area()
-		for swimmer in swimmers:
-			swimmer.whistled_at()
-		var old_global_pos = whistle_aoe.global_position
-		whistle_aoe.get_parent().remove_child(whistle_aoe)
-		get_tree().current_scene.add_child(whistle_aoe)
-		whistle_aoe.global_position = old_global_pos
-		whistle_aoe.release_and_fade()
-		whistle_aoe = null
-	if WhistleAudioStream:
-		var t = inverse_lerp(MIN_RADIUS, MAX_RADIUS, charge_radius) # t: 0 at MIN_RADIUS, 1 at MAX_RADIUS
-		# Set slowest pitch when fully charged, normal when smallest
-		var pitch = lerp(0.85, 1.05, 1.0 - t) # big radius = low pitch/long, small = normal
-		pitch += randf_range(-0.02, 0.02)
-		WhistleAudioStream.pitch_scale = pitch
-		WhistleAudioStream.play()
-		
-	var nav_obstacle = $NavigationObstacle2D
-	if nav_obstacle:
-		var tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.tween_property(nav_obstacle, "scale", Vector2.ONE * 3.0, 0.05)
-		tween.tween_interval(0.2)
-		tween.tween_property(nav_obstacle, "scale", Vector2.ONE, 0.05)
-	_reset_cast_state()
-
-func _reset_cast_state():
-	charge_radius = MIN_RADIUS * 3
-	cast_dir = Vector2.ZERO
-	casting = false
-	locked = false
-	charging = false
-	cast_unpress_timer = 0.0

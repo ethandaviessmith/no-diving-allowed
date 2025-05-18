@@ -133,6 +133,8 @@ func _step_move():
 		_wander_move()
 	elif _is_state([State.APPROACH, State.IN_LINE]):
 		_standard_move()
+		if curr_action == Util.ACT_POOL_DIVE and randf() > 0.1:
+			add_misbehave(Misbehave.DIVE) # sometimes show divers ahead of time
 	if navigation_agent.is_navigation_finished():
 		if _is_state(State.APPROACH):
 			var dist = global_position.distance_to(move_target)
@@ -295,6 +297,7 @@ func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH
 	move_target = activity_manager.get_interaction_pos(self)
 
+## Starts the activity timer (beginnig of performing an activity)
 func _do_perform_activity():
 	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
 	activity_start_time = Time.get_ticks_msec() / 1000.0
@@ -314,6 +317,8 @@ func _do_perform_activity():
 				break
 	if curr_action == Util.ACT_SHOWER:
 		SFX.play_activity_sfx(self, "shower", SFX.sfx_samples["shower"], activity_duration, -10)
+	if curr_action == Util.ACT_POOL_DIVE:
+		add_misbehave(Misbehave.DIVE)
 	play_activity_manager_anim(target_activity, false)
 
 var _current_activity_particles
@@ -453,8 +458,13 @@ func _on_wait_timer_timeout() -> void:
 	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
 		if randf() < 0.8: # 80% chance, to keep on sleeping
 			return
-			
-	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT] and target_activity:
+	if curr_action == Util.ACT_POOL_DIVE:
+		if has_misbehave(Misbehave.DIVE):
+			change_safety(-0.2)
+			Log.pr("dive")
+	
+	# Explicit on ActivityManagers with activities that change position (except laps)
+	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT, Util.ACT_POOL_DIVE] and target_activity:
 		var target_pos = target_activity.get_tween_target_for_swimmer(self)
 		if global_position.distance_to(target_pos) > 100:
 			Log.pr("Tween abort: swimmer too far from assigned slot (%s → %s)" % [global_position, target_pos])
@@ -656,13 +666,14 @@ func find_swimmers_nearby() -> Array:
 	return others
 	
 @onready var mood_icon_stack := $MoodIconStack
-enum Misbehave { BAD, RUN, TRASH, SPLASH, SLEEP }
+enum Misbehave { BAD, RUN, TRASH, SPLASH, SLEEP, DIVE }
 const MISBEHAVE_ICONS = {
 	Misbehave.BAD:    preload("res://assets/icons5.png"),
 	Misbehave.RUN:    preload("res://assets/icons6.png"),
 	Misbehave.TRASH:  preload("res://assets/icons7.png"),
 	Misbehave.SPLASH: preload("res://assets/icons8.png"),
 	Misbehave.SLEEP:  preload("res://assets/icons9.png"),
+	Misbehave.DIVE:  preload("res://assets/icons10.png"),
 }
 var misbehaves = {} # Misbehave enum : start_time
 const MISBEHAVE_ICON_OFFSET = 32

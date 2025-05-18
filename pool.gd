@@ -134,11 +134,15 @@ func on_swimmer_left_pool(swimmer):
 		{name = "PoolLadder1", node = NodePath("PoolLadder1/ActivityManager")},
 		{name = "PoolLadder2", node = NodePath("PoolLadder2/ActivityManager")}
 	],
+	Util.ACT_POOL_DIVE: [
+		{name = "PoolJump1", node = NodePath("PoolJump1/ActivityManager")},
+		{name = "PoolJump2", node = NodePath("PoolJump2/ActivityManager")}
+	],
 }
 func getActivityManager(curr_action: String, swimmer: Node = null) -> ActivityManager:
-	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT] and swimmer:
+	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT, Util.ACT_POOL_DIVE] and swimmer:
 		var a = get_randomized_activity_manager(curr_action)
-		if "Ladder" in a.name:
+		if a and "Ladder" in a.name:
 			Log.pr("here")
 		return a
 	
@@ -162,7 +166,7 @@ func getActivityManager(curr_action: String, swimmer: Node = null) -> ActivityMa
 func get_randomized_activity_manager(act_key: String) -> ActivityManager:
 	var options = activity_managers.get(act_key, [])
 	if options.is_empty():
-		Log.pr("missing activityManager", act_key)
+		Log.pr("missing activityManager keys", act_key)
 		return null
 
 	var prefer_a = []

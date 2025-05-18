@@ -15,26 +15,26 @@ var sfx_timers := {} # For ambient/interval effects
 var activity_channels := {} # activity_id : AudioStreamPlayer
 
 func _ready():
-	play_bg_music(preload("res://assets/audio/bg_music.wav"), -20)
+	play_bg_music(preload("res://assets/audio/bg_music.wav"), -30)
 	
 	sfx_samples["dive_splash"] = [
 		preload("res://assets/audio/dive_splash.mp3"),
 		preload("res://assets/audio/dive_splash2.mp3"),
 		preload("res://assets/audio/dive_splash3.mp3"),
 		preload("res://assets/audio/dive_splash4.mp3")]
-	sfx_volumes["dive_splash"] = -4
+	sfx_volumes["dive_splash"] = -24
 
 	sfx_samples["puddle"] = [
 		preload("res://assets/audio/wet_walk.mp3")
 	]
-	sfx_volumes["puddle"] = -8
+	sfx_volumes["puddle"] = -23
 	sfx_pitch_ranges["puddle"] = Vector2(0.94, 1.08)
 
 	sfx_samples["walk"] = [
 		preload("res://assets/audio/walk.wav"),
 		preload("res://assets/audio/walk2.wav")
 	]
-	sfx_volumes["walk"] = -8
+	sfx_volumes["walk"] = -23
 	sfx_pitch_ranges["walk"] = Vector2(0.94, 1.08)
 	
 	sfx_samples["splash"] = [
@@ -43,13 +43,13 @@ func _ready():
 		preload("res://assets/audio/small_splash2.mp3"),
 		preload("res://assets/audio/small_splash3.mp3")
 	]
-	sfx_volumes["splash"] = -14
+	sfx_volumes["splash"] = -18
 	sfx_pitch_ranges["splash"] = Vector2(0.97, 1.06)
 
 	sfx_samples["shower"] = [
 		preload("res://assets/audio/shower.mp3"),
 	]
-	sfx_volumes["shower"] = -14
+	sfx_volumes["shower"] = -50
 	sfx_pitch_ranges["shower"] = Vector2(0.97, 1.06)
 
 

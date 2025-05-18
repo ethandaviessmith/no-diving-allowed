@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://c7mojcrudt0tc"]
+[gd_scene load_steps=11 format=3 uid="uid://c7mojcrudt0tc"]
 
 [ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="1_7bdeq"]
 [ext_resource type="Script" uid="uid://j4oxuphwcgj3" path="res://life_guard.gd" id="1_mmhmk"]
 [ext_resource type="AudioStream" uid="uid://c6jobiw8jiknw" path="res://assets/audio/pea_whistle.wav" id="3_ujx44"]
+[ext_resource type="Script" uid="uid://4cixrdv246h2" path="res://whistle.gd" id="4_mng3v"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4mq66"]
 radius = 9.0
@@ -172,9 +173,14 @@ libraries = {
 &"": SubResource("AnimationLibrary_jrj3f")
 }
 
-[node name="WhistleAudioStream" type="AudioStreamPlayer2D" parent="."]
-stream = ExtResource("3_ujx44")
-
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="."]
 position = Vector2(0, -6)
 radius = 11.0
+
+[node name="Whistle" type="Node2D" parent="."]
+position = Vector2(0, -50)
+script = ExtResource("4_mng3v")
+
+[node name="WhistleAudioStream" type="AudioStreamPlayer2D" parent="Whistle"]
+stream = ExtResource("3_ujx44")
+volume_db = -15.0

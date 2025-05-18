@@ -21,7 +21,7 @@ Personality Type - affects what activities are chosen (child, adult, athlete, le
 
 LifeGuard
 Guard Chair - shows colour coding of swimmers moods (view hidden safety risks)
-whistle - distance option to sometimes resolve issue
+whistle - distance option to resolve issue
 
 
 #Ideas
