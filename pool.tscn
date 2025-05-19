@@ -1072,7 +1072,7 @@ schedule = ["PoolEnter", "PoolLaps", "PoolSwim", "PoolLaps", "PoolExit", "Exit"]
 clean = 1.0
 
 [node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
-position = Vector2(1201, 1080)
+position = Vector2(1027, 929)
 
 [node name="Swimmer2" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(410, 290)

@@ -36,12 +36,17 @@ func _input(event):
 			if not cleaning:
 				start_cleaning()
 		else:
-			$Whistle.handle_whistle_pressed()
+			whistle.handle_whistle_pressed()
 	if event.is_action_released("interact"):
 		if held_item and held_item.is_in_group("mop") and cleaning:
 			stop_cleaning()
 		else:
-			$Whistle.handle_whistle_released()
+			whistle.handle_whistle_released()
+	if event is InputEventKey:
+		# Replace with your actual key code/names as needed:
+		var z_down = Input.is_action_pressed("interact") # "z" action
+		var x_down = Input.is_action_pressed("grab") # "x" action
+		context_buttons.set_button_background(z_down, x_down)
 	update_context_buttons()
 
 
@@ -55,15 +60,14 @@ func get_input_dir():
 
 
 func update_context_buttons():
-# --- Z BUTTON LOGIC ---
+	# --- Z BUTTON LOGIC ---
 	if held_item:
-		context_buttons.set_z(context_buttons.ZIconType.CLEAN)
+		context_buttons.set_z(ContextButtons.ZIconType.CLEAN)
 	else:
-		if whistle.charging:
-			if not whistle.double_whistle_ready: 
-				context_buttons.set_z(ContextButtons.ZIconType.WHISTLE3)
-			else:
-				context_buttons.set_z(ContextButtons.ZIconType.WHISTLE2)
+		if whistle.whistle_aoe and is_instance_valid(whistle.whistle_aoe) and whistle.whistle_aoe.dome_active:
+			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE3)
+		elif whistle.charging:
+			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE2)
 		else:
 			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE)
 
@@ -78,6 +82,7 @@ func update_context_buttons():
 			context_buttons.set_x(ContextButtons.XIconType.OPEN_HAND)
 		else:
 			context_buttons.set_x(ContextButtons.XIconType.HAND)
+
 
 # Example is_near_mop() implementation:
 func is_near_mop() -> bool:

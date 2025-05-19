@@ -11,8 +11,6 @@ var charging: bool = false
 
 const WHISTLE_COOLDOWN = 0.25
 var whistle_aoe: Area2D = null
-var whistle_active := false
-var double_whistle_ready := false
 var whistle_cooldown := 0.0
 
 var cast_velocity := Vector2.ZERO
@@ -65,34 +63,32 @@ func start_whistle_cast():
 	cast_velocity = Vector2.ZERO
 	cast_position = global_position
 	whistle_aoe = aoe_scene.instantiate()
+	whistle_aoe.connect("dome_animation_finished", Callable(self, "_on_whistle_aoe_finished").bind(whistle_aoe))
 	# Parent as appropriate
 	get_parent().get_parent().add_child(whistle_aoe)
 	apply_whistle_level()
 
 func release_whistle_cast():
-	# Finalize effect, play final whistle sound
+	charging = false
+	whistle_cooldown = WHISTLE_COOLDOWN
+	cast_velocity = Vector2.ZERO
+	
 	if is_instance_valid(whistle_aoe):
+		cast_speed = get_whistle_props(WhistleLevel.LEVEL_1)["cast_speed"]
 		if whistle_aoe.has_method("get_swimmers_in_area"):
 			var swimmers = whistle_aoe.get_swimmers_in_area()
 			for swimmer in swimmers:
 				swimmer.whistled_at()
 		whistle_aoe.start_dome_animation()
-		whistle_aoe = null
-
-	charging = false
-	whistle_active = false
-	whistle_cooldown = WHISTLE_COOLDOWN
-	cast_velocity = Vector2.ZERO
-	# When not casting, fall back to level 1 speed
-	if is_instance_valid(whistle_aoe):
-		cast_speed = whistle_aoe.get_whistle_props(WhistleLevel.LEVEL_1)["cast_speed"]
-	else:
-		cast_speed = 250
-	Log.pr("Whistle Release", "Whistle released", charging, whistle_active, "Cooldown set to", whistle_cooldown)
 
 	if WhistleAudioStream:
 		WhistleAudioStream.pitch_scale = 1.05
 		WhistleAudioStream.play()
+
+
+func _on_whistle_aoe_finished(emitter):
+	if whistle_aoe == emitter:
+		whistle_aoe = null
 
 func _process(delta):
 	if whistle_cooldown > 0.0:
@@ -106,11 +102,8 @@ func _process(delta):
 			var from_lvl := WhistleLevel.LEVEL_1 if charge_frac < 0.5 else WhistleLevel.LEVEL_2
 			var to_lvl := WhistleLevel.LEVEL_2 if charge_frac < 0.5 else WhistleLevel.LEVEL_3
 			var interp = charge_frac / 0.5 if charge_frac < 0.5 else (charge_frac - 0.5) / 0.5
-
-			# Always get props from self (whistle.gd)
 			var props_from := get_whistle_props(from_lvl)
 			var props_to := get_whistle_props(to_lvl)
-
 			whistle_aoe.set_whistle_effects(
 				lerp(props_from["radius"], props_to["radius"], interp),
 				lerp(props_from["rotation"], props_to["rotation"], interp),
@@ -127,17 +120,25 @@ func _process(delta):
 
 		if new_level != whistle_level:
 			whistle_level = new_level
-			apply_whistle_level() # This now sets aoe level AND props
+			apply_whistle_level()
 
-		direction = get_input_dir()
-		if direction != Vector2.ZERO:
-			cast_dir = direction.normalized()
+		var input_dir = get_input_dir()
+		var input_strength = input_dir.length()
+		if not has_node("_cast_last_input_dir"):
+			set("_cast_last_input_dir", Vector2.ZERO)
+		if input_strength > 0.1:
+			set("_cast_last_input_dir", input_dir)
+			if cast_dir == Vector2.ZERO:
+				cast_dir = input_dir.normalized()
+			cast_dir = cast_dir.lerp(input_dir.normalized(), delta * 6.0 * input_strength)
+		else:
+			cast_velocity = cast_velocity.lerp(Vector2.ZERO, delta * 10.0)
 		if cast_dir != Vector2.ZERO:
-			# Use highest-level cast_speed for capping
 			var max_speed = get_whistle_props(WhistleLevel.LEVEL_3)["cast_speed"]
 			cast_speed = min(cast_speed + 350 * delta, max_speed)
 			var target_velocity = -cast_dir * cast_speed
-			cast_velocity = cast_velocity.lerp(target_velocity, 0.15)
+			if input_strength > 0.1:
+				cast_velocity = cast_velocity.lerp(target_velocity, 0.18 + (input_strength * 0.18))
 			var next_pos = cast_position + cast_velocity * delta
 			var dist = (next_pos - global_position).length()
 			if dist > 1000:
@@ -146,6 +147,5 @@ func _process(delta):
 			cast_position = next_pos
 		else:
 			cast_velocity = cast_velocity.lerp(Vector2.ZERO, 0.13)
-
 		if is_instance_valid(whistle_aoe):
 			whistle_aoe.global_position = cast_position

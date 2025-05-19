@@ -25,6 +25,8 @@ var steps_per_level: Array[int] = [4, 6, 8]
 const DOME_HEIGHT_FACTOR := 0.6 
 @export var aspect_ratio: float = 0.6
 
+signal dome_animation_finished
+
 func set_whistle_level(level: int, props: Dictionary) -> void:
 	whistle_level = level
 	current_props = props
@@ -33,7 +35,11 @@ func set_whistle_level(level: int, props: Dictionary) -> void:
 func get_steps() -> int:
 	return current_props.get("steps", 4)
 
+func _ready() -> void:
+	Log.pr("whistle ready")
+
 func start_dome_animation():
+	Log.pr("whistle dome")
 	dome_anim_time = 0.0
 	dome_active = true
 	dome_base_angle = dot_angle
@@ -50,19 +56,16 @@ func set_cast(b: bool): is_cast = b
 
 func release_and_fade():
 	if fade_active: return
+	Log.pr("whistle fade")
 	fade_active = true
 	if get_tree().is_debugging_collisions_hint(): modulate = Color(1,1,1,1) # for hot reloading
 	var t = create_tween()
 	t.tween_property(self, "modulate", Color(1,1,1,0), 0.5)
-	t.tween_callback(queue_free)
+	t.tween_callback(_on_faded_out)
 
-func animate_buff():
-	if double_buff_data.t <= 0.0:
-		double_buff_data = {}; is_cast = false; release_and_fade(); return
-	await get_tree().process_frame
-	double_buff_data.t -= get_process_delta_time()
-	queue_redraw()
-	animate_buff()
+func _on_faded_out():
+	emit_signal("dome_animation_finished")
+	queue_free()
 
 func _process(delta):
 	if dome_active:

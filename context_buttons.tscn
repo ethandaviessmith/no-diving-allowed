@@ -1,7 +1,63 @@
-[gd_scene load_steps=3 format=3 uid="uid://d0owmx3o1h005"]
+[gd_scene load_steps=10 format=3 uid="uid://d0owmx3o1h005"]
 
 [ext_resource type="Script" uid="uid://u1rs33sjcsfe" path="res://context_buttons.gd" id="1_mrk6k"]
 [ext_resource type="Texture2D" uid="uid://b2j8emwm2y0ip" path="res://assets/icons11.png" id="2_fwfuy"]
+[ext_resource type="Texture2D" uid="uid://ccxotv0smu3ap" path="res://assets/icons12.png" id="2_iqxex"]
+[ext_resource type="Texture2D" uid="uid://d21q0nlxwv7dl" path="res://assets/whistle_fx.png" id="4_evsjy"]
+[ext_resource type="Texture2D" uid="uid://be5gyugjv03f6" path="res://assets/button_bg.png" id="5_iqxex"]
+
+[sub_resource type="Animation" id="Animation_anjqk"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ZButtonAnim/Whistle_FX:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0, 4]
+}
+
+[sub_resource type="Animation" id="Animation_iqxex"]
+resource_name = "blow"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ZButtonAnim/Whistle_FX:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [5, 9]
+}
+
+[sub_resource type="Animation" id="Animation_gcp00"]
+resource_name = "idle"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ZButtonAnim/Whistle_FX:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0, 4]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jjdyt"]
+_data = {
+&"RESET": SubResource("Animation_anjqk"),
+&"blow": SubResource("Animation_iqxex"),
+&"idle": SubResource("Animation_gcp00")
+}
 
 [node name="CanvasLayer" type="CanvasLayer"]
 scale = Vector2(1.5, 1.5)
@@ -14,12 +70,24 @@ offset_top = 587.0
 offset_right = 178.0
 offset_bottom = 707.0
 
+[node name="ZButtonBackground" type="Sprite2D" parent="."]
+position = Vector2(62, 619.333)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("5_iqxex")
+hframes = 2
+
+[node name="XButtonBackground" type="Sprite2D" parent="."]
+position = Vector2(62, 674)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("5_iqxex")
+hframes = 2
+
 [node name="ZButtonIcon" type="TextureRect" parent="."]
 offset_left = 41.6667
 offset_top = 599.333
 offset_right = 81.6667
 offset_bottom = 639.333
-texture = ExtResource("2_fwfuy")
+texture = ExtResource("2_iqxex")
 
 [node name="XButtonIcon" type="TextureRect" parent="."]
 offset_left = 41.6667
@@ -43,6 +111,16 @@ offset_right = 192.667
 offset_bottom = 685.333
 theme_override_font_sizes/font_size = 12
 text = "x button"
+
+[node name="ZButtonAnim" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_jjdyt")
+}
+
+[node name="Whistle_FX" type="Sprite2D" parent="ZButtonAnim"]
+position = Vector2(63.3333, 617.333)
+texture = ExtResource("4_evsjy")
+hframes = 10
 
 [node name="Label" type="Label" parent="."]
 offset_left = 45.6667

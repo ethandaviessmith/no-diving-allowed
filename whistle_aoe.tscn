@@ -6,6 +6,7 @@
 
 [node name="WhistleAOE" type="Area2D"]
 z_index = 2
+scale = Vector2(1, 0.9)
 script = ExtResource("1_o5j8m")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

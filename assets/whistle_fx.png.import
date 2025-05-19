@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ddq7ryl10cf8v"
-path="res://.godot/imported/icons19.png-b9814bf18d690fc96de7b002129ef4c7.ctex"
+uid="uid://d21q0nlxwv7dl"
+path="res://.godot/imported/whistle_fx.png-ec55d7ffaba79801fcbc7d7ca7d92bf8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/icons19.png"
-dest_files=["res://.godot/imported/icons19.png-b9814bf18d690fc96de7b002129ef4c7.ctex"]
+source_file="res://assets/whistle_fx.png"
+dest_files=["res://.godot/imported/whistle_fx.png-ec55d7ffaba79801fcbc7d7ca7d92bf8.ctex"]
 
 [params]
 
