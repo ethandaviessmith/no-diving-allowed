@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=40 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -13,9 +13,12 @@
 [ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="7_48tf8"]
 [ext_resource type="Texture2D" uid="uid://64kfbt3a7w03" path="res://assets/props.png" id="7_dhh87"]
 [ext_resource type="Texture2D" uid="uid://dmq4ril00ymqj" path="res://assets/debug_bar_border.png" id="7_k0w2f"]
+[ext_resource type="Texture2D" uid="uid://bomk4ob816vrw" path="res://assets/icon_rule.png" id="7_pb5gw"]
 [ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
 [ext_resource type="Texture2D" uid="uid://b245abhhqfvbe" path="res://assets/brick_wall_texture.jpg" id="7_xv5nx"]
+[ext_resource type="Texture2D" uid="uid://cig13ofxjrkoe" path="res://assets/icons15.png" id="8_ansac"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
+[ext_resource type="Texture2D" uid="uid://bpgvqcvdld42e" path="res://assets/icon_safety.png" id="9_ch1vm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
 [ext_resource type="NavigationPolygon" uid="uid://bpvlggtathyb6" path="res://pool_navigation_region.tres" id="15_xv5nx"]
 
@@ -175,8 +178,21 @@ entrance_point = NodePath("Entrance")
 
 [node name="PoolUI" type="CanvasLayer" parent="."]
 
+[node name="Panel" type="Panel" parent="PoolUI"]
+offset_left = 1406.0
+offset_top = 25.0
+offset_right = 1655.0
+offset_bottom = 155.0
+
+[node name="Panel2" type="Panel" parent="PoolUI"]
+self_modulate = Color(1, 1, 0, 1)
+offset_left = 187.0
+offset_top = 7.0
+offset_right = 369.0
+offset_bottom = 155.0
+
 [node name="ClockContainer" type="Node2D" parent="PoolUI"]
-position = Vector2(306, 101)
+position = Vector2(284, 96)
 scale = Vector2(1.4, 1.4)
 
 [node name="ClockFace" type="Sprite2D" parent="PoolUI/ClockContainer"]
@@ -195,12 +211,6 @@ frame = 2
 
 [node name="TimeIcon" type="Sprite2D" parent="PoolUI/ClockContainer"]
 position = Vector2(0, -47)
-
-[node name="Panel" type="Panel" parent="PoolUI"]
-offset_left = 1487.0
-offset_top = 25.0
-offset_right = 1655.0
-offset_bottom = 111.0
 
 [node name="MoneyContainer" type="Node2D" parent="PoolUI"]
 position = Vector2(1504, 43)
@@ -230,7 +240,7 @@ libraries = {
 }
 
 [node name="GuestContainer" type="Node2D" parent="PoolUI"]
-position = Vector2(1504, 80)
+position = Vector2(1433, 90)
 
 [node name="Sprite2D" type="Sprite2D" parent="PoolUI/GuestContainer"]
 texture_filter = 1
@@ -253,6 +263,74 @@ scroll_active = false
 vertical_alignment = 1
 
 [node name="CanvasLayer" parent="PoolUI" instance=ExtResource("6_5exe5")]
+
+[node name="RuleContainer" type="Node2D" parent="PoolUI"]
+position = Vector2(1531, 91)
+
+[node name="Sprite2D" type="Sprite2D" parent="PoolUI/RuleContainer"]
+texture_filter = 1
+position = Vector2(23, 6)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("7_pb5gw")
+
+[node name="RuleLabel" type="RichTextLabel" parent="PoolUI/RuleContainer"]
+offset_left = 65.0
+offset_top = -12.0
+offset_right = 170.0
+offset_bottom = 28.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 28
+text = "0
+"
+fit_content = true
+scroll_active = false
+vertical_alignment = 1
+
+[node name="HappyContainer" type="Node2D" parent="PoolUI"]
+position = Vector2(1433, 124)
+
+[node name="Sprite2D" type="Sprite2D" parent="PoolUI/HappyContainer"]
+texture_filter = 1
+position = Vector2(23, 6)
+texture = ExtResource("8_ansac")
+
+[node name="GuestLabel" type="RichTextLabel" parent="PoolUI/HappyContainer"]
+offset_left = 65.0
+offset_top = -12.0
+offset_right = 170.0
+offset_bottom = 28.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 28
+text = "0
+"
+fit_content = true
+scroll_active = false
+vertical_alignment = 1
+
+[node name="SafetyContainer" type="Node2D" parent="PoolUI"]
+position = Vector2(1531, 125)
+
+[node name="Sprite2D" type="Sprite2D" parent="PoolUI/SafetyContainer"]
+texture_filter = 1
+position = Vector2(23, 6)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("9_ch1vm")
+
+[node name="RuleLabel" type="RichTextLabel" parent="PoolUI/SafetyContainer"]
+offset_left = 65.0
+offset_top = -12.0
+offset_right = 170.0
+offset_bottom = 28.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 28
+text = "0
+"
+fit_content = true
+scroll_active = false
+vertical_alignment = 1
 
 [node name="Visuals" type="Control" parent="."]
 layout_mode = 3
@@ -1055,9 +1133,8 @@ shape = SubResource("RectangleShape2D_08ey2")
 material = ExtResource("7_ryjux")
 offset_left = -146.0
 offset_top = 5.0
-offset_right = 231.525
+offset_right = 611.57
 offset_bottom = 487.43
-scale = Vector2(2.012, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="PoolDirt" type="Node2D" parent="."]
@@ -1069,7 +1146,6 @@ y_sort_enabled = true
 position = Vector2(315, 396)
 pool = NodePath("../..")
 schedule = ["PoolEnter", "PoolLaps", "PoolSwim", "PoolLaps", "PoolExit", "Exit"]
-clean = 1.0
 
 [node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
 position = Vector2(1027, 929)
@@ -1078,7 +1154,6 @@ position = Vector2(1027, 929)
 position = Vector2(410, 290)
 pool = NodePath("../..")
 schedule = ["WanderPool", "Shower", "Exit"]
-clean = 1.0
 
 [node name="SpawnTimer" type="Timer" parent="."]
 

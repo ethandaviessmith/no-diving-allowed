@@ -131,7 +131,7 @@ func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 
 func send_swimmer_to_wander(swimmer):
 	if wander_area:
-		var count = randi_range(3, 6) if swimmer.energy > 0.5 else randi_range(2, 4)
+		var count = randi_range(3, 6) if swimmer.mood.energy > 0.5 else randi_range(2, 4)
 		swimmer._setup_wander_and_go_with_area(wander_area, count)
 	else:
 		Log.pr("Missing Wander Area", name)

@@ -1,7 +1,7 @@
 class_name Swimmer extends CharacterBody2D
 enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP }
 enum PersonalityType { RANDOM, CHILD, ADULT, ATHLETE, LEISURE }
-enum Mood { GREAT, GOOD, BAD, ISSUE }
+#enum Mood { GREAT, GOOD, BAD, ISSUE }
 
 @export var pool: Pool
 @export var schedule: Array = []
@@ -19,6 +19,9 @@ var activity_duration: float = 0
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var anim: AnimationPlayer = $AnimationPlayer
 
+@export var personality_type: PersonalityType
+@onready var mood: MoodComponent = $MoodComponent
+
 var swim_speed: float = 180
 var base_speed := 120
 var wander_points: Array[Vector2] = []
@@ -27,28 +30,7 @@ var wander_speed_range := Vector2(40, 80)
 var wander_pause_range := Vector2(0.5, 2.5)
 var pause_timer := 0.0
 var wandering_paused := false
-
-@export var happy: float = 0.8
-@export var energy: float = 10.0
-@export var safety: float = 0.8
-@export var clean: float = 0.6
-@export var personality_type: PersonalityType
-var max_happy:float = 1.0
-var max_energy: float = 10.0
-var max_safety: float = 1.0
-var max_clean: float = 1.0
-var mood: int = Mood.GOOD  # enum: GREAT, GOOD, BAD, ISSUE
-
-@export var mood_color_great: Color
-@export var mood_color_good: Color
-@export var mood_color_bad: Color
-@export var mood_color_issue: Color
-@onready var mood_bar: ColorRect = $MoodBar
-
-@onready var bar_happy: TextureProgressBar = $HappyProgressBar
-@onready var bar_energy: TextureProgressBar = $EnergyProgressBar
-@onready var bar_safety: TextureProgressBar = $SafetyProgressBar
-@onready var bar_clean: TextureProgressBar = $CleanProgressBar
+var is_running := false
 
 
 var path_follow: PathFollow2D = null
@@ -67,35 +49,6 @@ var is_wet: bool = false
 var wet_timer: Timer = null
 var in_puddle: Dirt = null
 var puddle_slow := 0.5
-
-
-func _on_pool_entered(body):
-	if body == self:
-		set_is_swimming(true)
-		splash.visible = true
-		$Sprite2D.frame = 4
-
-func _on_pool_exited(body):
-	if body == self:
-		set_is_swimming(false)
-		splash.visible = false
-		$Sprite2D.frame = sprite_frame
-		is_wet = true
-		start_wet_timer()
-
-func set_pool(_pool, s):
-	pool = _pool
-	schedule = s if s != null else Util.get_schedule_enter(self)
-	pool.poolArea2D.body_entered.connect(_on_pool_entered)
-	pool.poolArea2D.body_exited.connect(_on_pool_exited)
-	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
-
-func set_is_swimming(flag: bool):
-	is_swimming = flag
-	if is_swimming:
-		var splash = preload("res://splash_effect.tscn").instantiate()
-		get_parent().add_child(splash)
-		splash.global_position = global_position + Vector2(0.0, -35.0)
 
 
 func _ready():
@@ -121,7 +74,15 @@ func set_sprite():
 		$Sprite2D.scale.x = 0.9
 	elif personality_type == PersonalityType.LEISURE:
 		$Sprite2D.scale.x = 1.1
+		
+func set_pool(_pool, s):
+	pool = _pool
+	schedule = s if s != null else Util.get_schedule_enter(self)
+	pool.poolArea2D.body_entered.connect(_on_pool_entered)
+	pool.poolArea2D.body_exited.connect(_on_pool_exited)
+	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
 
+## Movement
 func _on_agent_velocity_computed(suggested_velocity: Vector2):
 	velocity = suggested_velocity
 	move_and_slide()
@@ -134,7 +95,7 @@ func _step_move():
 	elif _is_state([State.APPROACH, State.IN_LINE]):
 		_standard_move()
 		if curr_action == Util.ACT_POOL_DIVE and randf() > 0.1:
-			add_misbehave(Misbehave.DIVE) # sometimes show divers ahead of time
+			mood.add_misbehave(MoodComponent.Misbehave.DIVE) # sometimes show divers ahead of time
 	if navigation_agent.is_navigation_finished():
 		if _is_state(State.APPROACH):
 			var dist = global_position.distance_to(move_target)
@@ -156,6 +117,21 @@ func _standard_move():
 		navigation_agent.target_position = navigation_agent.target_position
 		Log.pr("nav", name, self, navigation_agent.target_position, move_target, global_position)
 
+func is_far_from_navigation_path(max_distance: float) -> bool:
+	var path: PackedVector2Array = navigation_agent.get_current_navigation_path()
+	if path.size() <= 1 or not navigation_agent.is_navigation_finished():
+		return false
+	for i in path.size() - 1:
+		var a: Vector2 = path[i]
+		var b: Vector2 = path[i + 1]
+		var seg: Vector2 = b - a
+		var to_agent: Vector2 = global_position - a
+		var t: float = clamp(to_agent.dot(seg) / seg.length_squared(), 0.0, 1.0)
+		var closest: Vector2 = a + seg * t
+		if global_position.distance_to(closest) <= max_distance:
+			return false
+	return true 
+
 func _wander_move():
 	if wandering_paused:
 		pause_timer -= get_physics_process_delta_time()
@@ -175,49 +151,16 @@ func _wander_move():
 			pause_timer = randf_range(wander_pause_range.x, wander_pause_range.y)
 			_check_wander()
 
-
-func is_far_from_navigation_path(max_distance: float) -> bool:
-	var path: PackedVector2Array = navigation_agent.get_current_navigation_path()
-	if path.size() <= 1 or not navigation_agent.is_navigation_finished():
-		return false
-	for i in path.size() - 1:
-		var a: Vector2 = path[i]
-		var b: Vector2 = path[i + 1]
-		var seg: Vector2 = b - a
-		var to_agent: Vector2 = global_position - a
-		var t: float = clamp(to_agent.dot(seg) / seg.length_squared(), 0.0, 1.0)
-		var closest: Vector2 = a + seg * t
-		if global_position.distance_to(closest) <= max_distance:
-			return false
-	return true 
-
 func _physics_process(delta):
-	#if _is_state([State.APPROACH, State.WANDERING, State.IN_LINE]):
 	_step_move()
 
 func _process(delta: float) -> void:
-	if state == State.IDLE and schedule.size() == 0:
-		if energy + happy < 0.4 or happy < 0.2:
-			schedule = Util.get_schedule_exit(self)
-		elif energy < 0.5:
-			schedule = Util.get_schedule_lowenergy(self)
-		elif happy < 0.5:
-			schedule = Util.get_schedule_lowhappy(self)
-		else:
-			schedule = Util.get_schedule_random_pool(self)
-		start_next_action()
+	decide_next_action()
 	check_mood_actions()
-	update_mood()
+	mood.update_mood()
 	process_lane_follow(delta)
 	update_state_label()
 
-func leave_pool():
-		left_pool.emit()
-		var tween = create_tween()
-		tween.tween_property(self, "modulate:a", 0, 0.4)
-		tween.tween_property(self, "scale", scale * Vector2(1.0, 0.8), 0.35)
-		tween.set_parallel(true)
-		tween.connect("finished", Callable(self, "queue_free"))
 
 func process_lane_follow(delta: float):
 		if !is_on_lane:
@@ -258,11 +201,22 @@ func end_lap_movement():
 func _is_state(states) -> bool:
 	return state in (states if states is Array else [states])
 
+func decide_next_action():
+	if state == State.IDLE and schedule.size() == 0:
+		if mood.energy + mood.happy < 0.4 or mood.happy < 0.2:
+			schedule = Util.get_schedule_exit(self)
+		elif mood.energy < 0.5:
+			schedule = Util.get_schedule_lowenergy(self)
+		elif mood.happy < 0.5:
+			schedule = Util.get_schedule_lowhappy(self)
+		else:
+			schedule = Util.get_schedule_random_pool(self)
+		start_next_action()
+
 func check_mood_actions():
 	if _is_state(State.ACT):
-		if curr_action == Util.ACT_SHOWER and clean == max_clean:
+		if curr_action == Util.ACT_SHOWER and mood.clean == mood.max_clean:
 			_on_wait_timer_timeout()
-	pass
 
 func start_next_action():
 	if schedule.is_empty() or not pool:
@@ -290,7 +244,7 @@ func start_next_action():
 			schedule.remove_at(0)
 			state = State.WANDERING
 			wandering_paused = true
-			var count = randi_range(1, 2) if energy > 0.5 else randi_range(2, 5)
+			var count = randi_range(1, 2) if mood.energy > 0.5 else randi_range(2, 5)
 			_setup_wander_and_go_with_area(area, count)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
@@ -318,7 +272,7 @@ func _do_perform_activity():
 	if curr_action == Util.ACT_SHOWER:
 		SFX.play_activity_sfx(self, "shower", SFX.sfx_samples["shower"], activity_duration, -10)
 	if curr_action == Util.ACT_POOL_DIVE:
-		add_misbehave(Misbehave.DIVE)
+		mood.add_misbehave(MoodComponent.Misbehave.DIVE)
 	play_activity_manager_anim(target_activity, false)
 
 var _current_activity_particles
@@ -379,74 +333,7 @@ func update_state_label():
 	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
 	state_label.text = txt
 
-func whistled_at():
-	for type in misbehaves.keys():
-		remove_misbehave(type)
-	
-	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
-		finish_activity()
-	change_safety(0.8)
-	set_run(false)
-
-func update_mood():
-	# Just as an example, tweak to fit your liking
-	if happy > 0.75 and energy > 6.0 and safety > 0.7 and clean > 0.8:
-		mood = Mood.GREAT
-	elif happy > 0.5 and energy > 3.0 and safety > 0.5:
-		mood = Mood.GOOD
-	elif happy < 0.25 or energy < 2.0 or safety < 0.3:
-		mood = Mood.BAD
-	else:
-		mood = Mood.ISSUE
-	update_mood_bar_color()
-	Util.set_mood_progress(bar_happy, happy, max_happy)
-	Util.set_mood_progress(bar_energy, energy, max_energy)
-	Util.set_mood_progress(bar_safety, safety, max_safety)
-	Util.set_mood_progress(bar_clean, clean, max_clean)
-
-func get_mood_rank() -> float:
-	var energy_rank = 1.0 - clamp(energy / max_energy, 0.0, 1.0) # flipped
-	return (clamp(happy,0.0,max_happy) + clamp(safety,0.0,max_safety) + clamp(clean,0.0,max_clean) + energy_rank) / 4.0
-
-func update_mood_bar_color():
-	match mood:
-		Mood.GREAT: mood_bar.color = mood_color_great
-		Mood.GOOD: mood_bar.color = mood_color_good
-		Mood.BAD: mood_bar.color = mood_color_bad
-		Mood.ISSUE: mood_bar.color = mood_color_issue
-
-func change_happy(amount: float): 
-	happy = clamp(happy + amount, 0.0, 1.0)
-
-func drain_energy(amount: float = 1.0): 
-	energy = max(energy - amount, 0.0)
-
-func restore_energy(amount: float = 1.0): 
-	energy = min(energy + amount, 10.0)
-
-func change_safety(amount: float):
-	safety = clamp(safety + amount, 0.0, 1.0)
-
-func change_clean(amount: float):
-	var ratio := 1.0
-	if target_activity and "get_clean_ratio" in target_activity:
-		var clean_ratio = target_activity.get_clean_ratio()
-		if amount > 0: ratio = lerp(0.5, 1.5, clean_ratio)
-		else: ratio = lerp(1.5, 0.5, clean_ratio)
-	clean = clamp(clean + amount * ratio, 0.0, 1.0)
-	if clean == max_clean:
-		remove_misbehave(Misbehave.TRASH)
-
-func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[PersonalityType] = []) -> float:
-	if personality_type in less:
-		return amt * 0.5
-	if personality_type in more:
-		return amt * 1.5
-	return amt
-
-func _personality_factor(types:Array = [], base:float = 0.0) -> float:
-	return base if personality_type in types else 0.0
-
+#region Timers
 func _on_wait_timer_timeout() -> void:
 	wait_timer.stop()
 	_end_perform_activity()
@@ -459,8 +346,8 @@ func _on_wait_timer_timeout() -> void:
 		if randf() < 0.8: # 80% chance, to keep on sleeping
 			return
 	if curr_action == Util.ACT_POOL_DIVE:
-		if has_misbehave(Misbehave.DIVE):
-			change_safety(-0.2)
+		if mood.has_misbehave(MoodComponent.Misbehave.DIVE):
+			mood.change_safety(-0.2)
 			Log.pr("dive")
 	
 	# Explicit on ActivityManagers with activities that change position (except laps)
@@ -485,6 +372,37 @@ func finish_activity():
 	curr_action = null
 	start_next_action()
 
+func leave_pool():
+		left_pool.emit()
+		var tween = create_tween()
+		tween.tween_property(self, "modulate:a", 0, 0.4)
+		tween.tween_property(self, "scale", scale * Vector2(1.0, 0.8), 0.35)
+		tween.set_parallel(true)
+		tween.connect("finished", Callable(self, "queue_free"))
+
+func _on_pool_entered(body):
+	if body == self:
+		set_is_swimming(true)
+		splash.visible = true
+		$Sprite2D.frame = 4
+
+func _on_pool_exited(body):
+	if body == self:
+		set_is_swimming(false)
+		splash.visible = false
+		$Sprite2D.frame = sprite_frame
+		is_wet = true
+		start_wet_timer()
+
+func set_is_swimming(flag: bool):
+	is_swimming = flag
+	if is_swimming:
+		var splash = preload("res://splash_effect.tscn").instantiate()
+		get_parent().add_child(splash)
+		splash.global_position = global_position + Vector2(0.0, -35.0)
+
+## Animations
+
 func play_activity_manager_anim(am: ActivityManager, use_finish: bool) -> void:
 	if not am:
 		return
@@ -501,48 +419,6 @@ func play_dive_splash_sfx():
 func play_splash_sfx():
 	SFX.play("splash")
 
-#region Behaviour
-
-func _on_mood_timer_timeout() -> void:
-	match state:
-		State.ACT:
-			var amt = 0.2
-			match curr_action:
-				Util.ACT_SHOWER:
-					change_clean(_personality_val(amt, [PersonalityType.CHILD]))
-				Util.ACT_POOL_LAPS, Util.ACT_POOL_SWIM, Util.ACT_POOL_PLAY:
-					drain_energy(_personality_val(amt, [], [PersonalityType.LEISURE]))
-				Util.ACT_SUNBATHE:
-					restore_energy(0.1)
-					change_happy(-0.04)
-			# Activity random negative clean
-			if randf() < 0.05 + _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2):
-				change_clean(_personality_val(-0.04, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
-		State.IN_LINE, State.WANDERING:
-			# Random down in happy, small chance
-			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3):
-				change_happy(-0.04)
-		State.ACT, State.APPROACH:
-			# Random up in happy, small chance
-			if randf() < 0.2 - _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3):
-				change_happy(0.04)
-			if randf() < 0.2:
-				pass
-				#SFX.play_interval_sfx("walk", 1.5, 2.0, self)
-	if randf() < 0.5:
-		if in_puddle and not _is_state(State.IN_LINE):
-			change_safety(-0.2)
-			SFX.play("puddle")
-	else: 
-		change_safety(0.05)
-		if safety == max_safety:
-			if randf() < 0.5:
-				# lost possible bad mood icon?
-				pass
-			pass
-			
-	update_mood()
-	try_misbehave()
 
 func start_wet_timer():
 	if wet_timer: wet_timer.queue_free()
@@ -585,46 +461,111 @@ func _spawn_dirt_or_puddle(dirt_type: Dirt.DirtType):
 		node.position = position + Vector2(randf_range(-10,10), randf_range(0,10))
 		pool.poolDirt.add_child(node)
 
-var is_running := false
+#############################
+## MOOD
+
+signal rule_broken(swimmer, amount)
+
+func whistled_at():
+	var broken_count = mood.misbehaves.size()
+	if broken_count > 0:
+		rule_broken.emit(self, broken_count)
+		mood.start_removing_misbehave_icons()
+	
+	for type in mood.misbehaves.keys():
+		mood.remove_misbehave(type)
+	
+	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
+		finish_activity()
+	mood.change_safety(0.8)
+	set_run(false)
+
+func get_mood_rank():
+	return mood.get_mood_rank()
+	
+func _on_mood_timer_timeout() -> void:
+	var pf_child_athlete = _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2)
+	var pf_child_leisure = _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3)
+
+	match state:
+		State.ACT:
+			var amt = 0.2
+			match curr_action:
+				Util.ACT_SHOWER:
+					mood.change_clean(_personality_val(amt, [PersonalityType.CHILD]))
+				Util.ACT_POOL_LAPS, Util.ACT_POOL_SWIM, Util.ACT_POOL_PLAY:
+					mood.change_energy(_personality_val(-amt, [], [PersonalityType.LEISURE]))
+				Util.ACT_SUNBATHE:
+					mood.change_energy(0.1)
+					mood.change_happy(-0.04)
+			# Activity random negative clean
+			if randf() < 0.05 + pf_child_athlete:
+				mood.change_clean(_personality_val(-0.04, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
+		State.IN_LINE, State.WANDERING:
+			# Random down in happy, small chance
+			if randf() < 0.2 - pf_child_leisure:
+				mood.change_happy(-0.04)
+		State.ACT, State.APPROACH:
+			# Random up in happy, small chance
+			if randf() < 0.2 - pf_child_leisure:
+				mood.change_happy(0.04)
+			if randf() < 0.2:
+				pass
+				# SFX.play_interval_sfx("walk", 1.5, 2.0, self)
+	if randf() < 0.5:
+		if in_puddle and not _is_state(State.IN_LINE):
+			mood.change_safety(-0.2)
+			SFX.play("puddle")
+	else: 
+		mood.change_safety(0.05)
+		if mood.safety == mood.max_safety:
+			if randf() < 0.5:
+				# lost possible bad mood icon?
+				pass
+
+	mood.update_mood()
+	try_misbehave()
 
 func try_misbehave():
-	# More likely to misbehave with lower safety
-	if randf() > safety:
-		match get_current_context():
-			"waiting":
-				if  randf() > clean and randf() > 0.1:
-					throw_trash()
-			"walking_around":
-				if  randf() > clean and randf() > 0.3:
-					throw_trash()
-				elif randf() > 0.5:
-					toggle_run()
-			"in_pool":
-				if randf() > 0.5:
-					splashplay()
-				else:
-					horseplay()
-				SFX.play("splash")
-			"on_lounger":
-				if  randf() > happy and randf() > 0.7:
-					fall_asleep()
+	if randf() > mood.safety: # More likely to misbehave with lower safety
+		var pf_child_athlete = _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2)
+		var pf_child_leisure = _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3)
+		
+		# Waiting (in line)
+		if not is_swimming and _is_state(State.IN_LINE):
+			if randf() > mood.clean + pf_child_athlete and randf() > 0.1 + pf_child_athlete:
+				throw_trash()
+		# Walking Around
+		elif not is_swimming and _is_state([State.IDLE, State.APPROACH, State.WANDERING]):
+			if randf() > mood.clean + pf_child_athlete and randf() > 0.3 + pf_child_athlete:
+				throw_trash()
+			elif randf() > 0.5 + pf_child_leisure:
+				toggle_run()
+		# In Pool (but not laps)
+		elif is_swimming and curr_action != Util.ACT_POOL_LAPS:
+			if randf() > 0.5 + pf_child_athlete:
+				splashplay()
+			else:
+				horseplay()
+			SFX.play("splash")
+		# On Lounger
+		elif curr_action == Util.ACT_SUNBATHE and _is_state(State.ACT):
+			if randf() > mood.happy + pf_child_leisure and randf() > 0.7 + pf_child_leisure:
+				fall_asleep()
 
-func get_current_context() -> String:
-	if is_swimming and curr_action != Util.ACT_POOL_LAPS:
-		return "in_pool"
-	elif curr_action == Util.ACT_SUNBATHE and _is_state(State.ACT):
-		return "on_lounger"
-	elif not is_swimming and _is_state([State.IDLE, State.APPROACH, State.WANDERING]):
-		return "walking_around"
-	elif not is_swimming and _is_state(State.IN_LINE):
-		return "waiting"
-		pass
-	return "unknown"
+func _personality_factor(types:Array = [], base:float = 0.0) -> float:
+	return base if personality_type in types else 0.0
+
+func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[PersonalityType] = []) -> float:
+	if personality_type in less:
+		return amt * 0.5
+	if personality_type in more:
+		return amt * 1.5
+	return amt
 
 func throw_trash():
-	add_misbehave(Misbehave.TRASH)
-	#print("%s throws trash!" % name)
-	change_clean(-0.05)
+	mood.add_misbehave(MoodComponent.Misbehave.TRASH)
+	mood.change_clean(-0.05)
 	_spawn_dirt()
 	# Optionally spawn litter signal/event
 
@@ -632,31 +573,22 @@ func toggle_run():
 	set_run(not is_running)
 
 func set_run(is_run:bool):
-	add_misbehave(Misbehave.RUN) if is_run else remove_misbehave(Misbehave.RUN)
+	mood.add_misbehave(MoodComponent.Misbehave.RUN) if is_run else mood.remove_misbehave(MoodComponent.Misbehave.RUN)
 	is_running = is_run
-	#print("%s is now %s" % [name, "RUNNING" if is_running else "walking"])
 
 func splashplay():
-	add_misbehave(Misbehave.SPLASH)
-	#print("%s splashes loudly!" % name)
-	change_happy(0.02)
+	mood.add_misbehave(MoodComponent.Misbehave.SPLASH)
+	mood.change_happy(0.02)
 	# Option: SFX, particles, fountain
 
 func horseplay():
-	add_misbehave(Misbehave.BAD)
-	#print("%s starts horseplay!" % name)
+	mood.add_misbehave(MoodComponent.Misbehave.BAD)
 	var affected_others = find_swimmers_nearby()
 	if affected_others.size() > 0:
 		var victim = affected_others.pick_random()
 		if victim:
-			victim.change_happy(-0.2)
+			victim.mood.change_happy(-0.2)
 			print("%s made %s unhappy!" % [name, victim.name])
-
-func fall_asleep():
-	add_misbehave(Misbehave.SLEEP)
-	#print("%s falls asleep on lounger." % name)
-	energy = min(max_energy, energy + 1)
-	state = State.SLEEP
 
 func find_swimmers_nearby() -> Array:
 	var others := []
@@ -664,51 +596,10 @@ func find_swimmers_nearby() -> Array:
 		if o != self and global_position.distance_to(o.global_position) < 80.0:
 			others.append(o)
 	return others
-	
-@onready var mood_icon_stack := $MoodIconStack
-enum Misbehave { BAD, RUN, TRASH, SPLASH, SLEEP, DIVE }
-const MISBEHAVE_ICONS = {
-	Misbehave.BAD:    preload("res://assets/icons5.png"),
-	Misbehave.RUN:    preload("res://assets/icons6.png"),
-	Misbehave.TRASH:  preload("res://assets/icons7.png"),
-	Misbehave.SPLASH: preload("res://assets/icons8.png"),
-	Misbehave.SLEEP:  preload("res://assets/icons9.png"),
-	Misbehave.DIVE:  preload("res://assets/icons10.png"),
-}
-var misbehaves = {} # Misbehave enum : start_time
-const MISBEHAVE_ICON_OFFSET = 32
-const MISBEHAVE_DURATION = 60
 
-func add_misbehave(type: Misbehave):
-	if misbehaves.has(type): return
-	misbehaves[type] = Time.get_ticks_msec() / 1000.0
-	var icon = Sprite2D.new()
-	icon.texture = MISBEHAVE_ICONS[type]
-	icon.name = str(type)
-	icon.position.x = mood_icon_stack.get_child_count() * MISBEHAVE_ICON_OFFSET
-	mood_icon_stack.add_child(icon)
-
-func has_misbehave(type: Misbehave) -> bool:
-	return misbehaves.has(type)
-
-func remove_misbehave(type: Misbehave):
-	if misbehaves.has(type):
-		misbehaves.erase(type)
-		var icon = mood_icon_stack.get_node_or_null(str(type))
-		if icon:
-			icon.queue_free()
-		_update_misbehave_icon_positions()
-
-func _update_misbehave_icon_positions():
-	var i = 0
-	for icon in mood_icon_stack.get_children():
-		icon.position.x = i * MISBEHAVE_ICON_OFFSET
-		i += 1
-
-func process_misbehaves():
-	var now = Time.get_ticks_msec() / 1000.0
-	for type in misbehaves.keys():
-		if now - misbehaves[type] > MISBEHAVE_DURATION:
-			remove_misbehave(type)
+func fall_asleep():
+	mood.add_misbehave(MoodComponent.Misbehave.SLEEP)
+	mood.energy = min(mood.max_energy, mood.energy + 1)
+	state = State.SLEEP
 
 #endregion

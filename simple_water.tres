@@ -5,7 +5,7 @@
 [resource]
 shader = ExtResource("1_4slwd")
 shader_parameter/water_color = Color(0.19, 0.47, 0.88, 0.85)
-shader_parameter/wave_speed = 0.682
-shader_parameter/wave_strength = 0.425
-shader_parameter/refraction = 0.084
-shader_parameter/shimmer = 0.0
+shader_parameter/wave_speed = 0.44
+shader_parameter/wave_strength = 0.055
+shader_parameter/refraction = 0.06
+shader_parameter/shimmer = 0.19

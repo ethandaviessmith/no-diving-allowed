@@ -54,7 +54,7 @@ static func get_schedule_enter(swimmer):
 
 static func get_schedule_exit(swimmer):
 	var out = POOL_EXIT.duplicate()
-	if randf() < swimmer.energy:
+	if randf() < swimmer.mood.energy:
 		out.insert(0, WANDER_POOL)
 	return Util.add_schedule(swimmer, out)
 

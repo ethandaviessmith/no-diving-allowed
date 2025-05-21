@@ -1,9 +1,10 @@
-[gd_scene load_steps=19 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=20 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="2_q2u11"]
 [ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="2_r5jdi"]
 [ext_resource type="Texture2D" uid="uid://6iawdmindero" path="res://assets/debug.png" id="3_mest2"]
+[ext_resource type="Script" uid="uid://drb0cy2hm1ydk" path="res://mood_component.gd" id="3_q6fjm"]
 [ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="4_w3fy5"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
@@ -311,10 +312,76 @@ _data = {
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_2pdhi")
-mood_color_great = Color(0.212695, 0.424158, 0.970611, 1)
-mood_color_good = Color(0.132411, 0.526883, 0.326739, 1)
-mood_color_bad = Color(0.632349, 0.217379, 0.203615, 1)
 puddle_scene = ExtResource("2_r5jdi")
+
+[node name="MoodComponent" type="Node2D" parent="." node_paths=PackedStringArray("bar_happy", "bar_energy", "bar_safety", "bar_clean", "bar_mood", "mood_icon_stack")]
+script = ExtResource("3_q6fjm")
+bar_happy = NodePath("HappyProgressBar")
+bar_energy = NodePath("EnergyProgressBar")
+bar_safety = NodePath("SafetyProgressBar")
+bar_clean = NodePath("CleanProgressBar")
+bar_mood = NodePath("MoodBar")
+mood_icon_stack = NodePath("MoodIconStack")
+mood_color_great = Color(0.334926, 0.166766, 1, 1)
+mood_color_good = Color(0, 0.623529, 0, 1)
+mood_color_bad = Color(0.385237, 0.312582, 0.0032855, 1)
+mood_color_issue = Color(0.811765, 0, 0, 1)
+
+[node name="MoodBar" type="ColorRect" parent="MoodComponent"]
+offset_left = -16.0
+offset_top = -107.0
+offset_right = 16.0
+offset_bottom = -75.0
+color = Color(0.572442, 0.380153, 0.670682, 1)
+
+[node name="DebugBar" type="Sprite2D" parent="MoodComponent"]
+texture_filter = 1
+position = Vector2(0, -91)
+texture = ExtResource("3_mest2")
+
+[node name="HappyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -103.0
+offset_right = 31.0
+offset_bottom = -95.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("4_w3fy5")
+
+[node name="EnergyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -96.0
+offset_right = 31.0
+offset_bottom = -88.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("4_w3fy5")
+
+[node name="SafetyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -89.0
+offset_right = 31.0
+offset_bottom = -81.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("4_w3fy5")
+
+[node name="CleanProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -82.0
+offset_right = 31.0
+offset_bottom = -74.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("4_w3fy5")
+
+[node name="MoodIconStack" type="Node2D" parent="MoodComponent"]
+position = Vector2(0, -69)
+scale = Vector2(0.5, 0.5)
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_postprocessing = 2
@@ -377,63 +444,6 @@ lifetime = 0.51
 speed_scale = 0.4
 explosiveness = 0.2
 process_material = SubResource("ParticleProcessMaterial_q6fjm")
-
-[node name="DebugBar" type="Sprite2D" parent="."]
-texture_filter = 1
-position = Vector2(0, -91)
-texture = ExtResource("3_mest2")
-
-[node name="MoodBar" type="ColorRect" parent="."]
-visible = false
-offset_left = -8.0
-offset_top = -91.0
-offset_right = 11.0
-offset_bottom = -87.0
-color = Color(0.572442, 0.380153, 0.670682, 1)
-
-[node name="HappyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -7.0
-offset_top = -103.0
-offset_right = 31.0
-offset_bottom = -95.0
-scale = Vector2(0.5, 0.5)
-value = 100.0
-nine_patch_stretch = true
-texture_progress = ExtResource("4_w3fy5")
-
-[node name="EnergyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -7.0
-offset_top = -96.0
-offset_right = 31.0
-offset_bottom = -88.0
-scale = Vector2(0.5, 0.5)
-value = 100.0
-nine_patch_stretch = true
-texture_progress = ExtResource("4_w3fy5")
-
-[node name="SafetyProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -7.0
-offset_top = -89.0
-offset_right = 31.0
-offset_bottom = -81.0
-scale = Vector2(0.5, 0.5)
-value = 100.0
-nine_patch_stretch = true
-texture_progress = ExtResource("4_w3fy5")
-
-[node name="CleanProgressBar" type="TextureProgressBar" parent="."]
-offset_left = -7.0
-offset_top = -82.0
-offset_right = 31.0
-offset_bottom = -74.0
-scale = Vector2(0.5, 0.5)
-value = 100.0
-nine_patch_stretch = true
-texture_progress = ExtResource("4_w3fy5")
-
-[node name="MoodIconStack" type="Node2D" parent="."]
-position = Vector2(0, -69)
-scale = Vector2(0.5, 0.5)
 
 [connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]
