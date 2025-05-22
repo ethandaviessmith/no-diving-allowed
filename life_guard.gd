@@ -31,24 +31,34 @@ func _process(delta):
 func _input(event):
 	if event.is_action_pressed("grab"):
 		grab_item()
-	if event.is_action_pressed("interact"):
-		if held_item and held_item.is_in_group("mop"):
-			if not cleaning:
-				start_cleaning()
-		else:
-			whistle.handle_whistle_pressed()
+
+	var action_taken := false
+	if is_instance_valid(held_item) and held_item is Interactable:
+		if event.is_action_pressed("interact"):
+			if held_item.is_mop():
+				if not cleaning:
+					start_cleaning()
+					action_taken = true
+			elif held_item.is_lifesaver():
+				# Add logic here if you want action for lifesaver
+				action_taken = true
+				pass  # placeholder
+
+	if not action_taken and event.is_action_pressed("interact"):
+		whistle.handle_whistle_pressed()
+
 	if event.is_action_released("interact"):
-		if held_item and held_item.is_in_group("mop") and cleaning:
+		if is_instance_valid(held_item) and held_item is Interactable and held_item.is_mop() and cleaning:
 			stop_cleaning()
 		else:
 			whistle.handle_whistle_released()
+
+	
 	if event is InputEventKey:
-		# Replace with your actual key code/names as needed:
 		var z_down = Input.is_action_pressed("interact") # "z" action
 		var x_down = Input.is_action_pressed("grab") # "x" action
 		context_buttons.set_button_background(z_down, x_down)
 	update_context_buttons()
-
 
 func get_input_dir():
 	var dir = Vector2.ZERO

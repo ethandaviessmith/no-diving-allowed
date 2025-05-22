@@ -21,6 +21,7 @@ var activity_duration: float = 0
 
 @export var personality_type: PersonalityType
 @onready var mood: MoodComponent = $MoodComponent
+@onready var whistle_timer: Timer = $WhistleTimer
 
 var swim_speed: float = 180
 var base_speed := 120
@@ -95,7 +96,7 @@ func _step_move():
 	elif _is_state([State.APPROACH, State.IN_LINE]):
 		_standard_move()
 		if curr_action == Util.ACT_POOL_DIVE and randf() > 0.1:
-			mood.add_misbehave(MoodComponent.Misbehave.DIVE) # sometimes show divers ahead of time
+			try_add_misbehave(MoodComponent.Misbehave.DIVE) # sometimes show divers ahead of time
 	if navigation_agent.is_navigation_finished():
 		if _is_state(State.APPROACH):
 			var dist = global_position.distance_to(move_target)
@@ -272,7 +273,7 @@ func _do_perform_activity():
 	if curr_action == Util.ACT_SHOWER:
 		SFX.play_activity_sfx(self, "shower", SFX.sfx_samples["shower"], activity_duration, -10)
 	if curr_action == Util.ACT_POOL_DIVE:
-		mood.add_misbehave(MoodComponent.Misbehave.DIVE)
+		try_add_misbehave(MoodComponent.Misbehave.DIVE)
 	play_activity_manager_anim(target_activity, false)
 
 var _current_activity_particles
@@ -471,15 +472,16 @@ func whistled_at():
 	if broken_count > 0:
 		rule_broken.emit(self, broken_count)
 		mood.start_removing_misbehave_icons()
+
+	mood.clear_all_misbehaves_for_whistle()
 	
-	for type in mood.misbehaves.keys():
-		mood.remove_misbehave(type)
+	if curr_action == Util.ACT_POOL_DIVE:
+		curr_action = Util.ACT_POOL_ENTER
 	
 	if curr_action == Util.ACT_SUNBATHE and _is_state(State.SLEEP):
 		finish_activity()
 	mood.change_safety(0.8)
 	set_run(false)
-
 func get_mood_rank():
 	return mood.get_mood_rank()
 	
@@ -563,8 +565,14 @@ func _personality_val(amt:float, less:Array[PersonalityType] = [], more:Array[Pe
 		return amt * 1.5
 	return amt
 
+func try_add_misbehave(misbehave_type) -> bool:
+	if whistle_timer.time_left > 0:
+		return false
+	mood.add_misbehave(misbehave_type)
+	return true
+
 func throw_trash():
-	mood.add_misbehave(MoodComponent.Misbehave.TRASH)
+	if not try_add_misbehave(MoodComponent.Misbehave.TRASH): return
 	mood.change_clean(-0.05)
 	_spawn_dirt()
 	# Optionally spawn litter signal/event
@@ -573,16 +581,19 @@ func toggle_run():
 	set_run(not is_running)
 
 func set_run(is_run:bool):
-	mood.add_misbehave(MoodComponent.Misbehave.RUN) if is_run else mood.remove_misbehave(MoodComponent.Misbehave.RUN)
+	if is_run:
+		try_add_misbehave(MoodComponent.Misbehave.RUN) 
+	else:
+		mood.remove_misbehave(MoodComponent.Misbehave.RUN)
 	is_running = is_run
 
 func splashplay():
-	mood.add_misbehave(MoodComponent.Misbehave.SPLASH)
+	if not try_add_misbehave(MoodComponent.Misbehave.SPLASH): return
 	mood.change_happy(0.02)
 	# Option: SFX, particles, fountain
 
 func horseplay():
-	mood.add_misbehave(MoodComponent.Misbehave.BAD)
+	if not try_add_misbehave(MoodComponent.Misbehave.BAD): return
 	var affected_others = find_swimmers_nearby()
 	if affected_others.size() > 0:
 		var victim = affected_others.pick_random()
@@ -598,7 +609,7 @@ func find_swimmers_nearby() -> Array:
 	return others
 
 func fall_asleep():
-	mood.add_misbehave(MoodComponent.Misbehave.SLEEP)
+	if not try_add_misbehave(MoodComponent.Misbehave.SLEEP): return
 	mood.energy = min(mood.max_energy, mood.energy + 1)
 	state = State.SLEEP
 

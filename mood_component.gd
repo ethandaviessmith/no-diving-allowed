@@ -41,7 +41,7 @@ const MISBEHAVE_ICONS = {
 	Misbehave.SLEEP:  preload("res://assets/icons9.png"),
 	Misbehave.DIVE:   preload("res://assets/icons10.png"),
 }
-const MISBEHAVE_ICON_OFFSET := Vector2(16, 0)
+const MISBEHAVE_ICON_OFFSET := Vector2(32, 0)
 
 func _ready():
 	update_all_bars()
@@ -134,11 +134,13 @@ func process_misbehaves():
 func start_removing_misbehave_icons():
 	for icon in mood_icon_stack.get_children():
 		_animate_icon_removal(icon)
-
+		
+func clear_all_misbehaves_for_whistle():
+	# Only clear the data; icons are handled by animation
+	misbehaves.clear()
+	
 func _animate_icon_removal(icon: Sprite2D):
-	# Change icon to green
-	icon.modulate = Color(0.2, 1.0, 0.2) # or use a green icon if you want
-	# Animate: float up & fade out
+	icon.modulate = Color(0.2, 1.0, 0.2) # Change icon to green
 	var tween = get_tree().create_tween()
 	tween.tween_property(icon, "position", icon.position + Vector2(0, -40), 0.8)
 	tween.tween_property(icon, "modulate:a", 0.0, 0.8)

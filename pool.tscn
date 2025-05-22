@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bomk4ob816vrw" path="res://assets/icon_rule.png" id="7_pb5gw"]
 [ext_resource type="Material" uid="uid://se8w6lephliu" path="res://simple_water.tres" id="7_ryjux"]
 [ext_resource type="Texture2D" uid="uid://b245abhhqfvbe" path="res://assets/brick_wall_texture.jpg" id="7_xv5nx"]
-[ext_resource type="Texture2D" uid="uid://cig13ofxjrkoe" path="res://assets/icons15.png" id="8_ansac"]
+[ext_resource type="Texture2D" uid="uid://eywfx6140qsq" path="res://assets/icon_happy.png" id="8_pb5gw"]
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bpgvqcvdld42e" path="res://assets/icon_safety.png" id="9_ch1vm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
@@ -171,6 +171,7 @@ size = Vector2(263, 44)
 size = Vector2(172.5, 365)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point")]
+y_sort_enabled = true
 script = ExtResource("1_bslhr")
 max_guests = 12
 swimmer_scene = ExtResource("4_76ob0")
@@ -190,6 +191,7 @@ offset_left = 187.0
 offset_top = 7.0
 offset_right = 369.0
 offset_bottom = 155.0
+metadata/_edit_use_anchors_ = true
 
 [node name="ClockContainer" type="Node2D" parent="PoolUI"]
 position = Vector2(284, 96)
@@ -270,7 +272,7 @@ position = Vector2(1531, 91)
 [node name="Sprite2D" type="Sprite2D" parent="PoolUI/RuleContainer"]
 texture_filter = 1
 position = Vector2(23, 6)
-scale = Vector2(0.9, 0.9)
+scale = Vector2(1.3, 1.3)
 texture = ExtResource("7_pb5gw")
 
 [node name="RuleLabel" type="RichTextLabel" parent="PoolUI/RuleContainer"]
@@ -293,7 +295,8 @@ position = Vector2(1433, 124)
 [node name="Sprite2D" type="Sprite2D" parent="PoolUI/HappyContainer"]
 texture_filter = 1
 position = Vector2(23, 6)
-texture = ExtResource("8_ansac")
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("8_pb5gw")
 
 [node name="GuestLabel" type="RichTextLabel" parent="PoolUI/HappyContainer"]
 offset_left = 65.0
@@ -315,7 +318,6 @@ position = Vector2(1531, 125)
 [node name="Sprite2D" type="Sprite2D" parent="PoolUI/SafetyContainer"]
 texture_filter = 1
 position = Vector2(23, 6)
-scale = Vector2(0.9, 0.9)
 texture = ExtResource("9_ch1vm")
 
 [node name="RuleLabel" type="RichTextLabel" parent="PoolUI/SafetyContainer"]
@@ -337,8 +339,10 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+metadata/_edit_use_anchors_ = true
 
 [node name="TileMapLayer" type="TileMapLayer" parent="Visuals"]
+visible = false
 
 [node name="OutsideWallTextureRect" type="TextureRect" parent="Visuals"]
 layout_mode = 1
@@ -526,101 +530,6 @@ metadata/_custom_type_script = "uid://dsegwpsafpulq"
 [node name="Node2D" type="Node2D" parent="Exit/ActivityManager"]
 position = Vector2(0, 17)
 
-[node name="Shower" type="Area2D" parent="."]
-position = Vector2(1567, 629)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Shower"]
-shape = SubResource("RectangleShape2D_ryjux")
-
-[node name="ActivityManager" type="Node2D" parent="Shower" node_paths=PackedStringArray("wander_area")]
-position = Vector2(-4, 1)
-script = ExtResource("9_87cwm")
-line_positions = NodePath("LineNode")
-activity_position_path = NodePath("ActNode")
-wander_area = NodePath("../../ShowerRoom")
-bar_clean_path = NodePath("CleanProgressBar")
-activity = 3
-
-[node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
-position = Vector2(-83, -4)
-
-[node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(100, 0)
-
-[node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(51, 3)
-
-[node name="LinePos3" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(5, 4)
-
-[node name="LinePos4" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(3, 57)
-
-[node name="LinePos5" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(56, 56)
-
-[node name="LinePos6" type="Node2D" parent="Shower/ActivityManager/LineNode"]
-position = Vector2(103, 55)
-
-[node name="ActNode" type="Node2D" parent="Shower/ActivityManager"]
-
-[node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/ActNode"]
-position = Vector2(-130, -104)
-
-[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos1"]
-z_index = 1
-position = Vector2(-3, -65)
-emitting = false
-amount = 50
-lifetime = 0.5
-speed_scale = 0.8
-explosiveness = 0.19
-visibility_rect = Rect2(-50, -10, 100, 100)
-trail_enabled = true
-trail_lifetime = 0.05
-trail_sections = 6
-process_material = SubResource("ParticleProcessMaterial_k0w2f")
-
-[node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/ActNode"]
-position = Vector2(0, -103)
-
-[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos2"]
-z_index = 1
-position = Vector2(-3, -65)
-emitting = false
-amount = 50
-lifetime = 0.5
-speed_scale = 0.8
-explosiveness = 0.19
-visibility_rect = Rect2(-50, -10, 100, 100)
-trail_enabled = true
-trail_lifetime = 0.05
-trail_sections = 6
-process_material = SubResource("ParticleProcessMaterial_k0w2f")
-
-[node name="CleanProgressBar" type="TextureProgressBar" parent="Shower/ActivityManager"]
-modulate = Color(0.157268, 0.399016, 0.0942399, 1)
-texture_filter = 1
-offset_left = -158.0
-offset_top = -210.0
-offset_right = -60.0
-offset_bottom = -184.0
-scale = Vector2(0.5, 0.5)
-value = 100.0
-nine_patch_stretch = true
-texture_over = ExtResource("7_k0w2f")
-texture_progress = ExtResource("7_48tf8")
-
-[node name="Sprite2D" type="Sprite2D" parent="Shower"]
-position = Vector2(-136, -133)
-texture = ExtResource("7_dhh87")
-hframes = 4
-
-[node name="Sprite2D2" type="Sprite2D" parent="Shower"]
-position = Vector2(-6, -133)
-texture = ExtResource("7_dhh87")
-hframes = 4
-
 [node name="Locker" type="Node2D" parent="."]
 y_sort_enabled = true
 position = Vector2(1289, 828)
@@ -665,50 +574,146 @@ position = Vector2(268, 3)
 position = Vector2(-21.8001, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 1
 
 [node name="Sprite2D2" type="Sprite2D" parent="Locker"]
 position = Vector2(34.2, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 1
 
 [node name="Sprite2D3" type="Sprite2D" parent="Locker"]
 position = Vector2(90.2, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 1
 
 [node name="Sprite2D4" type="Sprite2D" parent="Locker"]
 position = Vector2(16, 66)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 2
 
 [node name="Sprite2D5" type="Sprite2D" parent="Locker"]
 position = Vector2(245, 66)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 2
 
 [node name="Sprite2D7" type="Sprite2D" parent="Locker"]
 position = Vector2(256, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 1
 
 [node name="Sprite2D6" type="Sprite2D" parent="Locker"]
 position = Vector2(312, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 1
+
+[node name="Shower" type="Area2D" parent="."]
+position = Vector2(1567, 488)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shower"]
+shape = SubResource("RectangleShape2D_ryjux")
+
+[node name="ActivityManager" type="Node2D" parent="Shower" node_paths=PackedStringArray("wander_area")]
+position = Vector2(-4, -11)
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../ShowerRoom")
+bar_clean_path = NodePath("CleanProgressBar")
+activity = 3
+
+[node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
+position = Vector2(-83, 92)
+
+[node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(100, 0)
+
+[node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(51, 3)
+
+[node name="LinePos3" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(5, 4)
+
+[node name="LinePos4" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(3, 57)
+
+[node name="LinePos5" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(56, 56)
+
+[node name="LinePos6" type="Node2D" parent="Shower/ActivityManager/LineNode"]
+position = Vector2(103, 55)
+
+[node name="ActNode" type="Node2D" parent="Shower/ActivityManager"]
+position = Vector2(0, 159)
+
+[node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/ActNode"]
+position = Vector2(-130, -104)
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos1"]
+z_index = 1
+position = Vector2(-3, -65)
+emitting = false
+amount = 50
+lifetime = 0.5
+speed_scale = 0.8
+explosiveness = 0.19
+visibility_rect = Rect2(-50, -10, 100, 100)
+trail_enabled = true
+trail_lifetime = 0.05
+trail_sections = 6
+process_material = SubResource("ParticleProcessMaterial_k0w2f")
+
+[node name="LinePos2" type="Node2D" parent="Shower/ActivityManager/ActNode"]
+position = Vector2(0, -103)
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="Shower/ActivityManager/ActNode/LinePos2"]
+z_index = 1
+position = Vector2(-3, -65)
+emitting = false
+amount = 50
+lifetime = 0.5
+speed_scale = 0.8
+explosiveness = 0.19
+visibility_rect = Rect2(-50, -10, 100, 100)
+trail_enabled = true
+trail_lifetime = 0.05
+trail_sections = 6
+process_material = SubResource("ParticleProcessMaterial_k0w2f")
+
+[node name="CleanProgressBar" type="TextureProgressBar" parent="Shower/ActivityManager"]
+modulate = Color(0.157268, 0.399016, 0.0942399, 1)
+texture_filter = 1
+offset_left = -158.0
+offset_top = -51.0
+offset_right = -60.0
+offset_bottom = -25.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_over = ExtResource("7_k0w2f")
+texture_progress = ExtResource("7_48tf8")
+
+[node name="Sprite2D" type="Sprite2D" parent="Shower"]
+position = Vector2(-136, 14)
+texture = ExtResource("7_dhh87")
+hframes = 6
+
+[node name="Sprite2D2" type="Sprite2D" parent="Shower"]
+position = Vector2(-6, 14)
+texture = ExtResource("7_dhh87")
+hframes = 6
 
 [node name="PoolStairsIn" type="Node2D" parent="."]
 position = Vector2(1140, 617)
@@ -849,7 +854,7 @@ position = Vector2(-3, 0)
 rotation = -1.5708
 scale = Vector2(0.64, 0.64)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 3
 
 [node name="ActivityManager" type="Node2D" parent="PoolLadder1" node_paths=PackedStringArray("wander_area")]
@@ -884,7 +889,7 @@ position = Vector2(0, 7)
 rotation = 3.14159
 scale = Vector2(0.64, 0.64)
 texture = ExtResource("7_dhh87")
-hframes = 4
+hframes = 6
 frame = 3
 
 [node name="ActivityManager" type="Node2D" parent="PoolLadder2" node_paths=PackedStringArray("wander_area")]
@@ -1098,29 +1103,81 @@ position = Vector2(277, 58)
 position = Vector2(57, 33)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("10_3nhhx")
-hframes = 3
+hframes = 5
 frame = 1
 
 [node name="Sprite2D2" type="Sprite2D" parent="Lounger"]
 position = Vector2(198, 27)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("10_3nhhx")
-hframes = 3
+hframes = 5
 frame = 2
 
 [node name="Sprite2D3" type="Sprite2D" parent="Lounger"]
 position = Vector2(130, 32)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("10_3nhhx")
-hframes = 3
+hframes = 5
 frame = 1
 
 [node name="Sprite2D4" type="Sprite2D" parent="Lounger"]
 position = Vector2(276, 28)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("10_3nhhx")
-hframes = 3
+hframes = 5
 frame = 2
+
+[node name="HighChair" type="Node2D" parent="."]
+y_sort_enabled = true
+position = Vector2(808, 913)
+
+[node name="Sprite2D" type="Sprite2D" parent="HighChair"]
+position = Vector2(0, 7)
+scale = Vector2(0.75, 1)
+texture = ExtResource("7_dhh87")
+hframes = 6
+frame = 4
+
+[node name="ActivityManager" type="Node2D" parent="HighChair" node_paths=PackedStringArray("wander_area")]
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../Pool")
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="ActNode" type="Node2D" parent="HighChair/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="HighChair/ActivityManager/ActNode"]
+
+[node name="ExitNode" type="Node2D" parent="HighChair/ActivityManager/ActNode/Node2D"]
+position = Vector2(0, 33)
+
+[node name="LineNode" type="Node2D" parent="HighChair/ActivityManager"]
+
+[node name="Node2D" type="Node2D" parent="HighChair/ActivityManager/LineNode"]
+position = Vector2(1, -36)
+
+[node name="Node2D2" type="Node2D" parent="HighChair/ActivityManager/LineNode"]
+position = Vector2(54, -13)
+
+[node name="Node2D" type="Node2D" parent="HighChair"]
+position = Vector2(-6, -98)
+
+[node name="Sprite2D2" type="Sprite2D" parent="HighChair/Node2D"]
+modulate = Color(0, 0, 0, 0.47451)
+position = Vector2(-24.245, 140.525)
+scale = Vector2(0.703, 0.649)
+skew = -0.858702
+texture = ExtResource("7_dhh87")
+hframes = 6
+frame = 4
+
+[node name="LifeSaver" parent="." instance=ExtResource("5_7g16q")]
+position = Vector2(891, 950)
+interactable_type = 1
+
+[node name="Mop" parent="." instance=ExtResource("5_7g16q")]
+position = Vector2(1108, 937)
 
 [node name="Pool" type="Area2D" parent="."]
 position = Vector2(513, 336)
@@ -1133,7 +1190,7 @@ shape = SubResource("RectangleShape2D_08ey2")
 material = ExtResource("7_ryjux")
 offset_left = -146.0
 offset_top = 5.0
-offset_right = 611.57
+offset_right = 613.57
 offset_bottom = 487.43
 metadata/_edit_use_anchors_ = true
 
@@ -1178,9 +1235,6 @@ unique_name_in_owner = true
 visible = false
 position = Vector2(182, 175)
 navigation_polygon = ExtResource("15_xv5nx")
-
-[node name="Mop" parent="." instance=ExtResource("5_7g16q")]
-position = Vector2(1108, 937)
 
 [node name="LockerRoom" type="Area2D" parent="." groups=["wander"]]
 position = Vector2(1425, 882)

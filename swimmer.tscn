@@ -445,5 +445,9 @@ speed_scale = 0.4
 explosiveness = 0.2
 process_material = SubResource("ParticleProcessMaterial_q6fjm")
 
+[node name="WhistleTimer" type="Timer" parent="."]
+wait_time = 15.0
+one_shot = true
+
 [connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]

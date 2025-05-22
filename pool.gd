@@ -35,8 +35,8 @@ var spawn_period := 10.0
 @export var day_start_hour := 9
 @export var day_end_hour := 15
 
-## Time for each day (seconds per hour) x 9 hours
-@export var day_duration_secs := 25.0
+## Time for each day
+@export var day_duration_secs := 120.0
 
 var current_hour := day_start_hour
 var current_minute := 0.0

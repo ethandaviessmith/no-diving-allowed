@@ -9,3 +9,4 @@ shader_parameter/wave_speed = 0.44
 shader_parameter/wave_strength = 0.055
 shader_parameter/refraction = 0.06
 shader_parameter/shimmer = 0.19
+shader_parameter/sun_orbit_speed = 0.03
