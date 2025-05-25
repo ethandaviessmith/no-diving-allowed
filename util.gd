@@ -15,18 +15,22 @@ const ACT_POOL_ENTER := "PoolEnter"
 const ACT_POOL_EXIT := "PoolExit"
 const ACT_POOL_DIVE := "PoolDive"
 
-
+const ACT_POOL_DROWN := "Drown"
 const WANDER_POOL := "WanderPool"
 
+# Lists
 const POOL_ENTER := [ACT_ENTRANCE, ACT_LOCKER, ACT_SHOWER, WANDER_POOL]
 const POOL_EXIT := [ACT_SHOWER, ACT_LOCKER, ACT_EXIT]
-const POOL_ACTIVITIES := [ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_POOL_PLAY, ACT_SUNBATHE, ACT_POOL_DIVE]
+const POOL_ACTIVITIES := [ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_POOL_PLAY, ACT_SUNBATHE, ACT_POOL_DIVE, WANDER_POOL]
 const POOL_IN_POOL := [ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_POOL_PLAY, ACT_POOL_DIVE, ACT_POOL_ENTER]
 const POOL_LOW_HAPPY := [ACT_POOL_LAPS, ACT_POOL_PLAY, WANDER_POOL, ACT_POOL_DIVE]
 const POOL_LOW_ENERGY := [ACT_POOL_SWIM, ACT_SUNBATHE, WANDER_POOL, ACT_POOL_ENTER]
 
+# Checks
+const POOL_ENERGY = [ACT_LOCKER, ACT_SHOWER, WANDER_POOL, ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_SUNBATHE, ACT_POOL_DIVE]
 
 const ACTIVITY_DURATION := {
+	ACT_POOL_DROWN: 8.0,
 	ACT_ENTRANCE: 0.2,
 	ACT_LOCKER: 4.0,
 	ACT_SHOWER: 5.0,
@@ -38,13 +42,14 @@ const ACTIVITY_DURATION := {
 	ACT_POOL_DIVE: 5.0,
 }
 
-enum Anim {NA, JUMP, LAPS, SHOWER, ENTER_POOL}
+enum Anim {NA, JUMP, LAPS, SHOWER, ENTER_POOL, DROWN}
 const ANIM_NAME_MAP = {
 	Anim.NA: "idle",
 	Anim.JUMP: "jump",
 	Anim.LAPS: "swim",
 	Anim.SHOWER: "shower",
 	Anim.ENTER_POOL: "enter_pool",
+	Anim.DROWN: "drown",
 	# sync with your actual animation names
 }
 
@@ -59,12 +64,10 @@ static func get_schedule_exit(swimmer):
 	return Util.add_schedule(swimmer, out)
 
 static func get_schedule_lowenergy(swimmer):
-	var opts = POOL_LOW_ENERGY.duplicate()
-	return Util.add_schedule(swimmer, Util._pick_rand(opts, 2))
+	return Util.add_schedule(swimmer, Util._pick_rand(POOL_LOW_ENERGY, 2))
 
 static func get_schedule_lowhappy(swimmer):
-	var opts = POOL_LOW_HAPPY.duplicate()
-	return Util.add_schedule(swimmer, Util._pick_rand(opts, 2))
+	return Util.add_schedule(swimmer, Util._pick_rand(POOL_LOW_HAPPY, 2))
 
 static func get_schedule_random_pool(swimmer):
 	return Util.add_schedule(swimmer, Util._pick_rand(POOL_ACTIVITIES, 3))
@@ -126,3 +129,6 @@ static func set_mood_progress(bar: TextureProgressBar, value: float, max: float)
 		bar.modulate = Color("ffdd57") # yellow
 	else:
 		bar.modulate = Color("ff495b") # red
+
+static func is_state(state, states) -> bool:
+	return state in (states if states is Array else [states])

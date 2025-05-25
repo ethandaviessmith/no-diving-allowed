@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=46 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://bpgvqcvdld42e" path="res://assets/icon_safety.png" id="9_ch1vm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
 [ext_resource type="NavigationPolygon" uid="uid://bpvlggtathyb6" path="res://pool_navigation_region.tres" id="15_xv5nx"]
+[ext_resource type="Shader" uid="uid://v6cndq4xl8cu" path="res://water_foam.gdshader" id="20_ansac"]
 
 [sub_resource type="Animation" id="Animation_xv5nx"]
 length = 0.001
@@ -155,6 +156,37 @@ point_count = 5
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_08ey2"]
 size = Vector2(741, 464)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ansac"]
+frequency = 0.0038
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ch1vm"]
+seamless = true
+noise = SubResource("FastNoiseLite_ansac")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sq6fn"]
+frequency = 0.0205
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b52o0"]
+seamless = true
+noise = SubResource("FastNoiseLite_sq6fn")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ch1vm"]
+shader = ExtResource("20_ansac")
+shader_parameter/waterNoise = SubResource("NoiseTexture2D_b52o0")
+shader_parameter/waterDistortionNoise = SubResource("NoiseTexture2D_ch1vm")
+shader_parameter/waterColor = Color(0.117, 0.27, 0.58, 1)
+shader_parameter/colorCorection = 0.34
+shader_parameter/distortionForce = 0.089
+shader_parameter/WDBrightness = 2.0
+shader_parameter/WDFreq = 0.65
+shader_parameter/WDSize = 0.9
+shader_parameter/WDSpeed = 4.0
+shader_parameter/tiling = Vector2(2.325, 1.63)
+shader_parameter/offSetSpeed = Vector2(0.03, 0)
+shader_parameter/backGroundDirX = 0.002
+shader_parameter/backGroundDirY = 0.002
+shader_parameter/alpha = 0.306
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_xv5nx"]
 vertices = PackedVector2Array(922.992, 583.633, 947.023, 654.008, 198.57, 655, 180, 625.68, 179.023, 162.969, 946.578, 161.031, 925.008, 233.523, 175.633, 656.961)
@@ -635,7 +667,7 @@ bar_clean_path = NodePath("CleanProgressBar")
 activity = 3
 
 [node name="LineNode" type="Node2D" parent="Shower/ActivityManager"]
-position = Vector2(-83, 92)
+position = Vector2(-82, 131)
 
 [node name="LinePos1" type="Node2D" parent="Shower/ActivityManager/LineNode"]
 position = Vector2(100, 0)
@@ -1194,6 +1226,14 @@ offset_right = 613.57
 offset_bottom = 487.43
 metadata/_edit_use_anchors_ = true
 
+[node name="WavesColourRect2" type="ColorRect" parent="Pool"]
+material = SubResource("ShaderMaterial_ch1vm")
+offset_left = -146.0
+offset_top = 5.0
+offset_right = 614.0
+offset_bottom = 487.0
+metadata/_edit_use_anchors_ = true
+
 [node name="PoolDirt" type="Node2D" parent="."]
 
 [node name="PoolSwimmers" type="Node2D" parent="."]
@@ -1224,7 +1264,6 @@ polygon = PackedVector2Array(1058, 842, 1452, 842, 1452, 665, 1336, 665, 1340, 5
 
 [node name="NavRegion_Pool" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
-visible = false
 position = Vector2(182, 175)
 navigation_polygon = SubResource("NavigationPolygon_xv5nx")
 enter_cost = 2.0
@@ -1232,7 +1271,6 @@ travel_cost = 10.0
 
 [node name="NavRegion_Ground" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
-visible = false
 position = Vector2(182, 175)
 navigation_polygon = ExtResource("15_xv5nx")
 
@@ -1256,3 +1294,13 @@ position = Vector2(1133, 603)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PoolSide"]
 position = Vector2(96.75, -42.5)
 shape = SubResource("RectangleShape2D_k0w2f")
+
+[node name="PoolDrown" type="Node2D" parent="."]
+
+[node name="ActivityManager" type="Node2D" parent="PoolDrown"]
+script = ExtResource("9_87cwm")
+line_positions = NodePath(".")
+activity_position_path = NodePath(".")
+activity = 5
+prevent_move = true
+metadata/_custom_type_script = "uid://dsegwpsafpulq"

@@ -145,6 +145,7 @@ func on_swimmer_left_pool(swimmer):
 	Util.ACT_POOL_LAPS: NodePath("PoolLaps/ActivityManager"),
 	Util.ACT_POOL_SWIM: NodePath("PoolSwim/ActivityManager"),
 	Util.ACT_POOL_PLAY: NodePath("PoolPlay/ActivityManager"),
+	Util.ACT_POOL_DROWN: NodePath("PoolDrown/ActivityManager"),
 	Util.ACT_POOL_ENTER: [
 		{name = "PoolStairs", node = NodePath("PoolStairsIn/ActivityManager")},
 		{name = "PoolJump1", node = NodePath("PoolJump1/ActivityManager")},

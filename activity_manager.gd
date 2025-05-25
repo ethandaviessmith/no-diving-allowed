@@ -14,12 +14,13 @@ var line_queue: Array = []
 @export var bar_clean_path: NodePath
 var bar_clean: TextureProgressBar
 
-@export var clean_tick: float = 0.01
+@export var clean_tick: float = 0.0  # getting dirty is off by default
 @export var max_clean: float = 1.0
 var clean: float = max_clean
 
 @export var activity: Util.Anim = Util.Anim.NA
 @export var finish_activity: Util.Anim = Util.Anim.NA
+@export var prevent_move := false
 
 func _process(delta):
 	var was_clean = clean
@@ -151,17 +152,24 @@ func release_swimmer_from_slot(swimmer:Swimmer):
 			break
 
 func get_interaction_pos(swimmer:Swimmer) -> Vector2:
-	if activity_positions.size() > 1:
-		for i in current_swimmers.size():
-			if current_swimmers[i] == swimmer:
-				var node = activity_positions[i]
-				if node is Path2D:
-					var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
-					if path_follow:
-						return path_follow.global_position
-				else:
-					return activity_positions[i].global_position
-	return global_position # Default/fallback
+	if prevent_move: return swimmer.global_position
+	
+	# Only return lane if swimmer is in that slot
+	for i in current_swimmers.size():
+		if current_swimmers[i] == swimmer:
+			var node = activity_positions[i]
+			if node is Path2D:
+				var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
+				if path_follow:
+					return path_follow.global_position
+			else:
+				return node.global_position
+	# If not assigned, and in line, go to currently assigned line position (optional):
+	if line_queue.has(swimmer):
+		var i = line_queue.find(swimmer)
+		if i < line_nodes.size():
+			return line_nodes[i].global_position
+	return global_position # fallback
 
 
 func notify_done(swimmer: Swimmer) -> void:

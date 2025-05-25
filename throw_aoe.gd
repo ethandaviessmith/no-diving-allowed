@@ -11,14 +11,14 @@ var rotation_speed := 0.2
 var dot_angle := 0.0
 var fade_active := false
 var double_buff_data = {}
-var current_color: Color = Color.WHITE  # Always set from the whistle
+var current_color: Color = Color.WHITE  # Always set from the throw
 
 var dome_anim_time := 0.0
 var dome_anim_duration := 0.3
 var dome_base_angle := 0.0
 var dome_active := false
 
-var whistle_level := Whistle.WhistleLevel.LEVEL_1
+var throw_level := Throw.ThrowLevel.LEVEL_1
 var current_props : Dictionary = {}
 var steps_per_level: Array[int] = [4, 6, 8] 
 
@@ -27,25 +27,25 @@ const DOME_HEIGHT_FACTOR := 0.6
 
 signal dome_animation_finished
 
-func set_whistle_level(level: int, props: Dictionary) -> void:
-	whistle_level = level
+func set_throw_level(level: int, props: Dictionary) -> void:
+	throw_level = level
 	current_props = props
-	set_whistle_effects(current_props["radius"], current_props["rotation"], current_props["color"])
+	set_throw_effects(current_props["radius"], current_props["rotation"], current_props["color"])
 
 func get_steps() -> int:
 	return current_props.get("steps", 4)
 
 func _ready() -> void:
-	Log.pr("whistle ready")
+	Log.pr("land aoe ready")
 
 func start_dome_animation():
-	Log.pr("whistle dome")
+	Log.pr("land dome")
 	dome_anim_time = 0.0
 	dome_active = true
 	dome_base_angle = dot_angle
 	queue_redraw()
 
-func set_whistle_effects(r: float, rot: float, col: Color) -> void:
+func set_throw_effects(r: float, rot: float, col: Color) -> void:
 	cshape.shape.radius = r
 	rotation_speed = rot
 	current_color = col
@@ -56,7 +56,7 @@ func set_cast(b: bool): is_cast = b
 
 func release_and_fade():
 	if fade_active: return
-	Log.pr("whistle fade")
+	Log.pr("land fade")
 	fade_active = true
 	if get_tree().is_debugging_collisions_hint(): modulate = Color(1,1,1,1) # for hot reloading
 	var t = create_tween()

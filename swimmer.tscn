@@ -1,7 +1,7 @@
-[gd_scene load_steps=20 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=22 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
-[ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="2_q2u11"]
+[ext_resource type="Texture2D" uid="uid://c1evnvd8y5ueb" path="res://assets/sprites.png" id="2_q2u11"]
 [ext_resource type="PackedScene" uid="uid://dvvlt27k5omf5" path="res://dirt_area.tscn" id="2_r5jdi"]
 [ext_resource type="Texture2D" uid="uid://6iawdmindero" path="res://assets/debug.png" id="3_mest2"]
 [ext_resource type="Script" uid="uid://drb0cy2hm1ydk" path="res://mood_component.gd" id="3_q6fjm"]
@@ -102,6 +102,140 @@ tracks/4/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_tt3ws"]
+resource_name = "drown_f"
+length = 1.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.545747, 0.8, 1.01932, 1.19918, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1, 0.5), Vector2(1, 1), Vector2(0.8, 1), Vector2(1, 1), Vector2(1, 0.5), Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:skew")
+tracks/1/interp = 3
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.545747, 1.01932, 1.19918, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.211185, 0.0, 0.0, 0.0, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.545747, 1.01932, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0, -31), Vector2(0, -31), Vector2(0, -31), Vector2(0, -31)]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = false
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.5),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"play_dive_splash_sfx"
+}]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Sprite2D:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.266667, 0.533333, 0.8, 0.94319, 1.16667, 1.36667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [16, 17, 16, 17, 16, 17, 16]
+}
+
+[sub_resource type="Animation" id="Animation_b8poi"]
+resource_name = "drown_m"
+length = 1.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.545747, 0.8, 1.01932, 1.19918, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1, 0.5), Vector2(1, 1), Vector2(0.8, 1), Vector2(1, 1), Vector2(1, 0.5), Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:skew")
+tracks/1/interp = 3
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.545747, 1.01932, 1.19918, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.211185, 0.0, 0.0, 0.0, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.545747, 1.01932, 1.39397),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0, -31), Vector2(0, -31), Vector2(0, -31), Vector2(0, -31)]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = false
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.5),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"play_dive_splash_sfx"
+}]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Sprite2D:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.266667, 0.533333, 0.8, 0.94319, 1.16667, 1.36667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [13, 14, 13, 14, 13, 14, 13]
 }
 
 [sub_resource type="Animation" id="Animation_3kjvg"]
@@ -295,12 +429,14 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.166667, 1),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [5, 5, 8]
+"values": [8, 8, 11]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_r5jdi"]
 _data = {
 &"RESET": SubResource("Animation_mest2"),
+&"drown_f": SubResource("Animation_tt3ws"),
+&"drown_m": SubResource("Animation_b8poi"),
 &"enter_pool": SubResource("Animation_3kjvg"),
 &"idle": SubResource("Animation_q2u11"),
 &"jump": SubResource("Animation_r5jdi"),
@@ -309,6 +445,7 @@ _data = {
 }
 
 [node name="Swimmer" type="CharacterBody2D" groups=["swimmer"]]
+scale = Vector2(1.2, 1.2)
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_2pdhi")
@@ -397,7 +534,6 @@ position = Vector2(0, -5)
 shape = SubResource("CapsuleShape2D_2pdhi")
 
 [node name="Label" type="Label" parent="."]
-visible = false
 offset_left = -36.0
 offset_top = -105.0
 offset_right = 108.0
@@ -420,10 +556,7 @@ process_material = SubResource("ParticleProcessMaterial_q6fjm")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, -31)
 texture = ExtResource("2_q2u11")
-hframes = 9
-
-[node name="MoodTimer" type="Timer" parent="."]
-autostart = true
+hframes = 18
 
 [node name="WaitTimer" type="Timer" parent="."]
 wait_time = 0.2
@@ -449,5 +582,4 @@ process_material = SubResource("ParticleProcessMaterial_q6fjm")
 wait_time = 15.0
 one_shot = true
 
-[connection signal="timeout" from="MoodTimer" to="." method="_on_mood_timer_timeout"]
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]

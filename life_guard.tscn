@@ -1,9 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://c7mojcrudt0tc"]
+[gd_scene load_steps=14 format=3 uid="uid://c7mojcrudt0tc"]
 
-[ext_resource type="Texture2D" uid="uid://dxjbge7f5rx03" path="res://sprites.png" id="1_7bdeq"]
+[ext_resource type="Texture2D" uid="uid://c1evnvd8y5ueb" path="res://assets/sprites.png" id="1_7bdeq"]
 [ext_resource type="Script" uid="uid://j4oxuphwcgj3" path="res://life_guard.gd" id="1_mmhmk"]
 [ext_resource type="AudioStream" uid="uid://c6jobiw8jiknw" path="res://assets/audio/pea_whistle.wav" id="3_ujx44"]
-[ext_resource type="Script" uid="uid://4cixrdv246h2" path="res://whistle.gd" id="4_mng3v"]
+[ext_resource type="Script" uid="uid://4cixrdv246h2" path="res://throw.gd" id="4_mng3v"]
+[ext_resource type="Script" uid="uid://dxbrx06f2ps7j" path="res://rope.gd" id="5_11h6k"]
+[ext_resource type="Shader" uid="uid://nc6p8ohqymm" path="res://rope.gdshader" id="5_jrj3f"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4mq66"]
 radius = 9.0
@@ -137,15 +139,23 @@ _data = {
 &"sweep": SubResource("Animation_mng3v")
 }
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6bwtn"]
+shader = ExtResource("5_jrj3f")
+shader_parameter/pixel_size = 0.5
+shader_parameter/band_width = 8.0
+shader_parameter/color_white = Vector4(1, 1, 1, 1)
+shader_parameter/color_blue = Vector4(0.22, 0.44, 1, 1)
+shader_parameter/twist_repeat = 6.0
+
 [node name="CharacterBody2D" type="CharacterBody2D"]
 y_sort_enabled = true
 script = ExtResource("1_mmhmk")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 offset_left = -11.0
-offset_top = -68.0
+offset_top = -80.0
 offset_right = 10.0
-offset_bottom = -64.0
+offset_bottom = -76.0
 color = Color(0.245382, 0.559757, 0.701337, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -163,9 +173,10 @@ metadata/_edit_lock_ = true
 position = Vector2(-11, -16)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -31)
+position = Vector2(0, -35)
+scale = Vector2(1.2, 1.2)
 texture = ExtResource("1_7bdeq")
-hframes = 9
+hframes = 18
 frame = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -184,3 +195,10 @@ script = ExtResource("4_mng3v")
 [node name="WhistleAudioStream" type="AudioStreamPlayer2D" parent="Whistle"]
 stream = ExtResource("3_ujx44")
 volume_db = -15.0
+
+[node name="Rope" type="Line2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_6bwtn")
+width = 4.0
+texture_mode = 1
+script = ExtResource("5_11h6k")

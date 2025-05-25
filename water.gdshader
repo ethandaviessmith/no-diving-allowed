@@ -59,7 +59,6 @@ void fragment() {
         0.03*bulk;
 
     // --- Sunspot ROUND, with faded and ripply top/bottom ---
-
 	float sun_radius = 0.13 + shimmer*0.07;
 	float margin_x = sun_radius * 1.15;
 	float margin_y = sun_radius * 1.12;
