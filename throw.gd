@@ -81,7 +81,9 @@ func handle_throw_released():
 	if charging:
 		release_throw_cast()
 
-func handle_throw_lifesaver():
+var lifesaver:Node2D
+func handle_throw_lifesaver(lifesaver_node):
+	lifesaver = lifesaver_node
 	if charging:
 		release_throw_cast()
 
@@ -117,7 +119,8 @@ func release_throw_cast():
 			var swimmers = throw_aoe.get_swimmers_in_area()
 			for swimmer in swimmers:
 				if throw_type == ThrowType.LIFE_SAVER:
-					swimmer.life_saver_thrown_at()
+					pass
+					#swimmer.life_saver_thrown_at(lifesaver) #pass the life saver
 				else:
 					swimmer.whistled_at()
 		throw_aoe.start_dome_animation()

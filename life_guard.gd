@@ -13,6 +13,7 @@ var lifesaver_returning := false
 @onready var rope := $Rope
 @onready var whistle:Throw = $Whistle
 @onready var context_buttons = $"../../PoolUI/CanvasLayer"
+@onready var interact_zone: Area2D = $InteractZone
 
 func _ready() -> void:
 	$Sprite2D.frame = randi() % 4
@@ -124,7 +125,7 @@ func update_context_buttons():
 			context_buttons.set_x(ContextButtons.XIconType.HAND)
 
 func is_near_mop() -> bool:
-	for area in $InteractZone.get_overlapping_areas():
+	for area in interact_zone.get_overlapping_areas():
 		if area.is_in_group("mop"):
 			return true
 	return false
@@ -158,16 +159,8 @@ func play_sweep_motion():
 
 func grab_item():
 	if held_item:
-		if held_item.is_mop() and cleaning:
-			stop_cleaning()
-		var pos = held_item.global_position
-		$HeldItem.remove_child(held_item)
-		get_parent().add_child(held_item)
-		held_item.global_position = pos + Vector2(24, 0) # Adjust offset as needed
-		held_item = null
-		rope.visible = false
-		return
-	var interact_zone = $InteractZone
+		return release_item()
+	var interact_zone = interact_zone
 	for area in interact_zone.get_overlapping_areas():
 		if "grab" in area.get_groups() and held_item == null:
 			held_item = area
@@ -181,8 +174,23 @@ func grab_item():
 			else:
 				whistle.throw_type = Throw.ThrowType.WHISTLE
 
+func release_item():
+	if held_item:
+		if held_item.is_mop() and cleaning:
+			stop_cleaning()
+		var pos = held_item.global_position
+		$HeldItem.remove_child(held_item)
+		get_parent().add_child(held_item)
+		held_item.global_position = pos + Vector2(24, 0) # Adjust offset as needed
+	held_item = null
+	rope.visible = false
+
+func grab_swimmer(swimmer:Swimmer):
+	if held_item: release_item()
+	swimmer.on_lifeguard_picks_up(self)
+
 func interact_with_area():
-	var interact_zone = $InteractZone
+	var interact_zone = interact_zone
 	for area in interact_zone.get_overlapping_areas():
 		if area.is_in_group("clean") and held_item != null and held_item.is_in_group("mop"):
 			area.start_clean()
@@ -204,7 +212,7 @@ func _on_throw_lifesaver():
 			var throw_center = whistle.throw_aoe.global_position
 			_animate_lifesaver_to(throw_center)
 		# You may want to set a state variable like `can_reel_in = true`
-		whistle.handle_throw_lifesaver()
+		whistle.handle_throw_lifesaver(lifesaver)
 
 func _animate_lifesaver_to(target_position: Vector2):
 	var lifesaver = _get_lifesaver()
@@ -217,12 +225,7 @@ func _on_lifesaver_at_aoe():
 	pass
 
 func _on_reel_in_lifesaver():
-	var lifesaver = null
-	# Find the lifesaver in the scene tree; get_held_lifesaver returns null if not parented to HeldItem.
-	for n in get_tree().current_scene.get_children():
-		if n.has_method("is_lifesaver") and n.is_lifesaver():
-			lifesaver = n
-			break
+	var lifesaver = _get_lifesaver()
 	if lifesaver and lifesaver_thrown and not lifesaver_returning:
 		lifesaver_returning = true
 		var tween = create_tween()
@@ -235,7 +238,13 @@ func _finish_reel_in_lifesaver(lifesaver):
 		lifesaver.get_parent().remove_child(lifesaver)
 	$HeldItem.add_child(lifesaver)
 	lifesaver.position = Vector2.ZERO
-	held_item = lifesaver  # Enable picking up again!
+	held_item = lifesaver
 	lifesaver_thrown = false
 	lifesaver_returning = false
 	whistle.handle_throw_pressed(Throw.ThrowType.LIFE_SAVER)
+
+	if "linked_swimmer" in lifesaver and is_instance_valid(lifesaver.linked_swimmer):
+		var swimmer = lifesaver.linked_swimmer
+		if swimmer.state == Swimmer.State.CARRY and swimmer.carry_target == lifesaver:
+			grab_swimmer(swimmer)
+			lifesaver.linked_swimmer = null

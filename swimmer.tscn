@@ -103,6 +103,18 @@ tracks/4/keys = {
 "update": 1,
 "values": [false]
 }
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("CollisionShape2D:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -5)]
+}
 
 [sub_resource type="Animation" id="Animation_tt3ws"]
 resource_name = "drown_f"
@@ -170,6 +182,18 @@ tracks/4/keys = {
 "update": 0,
 "values": [16, 17, 16, 17, 16, 17, 16]
 }
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("CollisionShape2D:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -44.54)]
+}
 
 [sub_resource type="Animation" id="Animation_b8poi"]
 resource_name = "drown_m"
@@ -236,6 +260,18 @@ tracks/4/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
 "values": [13, 14, 13, 14, 13, 14, 13]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("CollisionShape2D:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -44.54)]
 }
 
 [sub_resource type="Animation" id="Animation_3kjvg"]
@@ -307,6 +343,18 @@ tracks/0/keys = {
 "args": [],
 "method": &"set_sprite"
 }]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -5)]
 }
 
 [sub_resource type="Animation" id="Animation_r5jdi"]
@@ -534,10 +582,11 @@ position = Vector2(0, -5)
 shape = SubResource("CapsuleShape2D_2pdhi")
 
 [node name="Label" type="Label" parent="."]
+visible = false
 offset_left = -36.0
-offset_top = -105.0
+offset_top = -75.0
 offset_right = 108.0
-offset_bottom = -82.0
+offset_bottom = -52.0
 scale = Vector2(0.5, 0.5)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 10

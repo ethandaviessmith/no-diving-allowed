@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://cc6p5v7grul0p"]
+[gd_scene load_steps=49 format=3 uid="uid://cc6p5v7grul0p"]
 
 [ext_resource type="PackedScene" uid="uid://c7mojcrudt0tc" path="res://life_guard.tscn" id="1_03hax"]
 [ext_resource type="Script" uid="uid://c5fqn6vd3dqwf" path="res://pool.gd" id="1_bslhr"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="9_87cwm"]
 [ext_resource type="Texture2D" uid="uid://bpgvqcvdld42e" path="res://assets/icon_safety.png" id="9_ch1vm"]
 [ext_resource type="Texture2D" uid="uid://bw5pp7kh7nej0" path="res://assets/interactables.png" id="10_3nhhx"]
+[ext_resource type="Script" uid="uid://c5yn5wvcbo4hj" path="res://debug_panel.gd" id="10_ch1vm"]
 [ext_resource type="NavigationPolygon" uid="uid://bpvlggtathyb6" path="res://pool_navigation_region.tres" id="15_xv5nx"]
 [ext_resource type="Shader" uid="uid://v6cndq4xl8cu" path="res://water_foam.gdshader" id="20_ansac"]
 
@@ -188,6 +189,10 @@ shader_parameter/backGroundDirX = 0.002
 shader_parameter/backGroundDirY = 0.002
 shader_parameter/alpha = 0.306
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ch1vm"]
+radius = 12.72
+height = 55.31
+
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_xv5nx"]
 vertices = PackedVector2Array(922.992, 583.633, 947.023, 654.008, 198.57, 655, 180, 625.68, 179.023, 162.969, 946.578, 161.031, 925.008, 233.523, 175.633, 656.961)
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(4, 5, 6, 3), PackedInt32Array(2, 7, 3), PackedInt32Array(3, 6, 0)])
@@ -200,7 +205,10 @@ size = Vector2(346.5, 61.5)
 size = Vector2(263, 44)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k0w2f"]
-size = Vector2(172.5, 365)
+size = Vector2(142.5, 365)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ch1vm"]
+size = Vector2(183, 37)
 
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point")]
 y_sort_enabled = true
@@ -366,6 +374,55 @@ fit_content = true
 scroll_active = false
 vertical_alignment = 1
 
+[node name="DebugPanel" type="Panel" parent="PoolUI"]
+offset_right = 137.0
+offset_bottom = 101.0
+script = ExtResource("10_ch1vm")
+
+[node name="ResetButton" type="Button" parent="PoolUI/DebugPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 30.0
+offset_right = 59.0
+offset_bottom = 61.0
+text = "Reset"
+
+[node name="TimeScaleSlider" type="HSlider" parent="PoolUI/DebugPanel"]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 71.0
+offset_right = 82.0
+offset_bottom = 87.0
+focus_mode = 0
+max_value = 6.0
+step = 0.2
+
+[node name="TimeScaleLabel" type="Label" parent="PoolUI/DebugPanel"]
+layout_mode = 0
+offset_left = 91.0
+offset_top = 67.0
+offset_right = 125.0
+offset_bottom = 90.0
+text = "0.0"
+horizontal_alignment = 1
+
+[node name="ToggleLabelsButton" type="Button" parent="PoolUI/DebugPanel"]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 30.0
+offset_right = 133.0
+offset_bottom = 61.0
+toggle_mode = true
+text = "Labels"
+
+[node name="Label" type="Label" parent="PoolUI/DebugPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 3.0
+offset_right = 58.0
+offset_bottom = 26.0
+text = "Debug"
+
 [node name="Visuals" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
@@ -423,13 +480,23 @@ offset_bottom = 802.0
 color = Color(0.827451, 1, 1, 0.490196)
 metadata/_edit_use_anchors_ = true
 
-[node name="LockerRoomColourRect" type="ColorRect" parent="Visuals"]
+[node name="ShowerRoomColourRect" type="ColorRect" parent="Visuals"]
 layout_mode = 0
 offset_left = 1229.0
 offset_top = 802.0
 offset_right = 1634.0
 offset_bottom = 1016.0
 color = Color(1, 1, 0.772549, 0.490196)
+metadata/_edit_use_anchors_ = true
+
+[node name="FirstAidRoomColourRect2" type="ColorRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 1303.0
+offset_top = 173.0
+offset_right = 1634.0
+offset_bottom = 441.0
+color = Color(0.906667, 0.86, 1, 0.490196)
 metadata/_edit_use_anchors_ = true
 
 [node name="PoolEdgeColourRect" type="ColorRect" parent="Visuals"]
@@ -475,9 +542,9 @@ metadata/_edit_use_anchors_ = true
 [node name="WallTextureRect4" type="TextureRect" parent="Visuals"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 33.175
+anchor_left = 32.55
 anchor_top = 10.85
-anchor_right = 77.425
+anchor_right = 79.925
 anchor_bottom = 22.725
 grow_horizontal = 2
 grow_vertical = 2
@@ -532,6 +599,36 @@ offset_top = 1016.0
 offset_right = 1566.0
 offset_bottom = 1037.0
 color = Color(0.188188, 0.218596, 0.304759, 1)
+
+[node name="WallTextureRect5" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 32.55
+anchor_top = 4.175
+anchor_right = 35.925
+anchor_bottom = 18.55
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="WallTextureRect6" type="TextureRect" parent="Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 32.55
+anchor_top = 9.15
+anchor_right = 35.925
+anchor_bottom = 17.65
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_xv5nx")
+expand_mode = 1
+stretch_mode = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="Entrance" type="Area2D" parent="."]
 position = Vector2(1442, 1015)
@@ -606,49 +703,49 @@ position = Vector2(268, 3)
 position = Vector2(-21.8001, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 1
 
 [node name="Sprite2D2" type="Sprite2D" parent="Locker"]
 position = Vector2(34.2, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 1
 
 [node name="Sprite2D3" type="Sprite2D" parent="Locker"]
 position = Vector2(90.2, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 1
 
 [node name="Sprite2D4" type="Sprite2D" parent="Locker"]
 position = Vector2(16, 66)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 2
 
 [node name="Sprite2D5" type="Sprite2D" parent="Locker"]
 position = Vector2(245, 66)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 2
 
 [node name="Sprite2D7" type="Sprite2D" parent="Locker"]
 position = Vector2(256, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 1
 
 [node name="Sprite2D6" type="Sprite2D" parent="Locker"]
 position = Vector2(312, -26.8)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 1
 
 [node name="Shower" type="Area2D" parent="."]
@@ -740,12 +837,12 @@ texture_progress = ExtResource("7_48tf8")
 [node name="Sprite2D" type="Sprite2D" parent="Shower"]
 position = Vector2(-136, 14)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 
 [node name="Sprite2D2" type="Sprite2D" parent="Shower"]
 position = Vector2(-6, 14)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 
 [node name="PoolStairsIn" type="Node2D" parent="."]
 position = Vector2(1140, 617)
@@ -886,7 +983,7 @@ position = Vector2(-3, 0)
 rotation = -1.5708
 scale = Vector2(0.64, 0.64)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 3
 
 [node name="ActivityManager" type="Node2D" parent="PoolLadder1" node_paths=PackedStringArray("wander_area")]
@@ -921,7 +1018,7 @@ position = Vector2(0, 7)
 rotation = 3.14159
 scale = Vector2(0.64, 0.64)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 3
 
 [node name="ActivityManager" type="Node2D" parent="PoolLadder2" node_paths=PackedStringArray("wander_area")]
@@ -1088,7 +1185,7 @@ position = Vector2(-137, 56)
 position = Vector2(-202, 89)
 
 [node name="Lounger" type="Node2D" parent="."]
-position = Vector2(838, 220)
+position = Vector2(721, 220)
 
 [node name="ActivityManager" type="Node2D" parent="Lounger" node_paths=PackedStringArray("wander_area")]
 script = ExtResource("9_87cwm")
@@ -1167,7 +1264,7 @@ position = Vector2(808, 913)
 position = Vector2(0, 7)
 scale = Vector2(0.75, 1)
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 4
 
 [node name="ActivityManager" type="Node2D" parent="HighChair" node_paths=PackedStringArray("wander_area")]
@@ -1215,6 +1312,7 @@ position = Vector2(1108, 937)
 position = Vector2(513, 336)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pool"]
+visible = false
 position = Vector2(232.5, 245)
 shape = SubResource("RectangleShape2D_08ey2")
 
@@ -1260,10 +1358,16 @@ schedule = ["WanderPool", "Shower", "Exit"]
 position = Vector2(182, 175)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D"]
-polygon = PackedVector2Array(1058, 842, 1452, 842, 1452, 665, 1336, 665, 1340, 581, 1452, 581, 1452, 354, 1414, 354, 1414, 309, 1343, 311, 1343, 354, 1284, 354, 1284, 311, 1212, 311, 1212, 354, 1172, 354, 1172, 408, 1144, 408, 1145, 259, 1499, 259, 1499, 865, 1041, 865, 1042, 629, 1058, 625, 1062, 580, 1143, 580, 1143, 512, 1173, 512, 1173, 580, 1232, 581, 1233, 664, 1058, 664)
+polygon = PackedVector2Array(1058, 842, 1452, 842, 1452, 665, 1336, 665, 1340, 581, 1452, 581, 1452, 354, 1414, 354, 1414, 309, 1343, 311, 1343, 354, 1284, 354, 1284, 311, 1212, 311, 1212, 354, 1172, 354, 1172, 407, 1145, 407, 1142, 357, 1120, 354, 1120, 191, 1147, 191, 1147, 258, 1452, 258, 1452, -3, 1147, -2, 1147, 107, 1120, 107, 1120, -3, 1036, -4, -4, -3, -2, 844, -22, 861, -31, -17, 1079, -37, 1499, -33, 1499, 259, 1499, 865, 1041, 865, -11, 860, -30, 841, 1042, 841, 1042, 629, 1058, 625, 1062, 580, 1143, 580, 1143, 512, 1173, 512, 1173, 580, 1232, 581, 1233, 664, 1058, 664)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(626, 783)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_ch1vm")
 
 [node name="NavRegion_Pool" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
+visible = false
 position = Vector2(182, 175)
 navigation_polygon = SubResource("NavigationPolygon_xv5nx")
 enter_cost = 2.0
@@ -1271,6 +1375,7 @@ travel_cost = 10.0
 
 [node name="NavRegion_Ground" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
+visible = false
 position = Vector2(182, 175)
 navigation_polygon = ExtResource("15_xv5nx")
 
@@ -1292,7 +1397,7 @@ shape = SubResource("RectangleShape2D_evgcl")
 position = Vector2(1133, 603)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PoolSide"]
-position = Vector2(96.75, -42.5)
+position = Vector2(81.75, -42.5)
 shape = SubResource("RectangleShape2D_k0w2f")
 
 [node name="PoolDrown" type="Node2D" parent="."]
@@ -1304,3 +1409,66 @@ activity_position_path = NodePath(".")
 activity = 5
 prevent_move = true
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="FirstAid" type="Area2D" parent="."]
+position = Vector2(1464, 181)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FirstAid"]
+position = Vector2(-29, 61)
+shape = SubResource("RectangleShape2D_ch1vm")
+
+[node name="ActivityManager" type="Node2D" parent="FirstAid" node_paths=PackedStringArray("wander_area")]
+position = Vector2(-4, 44.2)
+script = ExtResource("9_87cwm")
+line_positions = NodePath("LineNode")
+activity_position_path = NodePath("ActNode")
+wander_area = NodePath("../../PoolSide")
+bar_clean_path = NodePath("CleanProgressBar")
+activity = 3
+
+[node name="LineNode" type="Node2D" parent="FirstAid/ActivityManager"]
+position = Vector2(-9, 92)
+
+[node name="LinePos1" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(3, 0)
+
+[node name="LinePos2" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(51, 3)
+
+[node name="LinePos3" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(107, 4)
+
+[node name="LinePos4" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(3, 57)
+
+[node name="LinePos5" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(56, 56)
+
+[node name="LinePos6" type="Node2D" parent="FirstAid/ActivityManager/LineNode"]
+position = Vector2(103, 55)
+
+[node name="ActNode" type="Node2D" parent="FirstAid/ActivityManager"]
+position = Vector2(0, 159)
+
+[node name="LinePos1" type="Node2D" parent="FirstAid/ActivityManager/ActNode"]
+position = Vector2(-130, -104)
+
+[node name="CleanProgressBar" type="TextureProgressBar" parent="FirstAid/ActivityManager"]
+modulate = Color(0.157268, 0.399016, 0.0942399, 1)
+texture_filter = 1
+offset_left = -115.0
+offset_top = -97.0
+offset_right = -17.0
+offset_bottom = -71.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_over = ExtResource("7_k0w2f")
+texture_progress = ExtResource("7_48tf8")
+
+[node name="Sprite2D" type="Sprite2D" parent="FirstAid"]
+position = Vector2(-34, 4.2)
+scale = Vector2(1.8, 1.8)
+texture = ExtResource("7_dhh87")
+hframes = 10
+frame = 5

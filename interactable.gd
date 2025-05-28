@@ -2,6 +2,10 @@
 class_name Interactable extends Area2D
 
 signal resolved
+signal swimmer_grabbed(swimmer)
+
+var linked_swimmer: Swimmer = null
+@onready var sprite: Sprite2D = $Sprite2D
 
 enum Type { MOP, LIFE_SAVER }
 @export var interactable_type: Type = Type.MOP:
@@ -9,9 +13,9 @@ enum Type { MOP, LIFE_SAVER }
 		interactable_type = value
 		_update_sprite_frame()
 
-@onready var sprite: Sprite2D = $Sprite2D
 
 func _ready():
+	body_entered.connect(_on_grab_area_entered)
 	_update_sprite_frame()
 
 func set_interactable_type(new_type: Type) -> void:
@@ -23,6 +27,11 @@ func _update_sprite_frame() -> void:
 		match interactable_type:
 			Type.MOP: sprite.frame = 0
 			Type.LIFE_SAVER: sprite.frame = 4
+
+func _on_grab_area_entered(body):
+	if body is Swimmer and body.curr_action == Util.ACT_POOL_DROWN and !body.being_carried:
+		body.life_saver_thrown_at(self)
+		emit_signal("swimmer_grabbed", body)
 
 func interact():
 	modulate = Color.GREEN

@@ -21,10 +21,10 @@ signal mood_changed(new_mood)
 signal misbehaved(type)
 signal misbehave_removed(type)
 
-var happy: float = 1.0
+var happy: float = 0.8
 var energy: float = 10.0
 var safety: float = 0.8
-var clean: float = 1.0
+var clean: float = 0.8
 
 var max_happy: float = 1.0
 var max_energy: float = 10.0

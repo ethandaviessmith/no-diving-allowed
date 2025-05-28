@@ -1,7 +1,7 @@
 class_name Swimmer extends CharacterBody2D
 
 # == ENUMS ==
-enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP }
+enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP, CARRY }
 
 
 # == EXPORTED VARS & NODES ==
@@ -35,6 +35,11 @@ var puddle_slow := 0.5
 var activity_start_time: float = 0
 var activity_duration: float = 0
 var sprite_frame
+
+# Tracking rescue targets
+var carry_target: Node = null   # Could be the life-saver or later the lifeguard
+var carry_offset: Vector2 = Vector2.ZERO  # Optional offset for position (carried above lifeguard, etc)
+var being_carried := false
 
 # == SCHEDULE/WANDER ==
 var wander_points: Array[Vector2] = []
@@ -82,6 +87,10 @@ func set_pool(_pool, s):
 
 # == PHYSICS & FRAME UPDATE ==
 func _physics_process(delta):
+	if state == State.CARRY and carry_target:
+		global_position = carry_target.global_position + carry_offset
+		# Optionally: Handle rotation, bobbing, etc.
+		return  # Don't process normal movement in carry state
 	_step_move()
 
 func _process(delta: float) -> void:
@@ -184,12 +193,12 @@ func start_lap_movement():
 	is_on_lane = true
 	path_direction = -1
 	path_follow.progress_ratio = path_buffer
-	$AnimationPlayer.play("swim")
+	anim.play("swim")
 
 func end_lap_movement():
 	is_on_lane = false
 	path_follow = null
-	$AnimationPlayer.stop()
+	anim.stop()
 	$Sprite2D.frame = sprite_frame + 4
 
 # == SCHEDULE / NEXT ACTIVITY / DECISION LOGIC ==
@@ -271,6 +280,9 @@ func _setup_wander_and_go_with_area(area: Area2D, count:int = 3):
 		wander_points.append(Util.rand_point_within_shape(shape, area.global_position + offset))
 
 func _check_wander():
+	if not wander_points:
+		Log.err("no wander points, wandering in a bad state", curr_action, state)
+		return
 	var target_point = wander_points[wander_index]
 	if move_target == target_point:
 		if global_position.distance_to(target_point) < 10.0:
@@ -294,12 +306,19 @@ func get_state_duration_left() -> float:
 		return max(0.0, (activity_start_time + activity_duration) - (Time.get_ticks_msec() / 1000.0))
 	return 0.0
 
+func toggle_label(visible: bool):
+	if state_label:  # Replace with correct node path
+		state_label.visible = visible
+
 func update_state_label():
 	var dur = ""
 	if _is_state(State.ACT):
 		dur = "%.1f" % get_state_duration_left()
 	var txt = "%s_%s:%s" % [str(State.keys()[state]), curr_action if curr_action != null else "", dur if dur != "" else "", ]
-	state_label.text = txt
+	if carry_target:
+		state_label.text = carry_target.name
+	else:
+		state_label.text = txt
 
 # == START AND END ACTIVITY ==
 func _do_perform_activity():
@@ -398,14 +417,6 @@ func set_is_swimming(flag: bool):
 		splash.global_position = global_position + Vector2(0.0, -35.0)
 
 # == MOOD/BEHAVIOR/INTERACTIONS ==
-func life_saver_thrown_at():
-	if state == State.ACT and curr_action == Util.ACT_POOL_DROWN:
-		mood.clear_misbehaves_by_filter(MoodComponent.LIFE_SAVER_REMOVABLES)
-		finish_activity()
-		state = State.IDLE
-		anim.play("idle")
-		start_next_action()
-
 func whistled_at():
 	var broken_count = mood.count_whistle_removable_misbehaves()
 	if broken_count > 0:
@@ -442,6 +453,42 @@ func start_drown():
 		anim.play("drown_m")
 	else:
 		anim.play("drown_f")
+		
+func life_saver_thrown_at(lifesaver: Node2D):
+	if state == State.ACT and curr_action == Util.ACT_POOL_DROWN:
+		mood.clear_misbehaves_by_filter(MoodComponent.LIFE_SAVER_REMOVABLES)
+		finish_activity()
+		set_carry_mode(true)
+		carry_target = lifesaver
+		carry_offset = Vector2(0, -60)
+		lifesaver.linked_swimmer = self
+
+func on_lifeguard_picks_up(life_guard):
+	if life_guard.has_method("release_item"):
+		life_guard.release_item()
+	set_carry_mode(true)
+	carry_target = life_guard
+	carry_offset = Vector2(0, 0) # adjust as needed, above lifeguard's hands
+
+func put_down():
+	set_carry_mode(false)
+
+func set_carry_mode(enabled: bool):
+	if curr_action == Util.ACT_POOL_DROWN:
+		curr_action = null
+	being_carried = enabled
+	if enabled:
+		state = State.CARRY
+		$NavigationAgent2D.process_mode = Node.PROCESS_MODE_DISABLED
+		$CollisionShape2D.disabled = true
+		anim.play("idle")
+		rotation_degrees = 90
+	else:
+		state = State.IDLE
+		$NavigationAgent2D.process_mode = Node.PROCESS_MODE_INHERIT
+		$CollisionShape2D.disabled = false
+		anim.play("idle")
+		rotation_degrees = 0
 
 func try_add_misbehave(misbehave_type) -> bool:
 	if whistle_timer.time_left > 0:
