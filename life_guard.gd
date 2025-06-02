@@ -103,7 +103,14 @@ func get_input_dir():
 func update_context_buttons():
 	# --- Z BUTTON LOGIC ---
 	if held_item:
-		context_buttons.set_z(ContextButtons.ZIconType.CLEAN)
+		if held_item is Interactable  and held_item.is_lifesaver():
+			context_buttons.set_z(ContextButtons.ZIconType.REEL_IN if lifesaver_thrown else ContextButtons.ZIconType.THROW)
+		elif held_item is Interactable and held_item.is_mop():
+			context_buttons.set_z(ContextButtons.ZIconType.CLEAN)
+		elif held_item is Swimmer:
+			context_buttons.set_z(ContextButtons.ZIconType.FIRST_AID if is_near_first_aid_area() else ContextButtons.ZIconType.BLANK)
+		else:
+			context_buttons.set_z(ContextButtons.ZIconType.BLANK)
 	else:
 		if whistle.throw_aoe and is_instance_valid(whistle.throw_aoe) and whistle.throw_aoe.dome_active:
 			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE3)
@@ -114,19 +121,45 @@ func update_context_buttons():
 
 	# --- X BUTTON LOGIC ---
 	if held_item:
-		if held_item.is_in_group("mop"):
+		if held_item is Interactable and held_item.is_mop():
 			context_buttons.set_x(ContextButtons.XIconType.MOP)
+		elif held_item is Interactable and held_item.is_lifesaver():
+			context_buttons.set_x(ContextButtons.XIconType.LIFE_SAVER)
+		elif held_item is Swimmer:
+			context_buttons.set_x(ContextButtons.XIconType.SWIMMER)
 		else:
 			context_buttons.set_x(ContextButtons.XIconType.BLANK)
 	else:
 		if is_near_mop():
-			context_buttons.set_x(ContextButtons.XIconType.OPEN_HAND)
+			context_buttons.set_x(ContextButtons.XIconType.GRAB_MOP)
+		elif is_near_lifesaver():
+			context_buttons.set_x(ContextButtons.XIconType.GRAB_LIFE_SAVER)
+		elif is_near_swimmer():
+			context_buttons.set_x(ContextButtons.XIconType.GRAB_SWIMMER)
 		else:
 			context_buttons.set_x(ContextButtons.XIconType.HAND)
 
 func is_near_mop() -> bool:
 	for area in interact_zone.get_overlapping_areas():
-		if area.is_in_group("mop"):
+		if area.is_in_group("grab") and area is Interactable and area.is_mop():
+			return true
+	return false
+
+func is_near_lifesaver() -> bool:
+	for area in interact_zone.get_overlapping_areas():
+		if area.is_in_group("grab") and area is Interactable and area.is_lifesaver():
+			return true
+	return false
+
+func is_near_swimmer() -> bool:
+	for body in interact_zone.get_overlapping_bodies():
+		if body is Swimmer and body.state in [Swimmer.State.CARRY, Swimmer.State.SIT] and not body.being_carried:
+			return true
+	return false
+
+func is_near_first_aid_area() -> bool:
+	for area in interact_zone.get_overlapping_areas():
+		if area.is_in_group("firstaid"):
 			return true
 	return false
 
@@ -160,7 +193,12 @@ func play_sweep_motion():
 func grab_item():
 	if held_item:
 		return release_item()
-	var interact_zone = interact_zone
+	for area in interact_zone.get_overlapping_bodies():
+		if area.is_in_group("swimmer"):
+			var swimmer:Swimmer = area
+			if area.state == Swimmer.State.SIT:
+				grab_swimmer(area)
+				return
 	for area in interact_zone.get_overlapping_areas():
 		if "grab" in area.get_groups() and held_item == null:
 			held_item = area
@@ -173,26 +211,48 @@ func grab_item():
 				rope.visible = true
 			else:
 				whistle.throw_type = Throw.ThrowType.WHISTLE
-
+	
 func release_item():
 	if held_item:
-		if held_item.is_mop() and cleaning:
-			stop_cleaning()
-		var pos = held_item.global_position
-		$HeldItem.remove_child(held_item)
-		get_parent().add_child(held_item)
-		held_item.global_position = pos + Vector2(24, 0) # Adjust offset as needed
+		if held_item is Swimmer:
+			var pos = held_item.global_position
+			$HeldItem.remove_child(held_item)
+			get_parent().add_child(held_item)
+			held_item.global_position = pos
+
+			held_item.set_swimmer_mode(Swimmer.State.CARRY, false)
+
+			var on_first_aid := false
+			for area in interact_zone.get_overlapping_areas():
+				if area.is_in_group("firstaid"):
+					on_first_aid = true
+					break
+
+			if on_first_aid:
+				if held_item.has_method("enter_first_aid"):
+					held_item.enter_first_aid()
+				else:
+					held_item.curr_action = Util.ACT_FIRSTAID
+			else:
+				held_item.set_swimmer_mode(Swimmer.State.SIT, true)
+		else:
+			if held_item.is_mop() and cleaning:
+				stop_cleaning()
+			var pos = held_item.global_position
+			$HeldItem.remove_child(held_item)
+			get_parent().add_child(held_item)
+			held_item.global_position = pos + Vector2(24, 0)
 	held_item = null
 	rope.visible = false
 
 func grab_swimmer(swimmer:Swimmer):
 	if held_item: release_item()
 	swimmer.on_lifeguard_picks_up(self)
+	held_item = swimmer
 
 func interact_with_area():
-	var interact_zone = interact_zone
 	for area in interact_zone.get_overlapping_areas():
-		if area.is_in_group("clean") and held_item != null and held_item.is_in_group("mop"):
+		if area.is_in_group("clean") and held_item != null and held_item is Interactable and held_item.is_mop():
 			area.start_clean()
 
 func _get_lifesaver() -> Node2D:
@@ -232,8 +292,7 @@ func _on_reel_in_lifesaver():
 		tween.tween_property(lifesaver, "global_position", $HeldItem.global_position, 0.5)
 		tween.tween_callback(Callable(self, "_finish_reel_in_lifesaver").bind(lifesaver))
 
-func _finish_reel_in_lifesaver(lifesaver):
-	# Remove from world/root, add to player's $HeldItem
+func _finish_reel_in_lifesaver(lifesaver: Interactable):
 	if lifesaver.get_parent():
 		lifesaver.get_parent().remove_child(lifesaver)
 	$HeldItem.add_child(lifesaver)

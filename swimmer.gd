@@ -1,7 +1,7 @@
 class_name Swimmer extends CharacterBody2D
 
 # == ENUMS ==
-enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP, CARRY }
+enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP, CARRY, SIT }
 
 
 # == EXPORTED VARS & NODES ==
@@ -10,6 +10,7 @@ enum State { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP, CARRY }
 @export var puddle_scene: PackedScene
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var wait_timer: Timer = $WaitTimer
 @onready var whistle_timer: Timer = $WhistleTimer
 @onready var state_label: Label = $Label
@@ -227,6 +228,9 @@ func start_next_action():
 		state = State.IDLE
 		return
 
+	if being_carried:
+		Log.pr("carry")
+
 	curr_action = schedule[0]
 	var activity_manager: ActivityManager = pool.getActivityManager(curr_action, self)
 	if activity_manager:
@@ -346,6 +350,8 @@ func _do_perform_activity():
 	play_activity_manager_anim(target_activity, false)
 
 func _end_perform_activity():
+	if _is_state([State.CARRY, State.SIT]):
+		return
 	if _current_activity_particles:
 		_current_activity_particles.emitting = false
 		_current_activity_particles = null
@@ -379,7 +385,10 @@ func finish_activity():
 	if curr_action == Util.ACT_EXIT:
 		leave_pool()
 		return
-	state = State.IDLE
+	if not _is_state([State.CARRY, State.SIT]):
+		state = State.IDLE
+	else:
+		Log.pr("tried to set state here")
 	if target_activity and target_activity.has_method("notify_done"):
 		target_activity.notify_done(self)
 		target_activity = null
@@ -458,37 +467,56 @@ func life_saver_thrown_at(lifesaver: Node2D):
 	if state == State.ACT and curr_action == Util.ACT_POOL_DROWN:
 		mood.clear_misbehaves_by_filter(MoodComponent.LIFE_SAVER_REMOVABLES)
 		finish_activity()
-		set_carry_mode(true)
+		set_swimmer_mode(State.CARRY, true)
 		carry_target = lifesaver
-		carry_offset = Vector2(0, -60)
+		carry_offset = Vector2(-20, -20)
 		lifesaver.linked_swimmer = self
 
 func on_lifeguard_picks_up(life_guard):
 	if life_guard.has_method("release_item"):
 		life_guard.release_item()
-	set_carry_mode(true)
+	set_swimmer_mode(State.CARRY, true)
 	carry_target = life_guard
-	carry_offset = Vector2(0, 0) # adjust as needed, above lifeguard's hands
+	carry_offset = Vector2(-20, -30) # adjust as needed, above lifeguard's hands
 
 func put_down():
-	set_carry_mode(false)
+	set_swimmer_mode(State.CARRY, false)
 
-func set_carry_mode(enabled: bool):
+func enter_first_aid():
+	curr_action = Util.ACT_FIRSTAID
+	_do_perform_activity()
+
+## CARRY/SIT state changes
+func set_swimmer_mode(mode: int, enabled: bool):
 	if curr_action == Util.ACT_POOL_DROWN:
 		curr_action = null
-	being_carried = enabled
 	if enabled:
-		state = State.CARRY
-		$NavigationAgent2D.process_mode = Node.PROCESS_MODE_DISABLED
-		$CollisionShape2D.disabled = true
-		anim.play("idle")
-		rotation_degrees = 90
+		state = mode
+		navigation_agent.process_mode = Node.PROCESS_MODE_DISABLED
+		if sprite_frame < 2:
+			anim.play("sit_m")
+		else:
+			anim.play("sit_f")
+
+		if mode == State.CARRY:
+			collision_shape.disabled = true
+			rotation_degrees = 50
+			being_carried = true
+			if curr_action == Util.ACT_POOL_DROWN:
+				curr_action = null
+		else:
+			rotation_degrees = 0
+			collision_shape.disabled = false
+			being_carried = false
 	else:
-		state = State.IDLE
-		$NavigationAgent2D.process_mode = Node.PROCESS_MODE_INHERIT
-		$CollisionShape2D.disabled = false
+		state = State.IDLE # Reset to normal/idle
+		navigation_agent.process_mode = Node.PROCESS_MODE_INHERIT
+		collision_shape.disabled = false
 		anim.play("idle")
+
 		rotation_degrees = 0
+		being_carried = false
+
 
 func try_add_misbehave(misbehave_type) -> bool:
 	if whistle_timer.time_left > 0:

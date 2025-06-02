@@ -1,8 +1,12 @@
 class_name ContextButtons extends CanvasLayer
 
 # --- ENUM DEFINITIONS ---
-enum ZIconType { WHISTLE, WHISTLE2, WHISTLE3, WHISTLE_BLOW, CLEAN, BLANK }
-enum XIconType { HAND, OPEN_HAND, MOP, BLANK }
+enum ZIconType {
+	WHISTLE, WHISTLE2, WHISTLE3, WHISTLE_BLOW, CLEAN, FIRST_AID, THROW, REEL_IN, BLANK
+}
+enum XIconType {
+	HAND, OPEN_HAND, MOP, LIFE_SAVER, SWIMMER, BLANK, GRAB_MOP, GRAB_LIFE_SAVER, GRAB_SWIMMER
+}
 
 
 # --- EXPORTED TEXTURE ARRAYS (MUST MATCH ENUM ORDER) ---
@@ -12,6 +16,9 @@ enum XIconType { HAND, OPEN_HAND, MOP, BLANK }
 	preload("res://assets/icons14.png"), # WHISTLE3
 	preload("res://assets/icons12.png"), # WHISTLEBLOW
 	preload("res://assets/icons15.png"), # CLEAN
+	preload("res://assets/icons19.png"), # FIRST AID
+	preload("res://assets/icons20.png"), # THROW
+	preload("res://assets/icons21.png"), # REEL IN
 	preload("res://assets/icons11.png"), # BLANK
 ]
 
@@ -19,15 +26,23 @@ enum XIconType { HAND, OPEN_HAND, MOP, BLANK }
 	preload("res://assets/icons16.png"), # HAND
 	preload("res://assets/icons17.png"), # OPEN_HAND
 	preload("res://assets/icons18.png"), # MOP
+	preload("res://assets/icons20.png"), # LIFE SAVER
+	preload("res://assets/icons22.png"), # SWIMMER
 	preload("res://assets/icons11.png"), # BLANK
+	preload("res://assets/icons18.png"), # MOP
+	preload("res://assets/icons20.png"), # LIFE SAVER
+	preload("res://assets/icons22.png"), # SWIMMER
 ]
 
 const Z_LABELS = {
 	ZIconType.WHISTLE: "Whistle",
-	ZIconType.WHISTLE2: "Whistle",
-	ZIconType.WHISTLE3: "Whistle",
+	ZIconType.WHISTLE2: "Whistle (Charge)",
+	ZIconType.WHISTLE3: "Whistle (Ready)",
 	ZIconType.WHISTLE_BLOW: "Whistle (Blow)",
 	ZIconType.CLEAN: "Clean",
+	ZIconType.FIRST_AID: "First Aid",
+	ZIconType.THROW: "Throw",
+	ZIconType.REEL_IN: "Reel In",
 	ZIconType.BLANK: "",
 }
 
@@ -35,7 +50,12 @@ const X_LABELS = {
 	XIconType.HAND: "Empty",
 	XIconType.OPEN_HAND: "Grab",
 	XIconType.MOP: "Drop Mop",
+	XIconType.LIFE_SAVER: "Drop Life Saver",
+	XIconType.SWIMMER: "Drop Swimmer",
 	XIconType.BLANK: "",
+	XIconType.GRAB_MOP: "Grab Mop",
+	XIconType.GRAB_LIFE_SAVER: "Grab Life Saver",
+	XIconType.GRAB_SWIMMER: "Grab Swimmer"
 }
 
 func set_z(icon_type: ZIconType) -> void:

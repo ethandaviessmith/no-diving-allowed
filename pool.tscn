@@ -1298,7 +1298,7 @@ position = Vector2(-24.245, 140.525)
 scale = Vector2(0.703, 0.649)
 skew = -0.858702
 texture = ExtResource("7_dhh87")
-hframes = 6
+hframes = 10
 frame = 4
 
 [node name="LifeSaver" parent="." instance=ExtResource("5_7g16q")]
@@ -1355,6 +1355,7 @@ schedule = ["WanderPool", "Shower", "Exit"]
 [node name="GameTimer" type="Timer" parent="."]
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
+visible = false
 position = Vector2(182, 175)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D"]
@@ -1410,7 +1411,7 @@ activity = 5
 prevent_move = true
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
-[node name="FirstAid" type="Area2D" parent="."]
+[node name="FirstAid" type="Area2D" parent="." groups=["firstaid"]]
 position = Vector2(1464, 181)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FirstAid"]

@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wh154"]
 size = Vector2(33, 52)
 
-[node name="Interactable" type="Area2D" groups=["grab", "mop"]]
+[node name="Interactable" type="Area2D" groups=["grab"]]
 texture_filter = 1
 script = ExtResource("1_wh154")
 
