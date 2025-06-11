@@ -58,6 +58,53 @@ const X_LABELS = {
 	XIconType.GRAB_SWIMMER: "Grab Swimmer"
 }
 
+func update_context_buttons(
+		held_item,
+		lifesaver_thrown,
+		whistle,
+		is_near_mop_func,
+		is_near_lifesaver_func,
+		is_near_swimmer_func,
+		is_near_first_aid_area_func):
+
+	# --- Z BUTTON LOGIC ---
+	if held_item:
+		if held_item is Interactable and held_item.is_lifesaver():
+			set_z(ZIconType.REEL_IN if lifesaver_thrown else ZIconType.THROW)
+		elif held_item is Interactable and held_item.is_mop():
+			set_z(ZIconType.CLEAN)
+		elif held_item is Swimmer:
+			set_z(ZIconType.FIRST_AID if is_near_first_aid_area_func.call() else ZIconType.BLANK)
+		else:
+			set_z(ZIconType.BLANK)
+	else:
+		if whistle.throw_aoe and is_instance_valid(whistle.throw_aoe) and whistle.throw_aoe.dome_active:
+			set_z(ZIconType.WHISTLE3)
+		elif whistle.charging:
+			set_z(ZIconType.WHISTLE2)
+		else:
+			set_z(ZIconType.WHISTLE)
+
+	# --- X BUTTON LOGIC ---
+	if held_item:
+		if held_item is Interactable and held_item.is_mop():
+			set_x(XIconType.MOP)
+		elif held_item is Interactable and held_item.is_lifesaver():
+			set_x(XIconType.LIFE_SAVER)
+		elif held_item is Swimmer:
+			set_x(XIconType.SWIMMER)
+		else:
+			set_x(XIconType.BLANK)
+	else:
+		if is_near_mop_func.call():
+			set_x(XIconType.GRAB_MOP)
+		elif is_near_lifesaver_func.call():
+			set_x(XIconType.GRAB_LIFE_SAVER)
+		elif is_near_swimmer_func.call():
+			set_x(XIconType.GRAB_SWIMMER)
+		else:
+			set_x(XIconType.HAND)
+
 func set_z(icon_type: ZIconType) -> void:
 	var anim:AnimationPlayer = $ZButtonAnim
 	var whistle_sprite:Sprite2D = $ZButtonAnim/Whistle_FX

@@ -213,9 +213,47 @@ size = Vector2(183, 37)
 [node name="Pool" type="Node2D" node_paths=PackedStringArray("entrance_point")]
 y_sort_enabled = true
 script = ExtResource("1_bslhr")
-max_guests = 12
 swimmer_scene = ExtResource("4_76ob0")
 entrance_point = NodePath("Entrance")
+activity_managers = {
+"Drown": NodePath("PoolDrown/ActivityManager"),
+"Entrance": NodePath("Entrance/ActivityManager"),
+"Exit": NodePath("Exit/ActivityManager"),
+"Locker": NodePath("Locker/ActivityManager"),
+"Lounger": NodePath("Lounger/ActivityManager"),
+"PoolDive": [{
+&"name": "PoolJump1",
+&"node": NodePath("PoolJump1/ActivityManager")
+}, {
+&"name": "PoolJump2",
+&"node": NodePath("PoolJump2/ActivityManager")
+}],
+"PoolEnter": [{
+&"name": "PoolStairs",
+&"node": NodePath("PoolStairsIn/ActivityManager")
+}, {
+&"name": "PoolJump1",
+&"node": NodePath("PoolJump1/ActivityManager")
+}, {
+&"name": "PoolJump2",
+&"node": NodePath("PoolJump2/ActivityManager")
+}],
+"PoolExit": [{
+&"name": "PoolStairs",
+&"node": NodePath("PoolStairsOut/ActivityManager")
+}, {
+&"name": "PoolLadder1",
+&"node": NodePath("PoolLadder1/ActivityManager")
+}, {
+&"name": "PoolLadder2",
+&"node": NodePath("PoolLadder2/ActivityManager")
+}],
+"PoolLaps": NodePath("PoolLaps/ActivityManager"),
+"PoolPlay": NodePath("PoolPlay/ActivityManager"),
+"PoolSwim": NodePath("PoolSwim/ActivityManager"),
+"Shower": NodePath("Shower/ActivityManager"),
+"Slip": NodePath("")
+}
 
 [node name="PoolUI" type="CanvasLayer" parent="."]
 
@@ -394,7 +432,7 @@ offset_top = 71.0
 offset_right = 82.0
 offset_bottom = 87.0
 focus_mode = 0
-max_value = 6.0
+max_value = 10.0
 step = 0.2
 
 [node name="TimeScaleLabel" type="Label" parent="PoolUI/DebugPanel"]

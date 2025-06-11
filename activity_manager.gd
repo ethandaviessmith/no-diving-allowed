@@ -192,3 +192,9 @@ func _cascade_line_queue():
 	for i in range(line_queue.size()):
 		if i < line_nodes.size():
 			line_queue[i].get_in_line(line_nodes[i].global_position)
+
+func clear_swimmer(swimmer):
+	var idx = current_swimmers.find(swimmer)
+	if idx != -1: current_swimmers[idx] = null
+	idx = line_queue.find(swimmer)
+	if idx != -1: line_queue[idx] = null

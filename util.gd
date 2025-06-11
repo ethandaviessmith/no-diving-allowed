@@ -16,6 +16,7 @@ const ACT_POOL_EXIT := "PoolExit"
 const ACT_POOL_DIVE := "PoolDive"
 
 const ACT_POOL_DROWN := "Drown"
+const ACT_SLIP := "Slip"
 const ACT_FIRSTAID := "FirstAid"
 const WANDER_POOL := "WanderPool"
 

@@ -1,0 +1,163 @@
+[gd_scene load_steps=4 format=3 uid="uid://60h3oe0bm6r"]
+
+[ext_resource type="Script" uid="uid://bqvwftsu4em1s" path="res://clipboard_summary.gd" id="1_att5y"]
+[ext_resource type="Texture2D" uid="uid://b62h8xpi34acm" path="res://assets/clipboard.png" id="2_d2xfh"]
+[ext_resource type="Theme" uid="uid://c5lqqrwutpaj3" path="res://clipboard_theme.tres" id="3_pc1a2"]
+
+[node name="CanvasLayer" type="CanvasLayer" node_paths=PackedStringArray("day_label", "earnings_value", "debt_paid_value", "debt_bar", "incidents_value", "warned_value", "messes_value", "stars_label", "comment_label", "next_day_button")]
+process_mode = 3
+script = ExtResource("1_att5y")
+day_label = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/Label")
+earnings_value = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer/EarningsLabel")
+debt_paid_value = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer/DebtLabel")
+debt_bar = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/DebtProgressBar")
+incidents_value = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2/IncidentLabel")
+warned_value = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2/WarnLabel")
+messes_value = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2/MessLabel")
+stars_label = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer3/RatingLabel")
+comment_label = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/CommentLabel")
+next_day_button = NodePath("ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/Button")
+
+[node name="ClipboardSummary" type="Control" parent="."]
+z_index = 104
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="ClipboardSummary"]
+layout_mode = 0
+offset_right = 1937.0
+offset_bottom = 1095.0
+
+[node name="TextureRect" type="TextureRect" parent="ClipboardSummary"]
+texture_filter = 1
+layout_mode = 0
+offset_left = 652.0
+offset_top = 225.0
+offset_right = 1185.0
+offset_bottom = 799.0
+texture = ExtResource("2_d2xfh")
+
+[node name="PanelPaper" type="Panel" parent="ClipboardSummary"]
+self_modulate = Color(100, 100, 100, 1)
+layout_mode = 0
+offset_left = 740.0
+offset_top = 262.0
+offset_right = 1106.0
+offset_bottom = 755.0
+rotation = 0.0261799
+
+[node name="MarginContainer" type="MarginContainer" parent="ClipboardSummary/PanelPaper"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ClipboardSummary/PanelPaper/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Day X Complete"
+
+[node name="HSeparator3" type="HSeparator" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Earnings Today"
+
+[node name="EarningsLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "$10"
+
+[node name="Label2" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Debt Paid"
+
+[node name="DebtLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "$200 / $1000"
+
+[node name="DebtProgressBar" type="ProgressBar" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="GridContainer2" type="GridContainer" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Incidents           "
+
+[node name="IncidentLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "1"
+
+[node name="Label2" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Warnings"
+
+[node name="WarnLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "5"
+
+[node name="Label3" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Messes"
+
+[node name="MessLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer2"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "5"
+
+[node name="HSeparator2" type="HSeparator" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="GridContainer3" type="GridContainer" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer3"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Rating                "
+
+[node name="RatingLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer/GridContainer3"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "★★★☆☆"
+
+[node name="CommentLabel" type="Label" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_pc1a2")
+text = "Feedback / comment section"
+
+[node name="Button" type="Button" parent="ClipboardSummary/PanelPaper/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+keep_pressed_outside = true
+text = "    Next Day    "

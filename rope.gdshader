@@ -7,7 +7,7 @@ uniform vec4 color_blue = vec4(0.22,0.44,1.0,1.0);
 uniform float twist_repeat = 6.0;
 
 void fragment() {
-	
+
 	float snapped_x = floor(UV.x / pixel_size) * pixel_size;
     float snapped_y = floor(UV.y / pixel_size) * pixel_size;
     // snap UV to pixel grid for sharp look

@@ -82,8 +82,8 @@ func set_sprite():
 func set_pool(_pool, s):
 	pool = _pool
 	schedule = s if s != null else Util.get_schedule_enter(self)
-	pool.poolArea2D.body_entered.connect(_on_pool_entered)
-	pool.poolArea2D.body_exited.connect(_on_pool_exited)
+	pool.pool_area.body_entered.connect(_on_pool_entered)
+	pool.pool_area.body_exited.connect(_on_pool_exited)
 	left_pool.connect(pool.on_swimmer_left_pool.bind(self))
 
 # == PHYSICS & FRAME UPDATE ==
@@ -269,7 +269,7 @@ func try_leave_line_and_use_activity(activity_manager):
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
 	state = State.APPROACH
-	move_target = activity_manager.get_interaction_pos(self)
+	move_target = activity_manager.get_interaction_pos(self) ## when compiling this line fails first, likely something else is wrong or needs to save / recompile
 
 func _setup_wander_and_go_with_area(area: Area2D, count:int = 3):
 	var attrs = Util.get_area_shape_and_offset(area)
@@ -404,6 +404,12 @@ func leave_pool():
 	tween.set_parallel(true)
 	tween.connect("finished", Callable(self, "queue_free"))
 
+func remove_from_pool():
+	if target_activity:
+		target_activity.clear_swimmer(self)
+	#leave_pool()
+	queue_free()
+
 func _on_pool_entered(body):
 	if body == self:
 		set_is_swimming(true)
@@ -446,6 +452,7 @@ func get_mood_rank():
 # Send state back to mood for logic
 func call_update_mood():
 	mood.mood_update(curr_action, state, is_swimming, in_puddle)
+	mood.try_misbehave(curr_action, state, is_swimming, in_puddle, is_running)
 
 func start_drown():
 	if not try_add_misbehave(MoodComponent.Misbehave.DROWN): return
@@ -484,6 +491,7 @@ func put_down():
 
 func enter_first_aid():
 	curr_action = Util.ACT_FIRSTAID
+	set_swimmer_mode(State.CARRY, false)
 	_do_perform_activity()
 
 ## CARRY/SIT state changes
@@ -564,6 +572,11 @@ func fall_asleep():
 	if not try_add_misbehave(MoodComponent.Misbehave.SLEEP): return
 	mood.energy = min(mood.max_energy, mood.energy + 1)
 	state = State.SLEEP
+	
+func start_slip():
+	mood.add_misbehave(MoodComponent.Misbehave.SLIP)
+	set_swimmer_mode(State.SIT, true)
+	Log.pr("have animation to show slip")
 
 # == WET/DRIP/ENVIRONMENT TIMER/PUZZLE LOGIC ==
 func start_wet_timer():
@@ -596,7 +609,7 @@ func _spawn_dirt(dirt_type: Dirt.DirtType = Dirt.DirtType.DIRT):
 		if node.has_method("setup"):
 			node.setup(dirt_type)
 		node.position = position + Vector2(randf_range(-10,10), randf_range(0,10))
-		pool.poolDirt.add_child(node)
+		pool.pool_dirt.add_child(node)
 
 # == ACTIVITY ANIMATION/SFX ==
 func play_activity_manager_anim(am: ActivityManager, use_finish: bool) -> void:

@@ -131,15 +131,13 @@ func mood_update(curr_action, state, is_swimming, in_puddle) -> void:
 		if safety == max_safety:
 			if randf() < 0.5:
 				pass
-	try_misbehave(curr_action, state, is_swimming)
 
 # == MISBEHAVE LOGIC ==
-func try_misbehave(curr_action, state, is_swimming):
-	Log.pr("misbehave tick")
+func try_misbehave(curr_action, state, is_swimming, in_puddle, is_running):
 	if randf() > safety:
 		if not owner: return
 		var swimmer:Swimmer = owner
-		Log.pr("misbehave tick")
+		#Log.pr("misbehave tick", swimmer.name)
 		var pf_child_athlete = _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2)
 		var pf_child_leisure = _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3)
 		if not is_swimming and Util.is_state(state, Swimmer.State.IN_LINE):
@@ -161,6 +159,8 @@ func try_misbehave(curr_action, state, is_swimming):
 		elif curr_action == Util.ACT_SUNBATHE and Util.is_state(state, Swimmer.State.ACT):
 			if randf() > happy + pf_child_leisure and randf() > 0.7 + pf_child_leisure:
 				swimmer.fall_asleep()
+		if in_puddle and is_running:
+			swimmer.start_slip()
 	update_mood()
 
 # == UTILS FOR PERSONALITY ==

@@ -90,7 +90,19 @@ func _input(event):
 		var z_down = Input.is_action_pressed("interact") # "z" action
 		var x_down = Input.is_action_pressed("grab") # "x" action
 		context_buttons.set_button_background(z_down, x_down)
+	
 	update_context_buttons()
+
+func update_context_buttons():
+	context_buttons.update_context_buttons(
+	held_item,
+	lifesaver_thrown,
+	whistle,
+	Callable(self, "is_near_mop"),
+	Callable(self, "is_near_lifesaver"),
+	Callable(self, "is_near_swimmer"),
+	Callable(self, "is_near_first_aid_area")
+)
 
 func get_input_dir():
 	var dir = Vector2.ZERO
@@ -99,45 +111,6 @@ func get_input_dir():
 	if Input.is_action_pressed("ui_down"): dir.y += 1
 	if Input.is_action_pressed("ui_up"): dir.y -= 1
 	return dir.normalized()
-
-func update_context_buttons():
-	# --- Z BUTTON LOGIC ---
-	if held_item:
-		if held_item is Interactable  and held_item.is_lifesaver():
-			context_buttons.set_z(ContextButtons.ZIconType.REEL_IN if lifesaver_thrown else ContextButtons.ZIconType.THROW)
-		elif held_item is Interactable and held_item.is_mop():
-			context_buttons.set_z(ContextButtons.ZIconType.CLEAN)
-		elif held_item is Swimmer:
-			context_buttons.set_z(ContextButtons.ZIconType.FIRST_AID if is_near_first_aid_area() else ContextButtons.ZIconType.BLANK)
-		else:
-			context_buttons.set_z(ContextButtons.ZIconType.BLANK)
-	else:
-		if whistle.throw_aoe and is_instance_valid(whistle.throw_aoe) and whistle.throw_aoe.dome_active:
-			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE3)
-		elif whistle.charging:
-			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE2)
-		else:
-			context_buttons.set_z(ContextButtons.ZIconType.WHISTLE)
-
-	# --- X BUTTON LOGIC ---
-	if held_item:
-		if held_item is Interactable and held_item.is_mop():
-			context_buttons.set_x(ContextButtons.XIconType.MOP)
-		elif held_item is Interactable and held_item.is_lifesaver():
-			context_buttons.set_x(ContextButtons.XIconType.LIFE_SAVER)
-		elif held_item is Swimmer:
-			context_buttons.set_x(ContextButtons.XIconType.SWIMMER)
-		else:
-			context_buttons.set_x(ContextButtons.XIconType.BLANK)
-	else:
-		if is_near_mop():
-			context_buttons.set_x(ContextButtons.XIconType.GRAB_MOP)
-		elif is_near_lifesaver():
-			context_buttons.set_x(ContextButtons.XIconType.GRAB_LIFE_SAVER)
-		elif is_near_swimmer():
-			context_buttons.set_x(ContextButtons.XIconType.GRAB_SWIMMER)
-		else:
-			context_buttons.set_x(ContextButtons.XIconType.HAND)
 
 func is_near_mop() -> bool:
 	for area in interact_zone.get_overlapping_areas():
