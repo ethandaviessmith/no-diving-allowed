@@ -35,7 +35,7 @@ func get_clean_ratio() -> float:
 
 func is_being_used() -> bool:
 	for swimmer in current_swimmers:
-		if swimmer != null and swimmer.state == Swimmer.State.ACT:
+		if swimmer != null and swimmer._is_state(Swimmer.SwimmerState.ACT):
 			return true
 	return false
 	
@@ -97,8 +97,8 @@ func try_queue_swimmer(swimmer):
 		return true
 
 	# Otherwise: send wandering
-	swimmer.state = swimmer.State.WANDERING
 	send_swimmer_to_wander(swimmer)
+	swimmer.set_activity(Util.ACT_WANDER)
 	return false
 
 func get_activity_node(swimmer):
@@ -128,7 +128,8 @@ func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
 	path_follow.progress_ratio = 0.0
 	# Optionally parent the swimmer under path_follow, or update position manually
 	swimmer.global_position = path_follow.global_position
-	swimmer.start_lap_movement() # Let join logic trigger movement state
+	#swimmer.start_lap_movement() # Let join logic trigger movement state
+	swimmer.set_activity(Util.ACT_POOL_LAPS)
 
 func send_swimmer_to_wander(swimmer):
 	if wander_area:

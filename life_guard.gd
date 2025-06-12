@@ -126,7 +126,7 @@ func is_near_lifesaver() -> bool:
 
 func is_near_swimmer() -> bool:
 	for body in interact_zone.get_overlapping_bodies():
-		if body is Swimmer and body.state in [Swimmer.State.CARRY, Swimmer.State.SIT] and not body.being_carried:
+		if body is Swimmer and body.state in [Swimmer.SwimmerState.CARRY, Swimmer.SwimmerState.SIT] and not body.being_carried:
 			return true
 	return false
 
@@ -169,7 +169,7 @@ func grab_item():
 	for area in interact_zone.get_overlapping_bodies():
 		if area.is_in_group("swimmer"):
 			var swimmer:Swimmer = area
-			if area.state == Swimmer.State.SIT:
+			if area.state == Swimmer.SwimmerState.SIT:
 				grab_swimmer(area)
 				return
 	for area in interact_zone.get_overlapping_areas():
@@ -193,7 +193,7 @@ func release_item():
 			get_parent().add_child(held_item)
 			held_item.global_position = pos
 
-			held_item.set_swimmer_mode(Swimmer.State.CARRY, false)
+			held_item.set_swimmer_mode(Swimmer.SwimmerState.CARRY, false)
 
 			var on_first_aid := false
 			for area in interact_zone.get_overlapping_areas():
@@ -207,7 +207,7 @@ func release_item():
 				else:
 					held_item.curr_action = Util.ACT_FIRSTAID
 			else:
-				held_item.set_swimmer_mode(Swimmer.State.SIT, true)
+				held_item.set_swimmer_mode(Swimmer.SwimmerState.SIT, true)
 		else:
 			if held_item.is_mop() and cleaning:
 				stop_cleaning()
@@ -277,6 +277,6 @@ func _finish_reel_in_lifesaver(lifesaver: Interactable):
 
 	if "linked_swimmer" in lifesaver and is_instance_valid(lifesaver.linked_swimmer):
 		var swimmer = lifesaver.linked_swimmer
-		if swimmer.state == Swimmer.State.CARRY and swimmer.carry_target == lifesaver:
+		if swimmer._is_state(Swimmer.SwimmerState.CARRY) and swimmer.carry_target == lifesaver:
 			grab_swimmer(swimmer)
 			lifesaver.linked_swimmer = null

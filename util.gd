@@ -1,13 +1,16 @@
 class_name Util extends Node
 
+
+## Activities that have a State should match names
+const ACT_IDLE := "Idle"
 const ACT_ENTRANCE := "Entrance"
 const ACT_LOCKER := "Locker"
 const ACT_SHOWER := "Shower"
 const ACT_SUNBATHE := "Lounger"
-const ACT_WANDER := "Wander"
+const ACT_WANDER := "Wandering"
 const ACT_EXIT := "Exit"
 
-const ACT_POOL_LAPS := "PoolLaps"
+const ACT_POOL_LAPS := "Laps"
 const ACT_POOL_SWIM := "PoolSwim"
 const ACT_POOL_PLAY := "PoolPlay"
 
@@ -79,7 +82,7 @@ static func _pick_rand(source:Array, n:int) -> Array:
 	opts.shuffle()
 	return opts.slice(0, n)
 
-static func add_schedule(swimmer, activities):
+static func add_schedule(swimmer: Swimmer, activities):
 	var schedule = []
 	var was_in_pool = swimmer.is_swimming
 	for i in activities.size():

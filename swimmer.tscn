@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=38 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://cut4o8bdcwi2g" path="res://assets/sprites.png" id="2_q2u11"]
@@ -6,6 +6,17 @@
 [ext_resource type="Texture2D" uid="uid://6iawdmindero" path="res://assets/debug.png" id="3_mest2"]
 [ext_resource type="Script" uid="uid://drb0cy2hm1ydk" path="res://mood_component.gd" id="3_q6fjm"]
 [ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="4_w3fy5"]
+[ext_resource type="Script" uid="uid://dx1rg3ctaul0t" path="res://state/default.gd" id="7_3kjvg"]
+[ext_resource type="Script" uid="uid://csebqglnxbm6p" path="res://state/active.gd" id="8_ogofy"]
+[ext_resource type="Script" uid="uid://d4nas8o01jhmd" path="res://state/idle.gd" id="9_buip2"]
+[ext_resource type="Script" uid="uid://dk4nmwuafmwnt" path="res://state/approach.gd" id="10_t0rd5"]
+[ext_resource type="Script" uid="uid://dmrnvaiq4vk5k" path="res://state/in_line.gd" id="11_vavx4"]
+[ext_resource type="Script" uid="uid://b57cacpoi08ug" path="res://state/act.gd" id="12_va8hj"]
+[ext_resource type="Script" uid="uid://crteapg5li0hx" path="res://state/wandering.gd" id="13_l6jv5"]
+[ext_resource type="Script" uid="uid://bsoqv317f2ttg" path="res://state/wander_move.gd" id="14_ye66s"]
+[ext_resource type="Script" uid="uid://cee2vse26sixd" path="res://state/laps.gd" id="15_t0rd5"]
+[ext_resource type="Script" uid="uid://bp7yx7ctkn0e1" path="res://state/wander_pause.gd" id="15_tei0a"]
+[ext_resource type="Script" uid="uid://cymy63qc7uyxb" path="res://addons/simple-state/classes/debugger.gd" id="16_t0rd5"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
 radius = 5.0
@@ -600,6 +611,17 @@ _data = {
 &"swim": SubResource("Animation_w3fy5")
 }
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_va8hj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l6jv5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ye66s"]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+
 [node name="Swimmer" type="CharacterBody2D" groups=["swimmer"]]
 scale = Vector2(1.2, 1.2)
 motion_mode = 1
@@ -737,5 +759,65 @@ process_material = SubResource("ParticleProcessMaterial_q6fjm")
 [node name="WhistleTimer" type="Timer" parent="."]
 wait_time = 15.0
 one_shot = true
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
+script = ExtResource("7_3kjvg")
+animation_player = NodePath("../AnimationPlayer")
+debug_mode = true
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("9_buip2")
+metadata/_custom_type_script = "uid://d4nas8o01jhmd"
+
+[node name="Active" type="Node" parent="StateMachine"]
+script = ExtResource("8_ogofy")
+metadata/_custom_type_script = "uid://csebqglnxbm6p"
+
+[node name="Approach" type="Node" parent="StateMachine/Active"]
+script = ExtResource("10_t0rd5")
+debug_mode = true
+metadata/_custom_type_script = "uid://dk4nmwuafmwnt"
+
+[node name="InLine" type="Node" parent="StateMachine/Active"]
+script = ExtResource("11_vavx4")
+metadata/_custom_type_script = "uid://dmrnvaiq4vk5k"
+
+[node name="Wandering" type="Node" parent="StateMachine/Active"]
+script = ExtResource("13_l6jv5")
+metadata/_custom_type_script = "uid://crteapg5li0hx"
+
+[node name="WanderMove" type="Node" parent="StateMachine/Active/Wandering"]
+script = ExtResource("14_ye66s")
+metadata/_custom_type_script = "uid://bsoqv317f2ttg"
+
+[node name="WanderPause" type="Node" parent="StateMachine/Active/Wandering"]
+script = ExtResource("15_tei0a")
+metadata/_custom_type_script = "uid://bp7yx7ctkn0e1"
+
+[node name="Laps" type="Node" parent="StateMachine"]
+script = ExtResource("15_t0rd5")
+metadata/_custom_type_script = "uid://cee2vse26sixd"
+
+[node name="Act" type="Node" parent="StateMachine"]
+script = ExtResource("12_va8hj")
+metadata/_custom_type_script = "uid://b57cacpoi08ug"
+
+[node name="StateMachineDebugger" type="Tree" parent="." node_paths=PackedStringArray("state_machine_root")]
+visible = false
+offset_right = 154.0
+offset_bottom = 386.0
+pivot_offset = Vector2(-122.5, 13.3333)
+size_flags_horizontal = 3
+theme_override_constants/draw_guides = 0
+theme_override_constants/relationship_line_width = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_va8hj")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_l6jv5")
+theme_override_styles/selected = SubResource("StyleBoxFlat_ye66s")
+theme_override_styles/selected_focus = SubResource("StyleBoxFlat_ye66s")
+select_mode = 1
+script = ExtResource("16_t0rd5")
+state_machine_root = NodePath("../StateMachine")
+allow_state_switching = true
+signal_show = true
 
 [connection signal="timeout" from="WaitTimer" to="." method="_on_wait_timer_timeout"]
