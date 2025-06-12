@@ -27,7 +27,7 @@ signal rule_broken(swimmer, amount)
 # == BASIC PROPERTIES ==
 var state = SwimmerState.IDLE: set = set_state, get = get_state
 var move_target: Vector2
-var target_activity: Node
+var target_activity: ActivityManager
 var curr_action = null
 var is_running := false
 var is_swimming := false
@@ -89,8 +89,6 @@ var path_follow: PathFollow2D = null
 var path_direction: int = 1
 var path_progress: float = 0.0
 var is_on_lane: bool = false
-var _queued_path_follow: PathFollow2D = null
-const path_buffer := 0.00
 
 # == MOVEMENT/SWIMMING ==
 var swim_speed: float = 180
@@ -141,10 +139,8 @@ func _process(delta: float) -> void:
 
 func set_activity(activity: String) -> void:
 	match activity:
-		Util.ACT_POOL_LAPS:
-			state_machine.change_state_name("Laps")
-		Util.ACT_WANDER:
-			state_machine.change_state_name("Wandering")
+		Util.ACT_POOL_LAPS, Util.ACT_WANDER:
+			state_machine.change_state_name(activity)
 	state_machine.change_state_name("Act")
 
 # == SCHEDULE / NEXT ACTIVITY / DECISION LOGIC ==
@@ -200,13 +196,14 @@ func start_next_action():
 			set_state(SwimmerState.WANDERING)
 
 func get_in_line(line_pos: Vector2):
-	set_state(SwimmerState.IN_LINE)
 	move_target = line_pos
+	set_state(SwimmerState.IN_LINE)
 
 func try_leave_line_and_use_activity(activity_manager):
 	if schedule.size() > 0 and schedule[0] == curr_action:
 		schedule.pop_front()
 	target_activity = activity_manager
+	#if target_activity.assign_swimmer_to_slot(self) >= 0:
 	begin_approach_to_activity(activity_manager)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
@@ -253,75 +250,14 @@ func update_state_label():
 		state_label.text = txt
 
 # == START AND END ACTIVITY ==
-func _do_perform_activity():
+func perform_activity():
 	set_state(SwimmerState.ACT)
-	activity_duration = Util.ACTIVITY_DURATION.get(curr_action, 1)
-	activity_start_time = Time.get_ticks_msec() / 1000.0
-	wait_timer.start(activity_duration)
-	update_state_label()
 
-	var node = target_activity.get_activity_node(self)
-	if node is Path2D:
-		var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
-		if path_follow:
-			target_activity.swimmer_attach_to_path(self, path_follow)
-	if node is Node2D:
-		for c in node.get_children():
-			if c is GPUParticles2D:
-				c.emitting = true
-				self._current_activity_particles = c
-				break
-	if curr_action == Util.ACT_SHOWER:
-		SFX.play_activity_sfx(self, "shower", SFX.sfx_samples["shower"], activity_duration)
-	if curr_action == Util.ACT_POOL_DIVE:
-		try_add_misbehave(MoodComponent.Misbehave.DIVE)
-	play_activity_manager_anim(target_activity, false)
-
-func _end_perform_activity():
-	if _is_state([SwimmerState.CARRY, SwimmerState.SIT]):
-		return
-	if _current_activity_particles:
-		_current_activity_particles.emitting = false
-		_current_activity_particles = null
-	#if is_on_lane: end_lap_movement()
-	if curr_action == Util.ACT_POOL_DROWN:
-		start_drown()
-		return
-	if curr_action == Util.ACT_SHOWER:
-		is_wet = true
-		start_wet_timer()
-		SFX.stop_activity_sfx(self, "shower")
-	if curr_action == Util.ACT_SUNBATHE and _is_state(SwimmerState.SLEEP):
-		if randf() < 0.8:
-			return
-	if curr_action == Util.ACT_POOL_DIVE:
-		if mood.has_misbehave(MoodComponent.Misbehave.DIVE):
-			mood.change_safety(-0.2)
-			Log.pr("dive")
-	if curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT, Util.ACT_POOL_DIVE] and target_activity:
-		var target_pos = target_activity.get_tween_target_for_swimmer(self)
-		if global_position.distance_to(target_pos) > 100:
-			Log.pr("Tween could abort: swimmer too far from assigned slot (%s → %s)" % [global_position, target_pos])
-		var tween := create_tween()
-		tween.tween_property(self, "global_position", target_pos, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		await tween.finished
-		navigation_agent.target_position = navigation_agent.target_position
-	play_activity_manager_anim(target_activity, true)
-	finish_activity()
-
-func finish_activity():
-	if curr_action == Util.ACT_EXIT:
-		leave_pool()
-		return
-	if not _is_state([SwimmerState.CARRY, SwimmerState.SIT]):
-		set_state(SwimmerState.IDLE)
-	else:
-		Log.pr("tried to set state here")
-	if target_activity and target_activity.has_method("notify_done"):
-		target_activity.notify_done(self)
-		target_activity = null
-	curr_action = null
+# Called by Act state when activity fully ends
+func on_activity_finished():
+	set_state(SwimmerState.IDLE) # Or whatever fallback
 	start_next_action()
+
 
 # == POOL ENTRY & EXIT ==
 func leave_pool():
@@ -369,7 +305,7 @@ func whistled_at():
 	if curr_action == Util.ACT_POOL_DIVE:
 		curr_action = Util.ACT_POOL_ENTER
 	if curr_action == Util.ACT_SUNBATHE and _is_state(SwimmerState.SLEEP):
-		finish_activity()
+		on_activity_finished()
 	mood.change_safety(0.8)
 	set_run(false)
 	whistle_timer.start()
@@ -392,7 +328,7 @@ func start_drown():
 	
 	move_target = global_position
 	navigation_agent.set_target_position(move_target)  # Stay in place
-	_do_perform_activity()
+	perform_activity()
 	if sprite_frame < 2:
 		anim.play("drown_m")
 	else:
@@ -401,7 +337,7 @@ func start_drown():
 func life_saver_thrown_at(lifesaver: Node2D):
 	if _is_state(SwimmerState.ACT) and curr_action == Util.ACT_POOL_DROWN:
 		mood.clear_misbehaves_by_filter(MoodComponent.LIFE_SAVER_REMOVABLES)
-		finish_activity()
+		on_activity_finished()
 		set_swimmer_mode(SwimmerState.CARRY, true)
 		carry_target = lifesaver
 		carry_offset = Vector2(-20, -20)
@@ -420,7 +356,7 @@ func put_down():
 func enter_first_aid():
 	curr_action = Util.ACT_FIRSTAID
 	set_swimmer_mode(SwimmerState.CARRY, false)
-	_do_perform_activity()
+	perform_activity()
 
 ## CARRY/SIT state changes
 func set_swimmer_mode(mode: int, enabled: bool):
@@ -448,11 +384,10 @@ func set_swimmer_mode(mode: int, enabled: bool):
 		set_state(SwimmerState.IDLE) # Reset to normal/idle
 		navigation_agent.process_mode = Node.PROCESS_MODE_INHERIT
 		collision_shape.disabled = false
-		anim.play("idle")
+		anim.play("Idle")
 
 		rotation_degrees = 0
 		being_carried = false
-
 
 func try_add_misbehave(misbehave_type) -> bool:
 	if whistle_timer.time_left > 0:
@@ -545,7 +480,7 @@ func play_activity_manager_anim(am: ActivityManager, use_finish: bool) -> void:
 		return
 	var anim_index: int = am.finish_activity if use_finish else am.activity
 	if anim_index != Util.Anim.NA:
-		var anim_name: String = Util.ANIM_NAME_MAP.get(anim_index, "idle")
+		var anim_name: String = Util.ANIM_NAME_MAP.get(anim_index, "Idle")
 		anim.play(anim_name)
 	elif use_finish and am.activity:
 		anim.play(Util.ANIM_NAME_MAP.get(Util.Anim.NA))
@@ -559,4 +494,4 @@ func play_splash_sfx():
 # == REGION: Timers (end)==
 func _on_wait_timer_timeout() -> void:
 	wait_timer.stop()
-	_end_perform_activity()
+	on_activity_finished()

@@ -54,7 +54,7 @@ func check_wander():
 			wander_index += 1
 			if wander_index >= wander_points.size():
 				clear_wander()
-				swimmer._end_perform_activity()
+				swimmer.on_activity_finished()
 				return false
 	else:
 		if wander_index < wander_points.size():

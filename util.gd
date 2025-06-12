@@ -10,7 +10,7 @@ const ACT_SUNBATHE := "Lounger"
 const ACT_WANDER := "Wandering"
 const ACT_EXIT := "Exit"
 
-const ACT_POOL_LAPS := "Laps"
+const ACT_POOL_LAPS := "PoolLaps"
 const ACT_POOL_SWIM := "PoolSwim"
 const ACT_POOL_PLAY := "PoolPlay"
 
@@ -49,7 +49,7 @@ const ACTIVITY_DURATION := {
 
 enum Anim {NA, JUMP, LAPS, SHOWER, ENTER_POOL, DROWN}
 const ANIM_NAME_MAP = {
-	Anim.NA: "idle",
+	Anim.NA: "Idle",
 	Anim.JUMP: "jump",
 	Anim.LAPS: "swim",
 	Anim.SHOWER: "shower",

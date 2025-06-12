@@ -76,26 +76,26 @@ func has_available_line_position() -> bool:
 	return line_nodes.size() > 0 and line_queue.size() < line_nodes.size()
 
 
-func try_queue_swimmer(swimmer):
-	# Random free activity slot
+
+func try_queue_swimmer(swimmer: Swimmer) -> bool:
+	# Find random free activity slot
 	var free_indices = []
 	for i in activity_positions.size():
 		if current_swimmers[i] == null:
 			free_indices.append(i)
-	# If there's a free spot: assign it
+	# If there's a free spot: assign it first
 	if not free_indices.is_empty():
 		var choice = free_indices[randi() % free_indices.size()]
 		current_swimmers[choice] = swimmer
 		swimmer.target_activity = self
+		# Only now call begin_approach after assignment is complete
 		swimmer.begin_approach_to_activity(self)
 		return true
-
 	# Otherwise if line is available, use it
 	if has_available_line_position():
 		line_queue.append(swimmer)
 		swimmer.get_in_line(line_nodes[line_queue.size() - 1].global_position)
 		return true
-
 	# Otherwise: send wandering
 	send_swimmer_to_wander(swimmer)
 	swimmer.set_activity(Util.ACT_WANDER)
@@ -121,15 +121,12 @@ func get_tween_target_for_swimmer(swimmer: Swimmer) -> Vector2:
 		return node.global_position
 	return node.global_position
 
-func swimmer_attach_to_path(swimmer, path_follow: PathFollow2D) -> void:
+func swimmer_attach_to_path(swimmer:Swimmer, path_follow: PathFollow2D) -> void:
 	swimmer.path_follow = path_follow           # Keep a reference for back-and-forth logic
 	swimmer.path_direction = 1                  # 1:right/forward, -1:left/back
-	# Put swimmer at path start
 	path_follow.progress_ratio = 0.0
-	# Optionally parent the swimmer under path_follow, or update position manually
 	swimmer.global_position = path_follow.global_position
-	#swimmer.start_lap_movement() # Let join logic trigger movement state
-	swimmer.set_activity(Util.ACT_POOL_LAPS)
+	#swimmer.set_activity(Util.ACT_POOL_LAPS)
 
 func send_swimmer_to_wander(swimmer):
 	if wander_area:
@@ -137,7 +134,7 @@ func send_swimmer_to_wander(swimmer):
 		swimmer._setup_wander_and_go_with_area(wander_area, count)
 	else:
 		Log.pr("Missing Wander Area", name)
-		pass #swimmer._setup_wander_and_go(swimmer.curr_action)
+		pass
 
 func assign_swimmer_to_slot(swimmer:Swimmer) -> int:
 	for i in current_swimmers.size():
@@ -192,10 +189,13 @@ func _process_next_in_line() -> void:
 func _cascade_line_queue():
 	for i in range(line_queue.size()):
 		if i < line_nodes.size():
-			line_queue[i].get_in_line(line_nodes[i].global_position)
+			var swimmer = line_queue[i]
+			var node = line_nodes[i]
+			if is_instance_valid(swimmer) and swimmer.has_method("get_in_line") and is_instance_valid(node):
+				swimmer.get_in_line(node.global_position)
 
 func clear_swimmer(swimmer):
 	var idx = current_swimmers.find(swimmer)
 	if idx != -1: current_swimmers[idx] = null
-	idx = line_queue.find(swimmer)
-	if idx != -1: line_queue[idx] = null
+	#line_queue.erase(swimmer)
+	line_queue.clear()

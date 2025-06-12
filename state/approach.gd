@@ -21,7 +21,7 @@ func _update(delta):
 			Log.pr("Too far from activity; resetting path: %s → %s" % [swimmer.global_position, swimmer.move_target])
 			swimmer.navigation_agent.set_target_position(swimmer.move_target)
 		else:
-			swimmer._do_perform_activity()
+			swimmer.perform_activity()
 
 func standard_move() -> void:
 	if swimmer.navigation_agent.get_target_position() != swimmer.move_target:
@@ -32,7 +32,6 @@ func standard_move() -> void:
 	if swimmer.global_position != swimmer.move_target and get_parent().is_far_from_navigation_path(80.0):
 		swimmer.navigation_agent.target_position = swimmer.navigation_agent.target_position
 		Log.pr("nav", swimmer.name, swimmer, swimmer.navigation_agent.target_position, swimmer.move_target, swimmer.global_position)
-
 
 func on_swimmer_velocity_computed(suggested_velocity: Vector2) -> void:
 	if get_parent().has_method("on_swimmer_velocity_computed"):

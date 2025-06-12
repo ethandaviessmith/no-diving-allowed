@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=39 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://cut4o8bdcwi2g" path="res://assets/sprites.png" id="2_q2u11"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://cee2vse26sixd" path="res://state/laps.gd" id="15_t0rd5"]
 [ext_resource type="Script" uid="uid://bp7yx7ctkn0e1" path="res://state/wander_pause.gd" id="15_tei0a"]
 [ext_resource type="Script" uid="uid://cymy63qc7uyxb" path="res://addons/simple-state/classes/debugger.gd" id="16_t0rd5"]
+[ext_resource type="Script" uid="uid://cwcsr7tg0vdhu" path="res://state/act_default.gd" id="16_vavx4"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
 radius = 5.0
@@ -338,36 +339,6 @@ tracks/3/keys = {
 }]
 }
 
-[sub_resource type="Animation" id="Animation_q2u11"]
-resource_name = "idle"
-length = 0.1
-tracks/0/type = "method"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"set_sprite"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, -5)]
-}
-
 [sub_resource type="Animation" id="Animation_r5jdi"]
 resource_name = "jump"
 loop_mode = 1
@@ -597,13 +568,43 @@ tracks/0/keys = {
 "values": [8, 8, 11]
 }
 
+[sub_resource type="Animation" id="Animation_q2u11"]
+resource_name = "idle"
+length = 0.1
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"set_sprite"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -5)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_r5jdi"]
 _data = {
+&"Idle": SubResource("Animation_q2u11"),
 &"RESET": SubResource("Animation_mest2"),
 &"drown_f": SubResource("Animation_tt3ws"),
 &"drown_m": SubResource("Animation_b8poi"),
 &"enter_pool": SubResource("Animation_3kjvg"),
-&"idle": SubResource("Animation_q2u11"),
 &"jump": SubResource("Animation_r5jdi"),
 &"shower": SubResource("Animation_q6fjm"),
 &"sit_f": SubResource("Animation_4r3di"),
@@ -794,13 +795,17 @@ metadata/_custom_type_script = "uid://bsoqv317f2ttg"
 script = ExtResource("15_tei0a")
 metadata/_custom_type_script = "uid://bp7yx7ctkn0e1"
 
-[node name="Laps" type="Node" parent="StateMachine"]
-script = ExtResource("15_t0rd5")
-metadata/_custom_type_script = "uid://cee2vse26sixd"
-
 [node name="Act" type="Node" parent="StateMachine"]
 script = ExtResource("12_va8hj")
 metadata/_custom_type_script = "uid://b57cacpoi08ug"
+
+[node name="ActDefault" type="Node" parent="StateMachine/Act"]
+script = ExtResource("16_vavx4")
+metadata/_custom_type_script = "uid://cwcsr7tg0vdhu"
+
+[node name="PoolLaps" type="Node" parent="StateMachine/Act"]
+script = ExtResource("15_t0rd5")
+metadata/_custom_type_script = "uid://cee2vse26sixd"
 
 [node name="StateMachineDebugger" type="Tree" parent="." node_paths=PackedStringArray("state_machine_root")]
 visible = false

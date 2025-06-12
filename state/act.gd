@@ -2,20 +2,103 @@
 class_name Act
 extends State
 
-func _enter() -> void:
-	if debug_mode:
-		print("Entered Act state.")
-	# Decide activity using activity manager or schedule
-	if target and target.has_method("start_activity"):
-		target.start_activity()
+@onready var swimmer := owner as Swimmer
 
-func _update(delta: float) -> void:
-	# If current activity is timed, decrement timer or check for completion
-	# If done, choose next state or emit signal
-	pass
+var activity_timer: float = 0.0
+var duration: float = 1.0
+var wait_timer: Timer
+var _current_activity_particles: GPUParticles2D = null
 
-func _before_exit() -> void:
-	if target and target.has_method("end_activity"):
-		target.end_activity()
-	if debug_mode:
-		print("Exiting Act state.")
+func _enter():
+	
+	duration = Util.ACTIVITY_DURATION.get(swimmer.curr_action, 1)
+	swimmer.activity_duration = duration
+	swimmer.activity_start_time = Time.get_ticks_msec() / 1000.0
+
+	if not wait_timer:
+		wait_timer = Timer.new()
+		wait_timer.one_shot = true
+		wait_timer.timeout.connect(_on_activity_done)
+		swimmer.add_child(wait_timer)
+	wait_timer.start(duration)
+
+	swimmer.update_state_label()
+	
+	for child in get_children(): # Match children ACT_ states if child exists
+		Log.pr("child", child.name, swimmer.curr_action)
+		if child is State and child.name == str(swimmer.curr_action):
+			change_state_name(child.name)
+			return
+	swimmer.set_state(Swimmer.SwimmerState.ACT)
+
+	var node = swimmer.target_activity.get_activity_node(swimmer)
+	#if node is Path2D:
+		#var path_follow = node.get_child(0) if node.get_child_count() > 0 else null
+		#if path_follow:
+			#swimmer.target_activity.swimmer_attach_to_path(swimmer, path_follow)
+	if node is Node2D:
+		for c in node.get_children():
+			if c is GPUParticles2D:
+				c.emitting = true
+				_current_activity_particles = c
+				break
+
+	match swimmer.curr_action:
+		Util.ACT_SHOWER:
+			SFX.play_activity_sfx(swimmer, "shower", SFX.sfx_samples["shower"], duration)
+		Util.ACT_POOL_DIVE:
+			swimmer.try_add_misbehave(MoodComponent.Misbehave.DIVE)
+	swimmer.play_activity_manager_anim(swimmer.target_activity, false)
+
+func _on_activity_done():
+	_end_activity()
+
+func _end_activity():
+	if swimmer._is_state([Swimmer.SwimmerState.CARRY, Swimmer.SwimmerState.SIT]):
+		return
+
+	if _current_activity_particles:
+		_current_activity_particles.emitting = false
+		_current_activity_particles = null
+
+	match swimmer.curr_action:
+		Util.ACT_POOL_DROWN:
+			swimmer.start_drown()
+			return
+		Util.ACT_SHOWER:
+			swimmer.is_wet = true
+			swimmer.start_wet_timer()
+			SFX.stop_activity_sfx(swimmer, "shower")
+		Util.ACT_SUNBATHE:
+			if swimmer._is_state(Swimmer.SwimmerState.SLEEP) and randf() < 0.8:
+				return
+		Util.ACT_POOL_DIVE:
+			if swimmer.mood.has_misbehave(MoodComponent.Misbehave.DIVE):
+				swimmer.mood.change_safety(-0.2)
+				Log.pr("dive")
+
+	if swimmer.curr_action in [Util.ACT_POOL_ENTER, Util.ACT_POOL_EXIT, Util.ACT_POOL_DIVE] and swimmer.target_activity:
+		var target_pos = swimmer.target_activity.get_tween_target_for_swimmer(swimmer)
+		if swimmer.global_position.distance_to(target_pos) > 100:
+			Log.pr("Tween could abort: swimmer too far from assigned slot (%s → %s)" % [swimmer.global_position, target_pos])
+		var tween := swimmer.create_tween()
+		tween.tween_property(swimmer, "global_position", target_pos, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		await tween.finished
+		swimmer.navigation_agent.target_position = swimmer.navigation_agent.target_position
+
+	swimmer.play_activity_manager_anim(swimmer.target_activity, true)
+	_finish_activity()
+
+func _finish_activity():
+	if swimmer.curr_action == Util.ACT_EXIT:
+		swimmer.leave_pool()
+		return
+	if not swimmer._is_state([Swimmer.SwimmerState.CARRY, Swimmer.SwimmerState.SIT]):
+		swimmer.set_state(Swimmer.SwimmerState.IDLE)
+	else:
+		Log.pr("tried to set state here")
+	if swimmer.target_activity and swimmer.target_activity.has_method("notify_done"):
+		swimmer.target_activity.notify_done(swimmer)
+		swimmer.target_activity = null
+	swimmer.curr_action = null
+	swimmer.start_next_action()
