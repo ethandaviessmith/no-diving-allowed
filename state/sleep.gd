@@ -1,19 +1,16 @@
 @icon("res://addons/simple-state/icons/state.png")
-class_name Sleep
-extends State
+class_name Sleep extends State
+
+@onready var swimmer: Swimmer = owner as Swimmer
 
 func _enter() -> void:
-	if debug_mode:
-		print("Entered Sleep state.")
-	if animation_player:
-		animation_player.play("sleep")
+	swimmer.set_anim("sleep") # change as needed
+	swimmer.velocity = Vector2.ZERO
 
 func _update(delta: float) -> void:
-	# If sleep is timed, wait or monitor for wake-up
-	pass
+	if swimmer.energy >= 1.0:
+		swimmer.set_state(Idle)
 
-func _before_exit() -> void:
-	if animation_player:
-		animation_player.stop()
-	if debug_mode:
-		print("Exiting Sleep state.")
+# Optionally, add an _exit for cleanup
+func _exit() -> void:
+	swimmer.set_anim("idle")

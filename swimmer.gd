@@ -1,9 +1,5 @@
 class_name Swimmer extends CharacterBody2D
 
-# == ENUMS ==
-enum SwimmerState { IDLE, APPROACH, IN_LINE, WANDERING, ACT, SLEEP, CARRY, SIT }
-
-
 # == EXPORTED VARS & NODES ==
 @export var pool: Pool
 @export var schedule: Array = []
@@ -25,7 +21,7 @@ signal left_pool
 signal rule_broken(swimmer, amount)
 
 # == BASIC PROPERTIES ==
-var state = SwimmerState.IDLE: set = set_state, get = get_state
+var state = null: set = set_state, get = get_state
 var move_target: Vector2
 var target_activity: ActivityManager
 var curr_action = null
@@ -39,50 +35,31 @@ var activity_start_time: float = 0
 var activity_duration: float = 0
 var sprite_frame
 
-func set_state(new_state: int) -> void:
-	if state == new_state:
-		return
-	state = new_state
-	# Transition the state machine:
-	#var state_machine:State = $StateMachine  # or whatever the node path is
-	if STATE_ENUM_TO_NODE.has(new_state):
-		await state_machine.change_state_name(STATE_ENUM_TO_NODE[new_state])
-	if STATE_ENUM_TO_NODE[new_state] == "Active":
-		state_machine.get_active_substate().set_behavior_state(new_state)
-	_on_state_changed(new_state)
+func set_state(new_state) -> void:
+	var key : String = Util.get_state_key(new_state)
+	if curr_action == null:
+		Log.err("why empty?", key)
 
-func get_state() -> int:
+	if state_machine.state_class_to_mapping.has(key):
+		var mapping = state_machine.state_class_to_mapping[key]
+		var state_node_name = mapping[0]
+		var behavior_state = mapping[1]
+		await state_machine.change_state_name(state_node_name)
+		if state_node_name == "Active" and behavior_state != null:
+			state_machine.get_active_substate().set_behavior_state(behavior_state)
+	_on_state_changed(new_state)
+	
+func get_state():
 	return state
 
-func _on_state_changed(new_state: int) -> void:
-	Log.pr("state changed", STATE_ENUM_TO_NODE[new_state])
+func _on_state_changed(new_state) -> void:
+	Log.pr("state changed", Util.get_state_key(new_state))
 	pass
-
-# Patch to transition to state machine
-const STATE_ENUM_TO_NODE = {
-	SwimmerState.IDLE: "Idle",
-	SwimmerState.APPROACH: "Active",
-	SwimmerState.IN_LINE: "Active",
-	SwimmerState.WANDERING: "Active",
-	SwimmerState.ACT: "Act",
-	SwimmerState.SLEEP: "Sleep",
-	SwimmerState.CARRY: "Carry",
-	SwimmerState.SIT: "Sit",
-}
-
 
 # Tracking rescue targets
 var carry_target: Node = null   # Could be the life-saver or later the lifeguard
 var carry_offset: Vector2 = Vector2.ZERO  # Optional offset for position (carried above lifeguard, etc)
 var being_carried := false
-
-# == SCHEDULE/WANDER ==
-#var wander_points: Array[Vector2] = []
-#var wander_index: int = 0
-var wander_speed_range := Vector2(40, 80)
-var wander_pause_range := Vector2(0.5, 2.5)
-#var pause_timer := 0.0
-#var wandering_paused := false
 
 # == POOL LANE/PATH ==
 var path_follow: PathFollow2D = null
@@ -107,6 +84,7 @@ func _ready():
 	update_state_label()
 	sprite_frame = randi() % 4
 	set_sprite()
+	#set_state(Idle)
 
 func set_sprite():
 	mood.set_sprite(sprite, sprite_frame)
@@ -120,13 +98,13 @@ func set_pool(_pool, s):
 
 func _on_agent_velocity_computed(suggested_velocity: Vector2):
 	# By default, send to active movement state
-	var cur_state = $StateMachine.get_deep_active_state()
+	var cur_state = state_machine.get_deep_active_state()
 	if cur_state.has_method("on_swimmer_velocity_computed"):
 		cur_state.on_swimmer_velocity_computed(suggested_velocity)
 
 # == PHYSICS & FRAME UPDATE ==
 func _physics_process(delta):
-	if _is_state(SwimmerState.CARRY) and carry_target:
+	if _is_state(Carry) and carry_target:
 		global_position = carry_target.global_position + carry_offset
 		return  # Don't process normal movement in carry state
 	#_step_move()
@@ -138,8 +116,9 @@ func _process(delta: float) -> void:
 
 
 func set_activity(activity: String) -> void:
+	curr_action = activity
 	match activity:
-		Util.ACT_POOL_LAPS, Util.ACT_WANDER:
+		Util.ACT_POOL_LAPS, Util.ACT_WANDER, Util.ACT_POOL_DROWN:
 			state_machine.change_state_name(activity)
 	state_machine.change_state_name("Act")
 
@@ -152,22 +131,20 @@ func get_walk_speed() -> float:
 	return (base_speed * 2 if is_running else base_speed) * (puddle_slow if in_puddle else 1)
 
 func get_wander_speed() -> float:
-	var speed = randf_range(wander_speed_range.x, wander_speed_range.y)
+	var speed = randf_range(Util.wander_speed_range.x, Util.wander_speed_range.y)
 	return (speed * 2 if is_running else speed) * (puddle_slow if in_puddle else 1)
 
 func check_mood_actions(): # changing action based on mood (e.g. when clean stop showering)
-	if _is_state(SwimmerState.ACT):
+	if _is_state(ActDefault):
 		if curr_action == Util.ACT_SHOWER and mood.clean == mood.max_clean:
 			_on_wait_timer_timeout()
 
 func start_next_action():
 	if schedule.is_empty() or not pool:
-		set_state(SwimmerState.IDLE)
+		set_state(Idle)
 		return
-
-	if being_carried:
-		Log.pr("carry")
-
+	#if being_carried:
+		#Log.pr("carry")
 	Log.pr("start_next_action", schedule[0])
 	curr_action = schedule[0]
 	var activity_manager: ActivityManager = pool.getActivityManager(curr_action, self)
@@ -180,10 +157,10 @@ func start_next_action():
 		else:
 			if activity_manager.has_available_line_position():
 				target_activity = activity_manager
-				set_state(SwimmerState.IN_LINE)
+				set_state(InLine)
 				activity_manager.try_queue_swimmer(self)
 			else:
-				set_state(SwimmerState.WANDERING)
+				set_state(Wandering)
 	else:
 		if curr_action == Util.ACT_POOL_DROWN:
 			Log.pr("drowning and going to wander")
@@ -193,22 +170,21 @@ func start_next_action():
 			#wandering_paused = true
 			var count = randi_range(1, 2) if mood.energy > 0.5 else randi_range(2, 5)
 			_setup_wander_and_go_with_area(area, count)
-			set_state(SwimmerState.WANDERING)
+			set_state(Wandering)
 
 func get_in_line(line_pos: Vector2):
 	move_target = line_pos
-	set_state(SwimmerState.IN_LINE)
+	set_state(InLine)
 
 func try_leave_line_and_use_activity(activity_manager):
 	if schedule.size() > 0 and schedule[0] == curr_action:
 		schedule.pop_front()
 	target_activity = activity_manager
-	#if target_activity.assign_swimmer_to_slot(self) >= 0:
 	begin_approach_to_activity(activity_manager)
 
 func begin_approach_to_activity(activity_manager: ActivityManager):
 	move_target = activity_manager.get_interaction_pos(self) ## when compiling this line fails first, likely something else is wrong or needs to save / recompile
-	set_state(SwimmerState.APPROACH)
+	set_state(Approach)
 	
 func _setup_wander_and_go_with_area(area: Area2D, count: int = 3):
 	var wandering = state_machine.get_node("Active/Wandering")
@@ -219,7 +195,7 @@ func _setup_wander_and_go_with_area(area: Area2D, count: int = 3):
 
 # == ACTIVITY/STATE TIMERS AND LABELS ==
 func get_state_duration_left() -> float:
-	if _is_state(SwimmerState.ACT):
+	if _is_state(Act):
 		return max(0.0, (activity_start_time + activity_duration) - (Time.get_ticks_msec() / 1000.0))
 	return 0.0
 
@@ -229,14 +205,12 @@ func toggle_label(visible: bool):
 
 func update_state_label():
 	var dur = ""
-	if _is_state(SwimmerState.ACT):
+	if _is_state(Act):
 		dur = "%.1f" % get_state_duration_left()
 	var state_machine:State = $StateMachine if has_node("StateMachine") else null
 	var state_name = ""
 	if state_machine and state_machine.get_deep_active_state():
 		state_name = "(" + state_machine.get_deep_active_state().name + ")"
-	elif typeof(get_state()) == TYPE_INT and get_state() in SwimmerState.values():
-		state_name = SwimmerState.keys()[get_state()]
 	else:
 		state_name = str(get_state())
 	var txt = "%s_%s:%s" % [
@@ -245,17 +219,17 @@ func update_state_label():
 		dur if dur != "" else "",
 	]
 	if carry_target:
-		state_label.text = carry_target.name
+		state_label.text = carry_target.name + txt
 	else:
 		state_label.text = txt
 
 # == START AND END ACTIVITY ==
 func perform_activity():
-	set_state(SwimmerState.ACT)
+	set_state(Act)
 
 # Called by Act state when activity fully ends
 func on_activity_finished():
-	set_state(SwimmerState.IDLE) # Or whatever fallback
+	set_state(Idle)
 	start_next_action()
 
 
@@ -304,7 +278,7 @@ func whistled_at():
 	mood.clear_misbehaves_by_filter(MoodComponent.WHISTLE_REMOVABLES)
 	if curr_action == Util.ACT_POOL_DIVE:
 		curr_action = Util.ACT_POOL_ENTER
-	if curr_action == Util.ACT_SUNBATHE and _is_state(SwimmerState.SLEEP):
+	if curr_action == Util.ACT_SUNBATHE and _is_state(Sleep):
 		on_activity_finished()
 	mood.change_safety(0.8)
 	set_run(false)
@@ -321,24 +295,18 @@ func call_update_mood():
 func start_drown():
 	if not try_add_misbehave(MoodComponent.Misbehave.DROWN): return
 	mood.change_happy(-0.3)
-	schedule.clear()
-	schedule.append(Util.ACT_POOL_DROWN)
-	curr_action = Util.ACT_POOL_DROWN
 	target_activity = pool.getActivityManager(Util.ACT_POOL_DROWN, self)
-	
 	move_target = global_position
 	navigation_agent.set_target_position(move_target)  # Stay in place
+	curr_action = Util.ACT_POOL_DROWN
+	schedule.clear()
 	perform_activity()
-	if sprite_frame < 2:
-		anim.play("drown_m")
-	else:
-		anim.play("drown_f")
 		
 func life_saver_thrown_at(lifesaver: Node2D):
-	if _is_state(SwimmerState.ACT) and curr_action == Util.ACT_POOL_DROWN:
+	if _is_state(Act) and curr_action == Util.ACT_POOL_DROWN:
 		mood.clear_misbehaves_by_filter(MoodComponent.LIFE_SAVER_REMOVABLES)
 		on_activity_finished()
-		set_swimmer_mode(SwimmerState.CARRY, true)
+		set_state(Carry)
 		carry_target = lifesaver
 		carry_offset = Vector2(-20, -20)
 		lifesaver.linked_swimmer = self
@@ -346,48 +314,17 @@ func life_saver_thrown_at(lifesaver: Node2D):
 func on_lifeguard_picks_up(life_guard):
 	if life_guard.has_method("release_item"):
 		life_guard.release_item()
-	set_swimmer_mode(SwimmerState.CARRY, true)
+	set_state(Carry)
 	carry_target = life_guard
 	carry_offset = Vector2(-20, -30) # adjust as needed, above lifeguard's hands
 
 func put_down():
-	set_swimmer_mode(SwimmerState.CARRY, false)
+	set_state(Idle)
 
 func enter_first_aid():
 	curr_action = Util.ACT_FIRSTAID
-	set_swimmer_mode(SwimmerState.CARRY, false)
+	set_state(Idle)
 	perform_activity()
-
-## CARRY/SIT state changes
-func set_swimmer_mode(mode: int, enabled: bool):
-	if curr_action == Util.ACT_POOL_DROWN:
-		curr_action = null
-	if enabled:
-		set_state(mode)
-		navigation_agent.process_mode = Node.PROCESS_MODE_DISABLED
-		if sprite_frame < 2:
-			anim.play("sit_m")
-		else:
-			anim.play("sit_f")
-
-		if mode == SwimmerState.CARRY:
-			collision_shape.disabled = true
-			rotation_degrees = 50
-			being_carried = true
-			if curr_action == Util.ACT_POOL_DROWN:
-				curr_action = null
-		else:
-			rotation_degrees = 0
-			collision_shape.disabled = false
-			being_carried = false
-	else:
-		set_state(SwimmerState.IDLE) # Reset to normal/idle
-		navigation_agent.process_mode = Node.PROCESS_MODE_INHERIT
-		collision_shape.disabled = false
-		anim.play("Idle")
-
-		rotation_degrees = 0
-		being_carried = false
 
 func try_add_misbehave(misbehave_type) -> bool:
 	if whistle_timer.time_left > 0:
@@ -434,11 +371,11 @@ func find_swimmers_nearby() -> Array:
 func fall_asleep():
 	if not try_add_misbehave(MoodComponent.Misbehave.SLEEP): return
 	mood.energy = min(mood.max_energy, mood.energy + 1)
-	set_state(SwimmerState.SLEEP)
+	set_state(Sleep)
 	
 func start_slip():
 	mood.add_misbehave(MoodComponent.Misbehave.SLIP)
-	set_swimmer_mode(SwimmerState.SIT, true)
+	set_state(Sit)
 	Log.pr("have animation to show slip")
 
 # == WET/DRIP/ENVIRONMENT TIMER/PUZZLE LOGIC ==

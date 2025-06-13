@@ -29,7 +29,7 @@ func _update_sprite_frame() -> void:
 			Type.LIFE_SAVER: sprite.frame = 4
 
 func _on_grab_area_entered(body):
-	if body is Swimmer and body.curr_action == Util.ACT_POOL_DROWN and !body.being_carried:
+	if body is Swimmer and body.state_machine and body.state_machine.get_deep_active_state() is Drown and not body.being_carried:
 		body.life_saver_thrown_at(self)
 		emit_signal("swimmer_grabbed", body)
 

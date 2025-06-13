@@ -29,9 +29,6 @@ var wander_index: int = 0
 var pause_timer: float = 0.0
 var wandering_paused: bool = false
 
-# Access these from swimmer/swimmer.config if needed:
-# swimmer.wander_speed_range / swimmer.wander_pause_range
-
 func _setup_wander_and_go_with_area(area: Area2D, count:int = 3):
 	var attrs = Util.get_area_shape_and_offset(area)
 	var shape = attrs.shape

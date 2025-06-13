@@ -16,7 +16,7 @@ func _update(delta):
 	else:
 		swimmer.velocity = Vector2.ZERO
 		get_parent().wandering_paused = true
-		get_parent().pause_timer = randf_range(swimmer.wander_pause_range.x, swimmer.wander_pause_range.y)
+		get_parent().pause_timer = randf_range(Util.wander_pause_range.x, Util.wander_pause_range.y)
 		if get_parent().check_wander():
 			get_parent().change_state_name("WanderPause") # Switch to pause state
 

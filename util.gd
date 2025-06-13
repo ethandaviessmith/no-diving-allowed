@@ -58,6 +58,40 @@ const ANIM_NAME_MAP = {
 	# sync with your actual animation names
 }
 
+# == SCHEDULE/WANDER ==
+const wander_speed_range := Vector2(40, 80)
+const wander_pause_range := Vector2(0.5, 2.5)
+
+
+const STATE_ENUM : Dictionary = {
+	"idle": "Idle",
+	"active": "Active",
+	"approach": "Approach",
+	"in_line": "InLine",
+	"wandering": "Wandering",
+	"act": "Act",
+	"act_default": "ActDefault",
+	"pool_laps": "PoolLaps",
+	"drown": "Drown",
+	"sit": "Sit",
+	"carry": "Carry",
+	"sleep": "Sleep"
+}
+
+static func get_state_key(state) -> String:
+	if typeof(state) == TYPE_STRING:
+		return state
+	if typeof(state) == TYPE_OBJECT:
+		if state is Node:
+			return state.get_class() # always correct if class_name set
+		if state is GDScript:
+			var fname = state.resource_path.get_file().get_basename().to_lower()
+			if STATE_ENUM.has(fname):
+				return STATE_ENUM[fname]
+			return fname # fallback, but strongly prefer enum match!
+	return str(state)
+
+
 #region SCHEDULE
 static func get_schedule_enter(swimmer):
 	return Util.add_schedule(swimmer, POOL_ENTER.duplicate())

@@ -3,28 +3,42 @@ class_name Active
 extends State
 
 @onready var swimmer := owner as Swimmer
-var current_behavior:int = -1
 
-func set_behavior_state(swimmer_state:int) -> void:
-	if swimmer_state == Swimmer.SwimmerState.APPROACH:
-		change_state_name("Approach")
-	elif swimmer_state == Swimmer.SwimmerState.IN_LINE:
-		change_state_name("InLine")
-	elif swimmer_state == Swimmer.SwimmerState.WANDERING:
-		change_state_name("Wandering")
+var current_behavior: Variant = null
+
+# Accept class reference or name string as argument
+func set_behavior_state(behavior_state) -> void:
+	var target_state_name: String
+	if typeof(behavior_state) == TYPE_STRING:
+		target_state_name = behavior_state
+	elif typeof(behavior_state) == TYPE_OBJECT and behavior_state is Script:
+		target_state_name = behavior_state.get_class()
+	elif behavior_state != null:
+		target_state_name = str(behavior_state)
 	else:
-		change_to_next_substate()
+		target_state_name = ""
+	
+	match target_state_name:
+		"Approach":
+			change_state_name("Approach")
+		"InLine":
+			change_state_name("InLine")
+		"Wandering":
+			change_state_name("Wandering")
+		_:
+			change_to_next_substate()
 
-	current_behavior = swimmer_state
+	current_behavior = behavior_state
 
-func _enter():
-	# Immediately select target substate if current_behavior was set externally
-	if current_behavior != -1:
+
+func _enter() -> void:
+	if current_behavior:
 		set_behavior_state(current_behavior)
 	else:
 		change_to_next_substate()
 	if debug_mode:
 		print("Entered Active state.")
+
 
 # -------- MOVEMENT HELPERS --------
 

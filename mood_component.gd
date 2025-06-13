@@ -103,7 +103,7 @@ func mood_update(curr_action, state, is_swimming, in_puddle) -> void:
 		pass
 
 	match state:
-		Swimmer.SwimmerState.ACT:
+		Act:
 			match curr_action:
 				Util.ACT_SHOWER:
 					change_clean(_personality_val(amt_low, [PersonalityType.CHILD]))
@@ -114,16 +114,16 @@ func mood_update(curr_action, state, is_swimming, in_puddle) -> void:
 					change_happy(-amt_low)
 			if randf() < 0.05 + pf_child_athlete:
 				change_clean(_personality_val(-amt_low, [], [PersonalityType.CHILD, PersonalityType.ATHLETE]))
-		Swimmer.SwimmerState.IN_LINE, Swimmer.SwimmerState.WANDERING:
+		InLine, Wandering:
 			if randf() < 0.2 - pf_child_leisure:
 				change_happy(-amt_low)
-		Swimmer.SwimmerState.ACT, Swimmer.SwimmerState.APPROACH:
+		Act, Approach:
 			if randf() < 0.2 - pf_child_leisure:
 				change_happy(amt_low)
 			if randf() < 0.2:
 				pass
 	if randf() < 0.5:
-		if in_puddle and not Util.is_state(state, Swimmer.SwimmerState.IN_LINE):
+		if in_puddle and not Util.is_state(state, InLine):
 			change_safety(-0.2)
 			SFX.play("puddle")
 	else:
@@ -140,10 +140,10 @@ func try_misbehave(curr_action, state, is_swimming, in_puddle, is_running):
 		#Log.pr("misbehave tick", swimmer.name)
 		var pf_child_athlete = _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2)
 		var pf_child_leisure = _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3)
-		if not is_swimming and Util.is_state(state, Swimmer.SwimmerState.IN_LINE):
+		if not is_swimming and Util.is_state(state, InLine):
 			if randf() > clean + pf_child_athlete and randf() > 0.1 + pf_child_athlete:
 				swimmer.throw_trash()
-		elif not is_swimming and Util.is_state(state, [Swimmer.SwimmerState.IDLE, Swimmer.SwimmerState.APPROACH, Swimmer.SwimmerState.WANDERING]):
+		elif not is_swimming and Util.is_state(state, [Idle, Approach, Wandering]):
 			if randf() > clean + pf_child_athlete and randf() > 0.3 + pf_child_athlete:
 				swimmer.throw_trash()
 			elif randf() > 0.5 + pf_child_leisure:
@@ -156,7 +156,7 @@ func try_misbehave(curr_action, state, is_swimming, in_puddle, is_running):
 			else:
 				swimmer.horseplay()
 			SFX.play("splash")
-		elif curr_action == Util.ACT_SUNBATHE and Util.is_state(state, Swimmer.SwimmerState.ACT):
+		elif curr_action == Util.ACT_SUNBATHE and Util.is_state(state, Act):
 			if randf() > happy + pf_child_leisure and randf() > 0.7 + pf_child_leisure:
 				swimmer.fall_asleep()
 		if in_puddle and is_running:

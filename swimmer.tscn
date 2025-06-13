@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://cvsf3liqe130j"]
+[gd_scene load_steps=43 format=3 uid="uid://cvsf3liqe130j"]
 
 [ext_resource type="Script" uid="uid://c6fm2j7gxqrnj" path="res://swimmer.gd" id="1_2pdhi"]
 [ext_resource type="Texture2D" uid="uid://cut4o8bdcwi2g" path="res://assets/sprites.png" id="2_q2u11"]
@@ -18,6 +18,10 @@
 [ext_resource type="Script" uid="uid://bp7yx7ctkn0e1" path="res://state/wander_pause.gd" id="15_tei0a"]
 [ext_resource type="Script" uid="uid://cymy63qc7uyxb" path="res://addons/simple-state/classes/debugger.gd" id="16_t0rd5"]
 [ext_resource type="Script" uid="uid://cwcsr7tg0vdhu" path="res://state/act_default.gd" id="16_vavx4"]
+[ext_resource type="Script" uid="uid://dg3cdwrcitqpp" path="res://state/drown.gd" id="18_tei0a"]
+[ext_resource type="Script" uid="uid://btvtv5td1emx5" path="res://state/sit.gd" id="18_ye66s"]
+[ext_resource type="Script" uid="uid://dyxpas0kj08q1" path="res://state/carry.gd" id="19_tei0a"]
+[ext_resource type="Script" uid="uid://cwvjua7gqpa26" path="res://state/sleep.gd" id="20_rfocf"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2pdhi"]
 radius = 5.0
@@ -52,6 +56,36 @@ scale_min = 3.0
 scale_max = 5.0
 scale_curve = SubResource("CurveTexture_r5jdi")
 color_ramp = SubResource("GradientTexture1D_w3fy5")
+
+[sub_resource type="Animation" id="Animation_q2u11"]
+resource_name = "idle"
+length = 0.1
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"set_sprite"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -5)]
+}
 
 [sub_resource type="Animation" id="Animation_mest2"]
 length = 0.001
@@ -568,36 +602,6 @@ tracks/0/keys = {
 "values": [8, 8, 11]
 }
 
-[sub_resource type="Animation" id="Animation_q2u11"]
-resource_name = "idle"
-length = 0.1
-tracks/0/type = "method"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"set_sprite"
-}]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, -5)]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_r5jdi"]
 _data = {
 &"Idle": SubResource("Animation_q2u11"),
@@ -806,6 +810,22 @@ metadata/_custom_type_script = "uid://cwcsr7tg0vdhu"
 [node name="PoolLaps" type="Node" parent="StateMachine/Act"]
 script = ExtResource("15_t0rd5")
 metadata/_custom_type_script = "uid://cee2vse26sixd"
+
+[node name="Drown" type="Node" parent="StateMachine/Act"]
+script = ExtResource("18_tei0a")
+metadata/_custom_type_script = "uid://dg3cdwrcitqpp"
+
+[node name="Sit" type="Node" parent="StateMachine"]
+script = ExtResource("18_ye66s")
+metadata/_custom_type_script = "uid://btvtv5td1emx5"
+
+[node name="Carry" type="Node" parent="StateMachine"]
+script = ExtResource("19_tei0a")
+metadata/_custom_type_script = "uid://dyxpas0kj08q1"
+
+[node name="Sleep" type="Node" parent="StateMachine"]
+script = ExtResource("20_rfocf")
+metadata/_custom_type_script = "uid://cwvjua7gqpa26"
 
 [node name="StateMachineDebugger" type="Tree" parent="." node_paths=PackedStringArray("state_machine_root")]
 visible = false

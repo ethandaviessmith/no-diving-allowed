@@ -35,7 +35,7 @@ func get_clean_ratio() -> float:
 
 func is_being_used() -> bool:
 	for swimmer in current_swimmers:
-		if swimmer != null and swimmer._is_state(Swimmer.SwimmerState.ACT):
+		if swimmer != null and swimmer._is_state(Act):
 			return true
 	return false
 	
