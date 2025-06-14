@@ -2,17 +2,21 @@
 class_name Idle
 extends AnimationState
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter() -> void:
-	swimmer.set_sprite()
-	#if animation_player:
-		#animation_player.play("idle")
+	if swimmer:
+		swimmer.set_sprite()
 	if debug_mode:
 		print("Entered Idle state.")
+		swimmer.target_activity = $"../../ActivityManager"
 
 func _update(delta: float) -> void:
-	set_next_schedule()
+	if swimmer:
+		if swimmer.schedule.size() > 0:
+			swimmer.start_next_action()
+		else:
+			set_next_schedule()
 
 func _before_exit() -> void:
 	if animation_player:

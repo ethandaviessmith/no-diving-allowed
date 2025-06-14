@@ -1008,10 +1008,21 @@ func update_tabs():
 	for index: int in scripts_tab_container.get_tab_count():
 		update_tab(index)
 
+#func update_tab(index: int):
+	#scripts_tab_container.set_tab_title(index, scripts_item_list.get_item_text(index))
+	#scripts_tab_container.set_tab_icon(index, scripts_item_list.get_item_icon(index))
+	#scripts_tab_container.set_tab_tooltip(index, scripts_item_list.get_item_tooltip(index))
+
 func update_tab(index: int):
+	var path := get_res_path(index)
+	var icon := scripts_item_list.get_item_icon(index)
 	scripts_tab_container.set_tab_title(index, scripts_item_list.get_item_text(index))
 	scripts_tab_container.set_tab_icon(index, scripts_item_list.get_item_icon(index))
 	scripts_tab_container.set_tab_tooltip(index, scripts_item_list.get_item_tooltip(index))
+
+	# Set custom control with two lines and color
+	var control := make_script_tab_control(path, icon)
+	#scripts_tab_container.set_tab_button(index, control)
 
 func update_tabs_position():
 	if (is_script_tabs_top):
@@ -1302,3 +1313,44 @@ class TabStateCache:
 			tab_bar.drag_to_rearrange_enabled = drag_to_rearrange_enabled
 			tab_bar.tab_close_display_policy = tab_close_display_policy
 			tab_bar.select_with_rmb = select_with_rmb
+
+### Ethan Changes
+
+# Computes a color from a string (e.g. directory name)
+func get_color_from_string(name: String) -> Color:
+	var hash_val := abs(hash(name))
+	return Color.from_hsv(float(hash_val % 360) / 360.0, 0.7, 0.95)
+	
+# Gets the parent directory name from a path string.
+func get_parent_dir_name(path: String) -> String:
+	var dir_path := path.get_base_dir()
+	var parts := dir_path.split("/")
+	if parts.size() > 0:
+		return parts[parts.size()-1]
+	return ""
+
+# Creates a custom VBoxContainer for a tab with two lines: 
+# Line 1: script filename (colored by parent dir)
+# Line 2: parent dir name (smaller font, less prominent color)
+func make_script_tab_control(path: String, icon: Texture2D) -> Control:
+	var hbox := HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	if icon:
+		var icon_tex := TextureRect.new()
+		icon_tex.texture = icon
+		icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		icon_tex.custom_minimum_size = Vector2(16, 16)
+		hbox.add_child(icon_tex)
+
+	var filename := path.get_file()
+	var title_label := Label.new()
+	title_label.text = filename
+	var parent_dir := get_parent_dir_name(path)
+	var color := get_color_from_string(parent_dir)
+	title_label.modulate = color
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	hbox.add_child(title_label)
+	return hbox

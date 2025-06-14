@@ -8,6 +8,7 @@ extends Node2D
 @export var day_start_hour := 9
 @export var day_end_hour := 15
 @export var day_duration_secs := 120.0
+@export var endless_days := true
 
 @onready var pool_area: Area2D = $Pool
 @onready var pool_swimmers: Node2D = $PoolSwimmers
@@ -213,8 +214,7 @@ func _check_time_of_day_triggers(hr: int):
 		var next_index = tod_states.find(TOD_HOURS[hr]) + 1
 		next_state_hour = int(tod_states[next_index]) if next_index < tod_states.size() else 999
 
-		if TOD_HOURS[hr] == "closing":
-			# Gather stats; replace these with your actual gameplay variables as needed
+		if not endless_days and TOD_HOURS[hr] == "closing":
 			set_end_of_day()
 
 		  

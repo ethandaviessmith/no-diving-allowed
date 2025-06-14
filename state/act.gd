@@ -2,7 +2,7 @@
 class_name Act
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 var activity_timer: float = 0.0
 var duration: float = 1.0
@@ -10,23 +10,22 @@ var wait_timer: Timer
 var _current_activity_particles: GPUParticles2D = null
 
 func _enter():
-	
+	Log.pr("act _enter", swimmer.name)
 	duration = Util.ACTIVITY_DURATION.get(swimmer.curr_action, 1)
 	swimmer.activity_duration = duration
 	swimmer.activity_start_time = Time.get_ticks_msec() / 1000.0
 
-	if not swimmer.curr_action == Util.ACT_POOL_DROWN: # timer to finish activity
-		if not wait_timer:
-			wait_timer = Timer.new()
-			wait_timer.one_shot = true
-			wait_timer.timeout.connect(_on_activity_done)
-			swimmer.add_child(wait_timer)
-		wait_timer.start(duration)
+	#if not swimmer.curr_action == Util.ACT_POOL_DROWN: # timer to finish activity
+	if not wait_timer:
+		wait_timer = Timer.new()
+		wait_timer.one_shot = true
+		wait_timer.timeout.connect(_on_activity_done)
+		swimmer.add_child(wait_timer)
+	wait_timer.start(duration)
 
 	swimmer.update_state_label()
 	
 	for child in get_children(): # Match children ACT_ states if child exists
-		Log.pr("act_substate", owner.name, child.name, swimmer.curr_action)
 		if child is State and child.name == str(swimmer.curr_action):
 			change_state_name(child.name)
 			return
@@ -45,6 +44,7 @@ func _enter():
 		Util.ACT_POOL_DIVE:
 			swimmer.try_add_misbehave(MoodComponent.Misbehave.DIVE)
 	swimmer.play_activity_manager_anim(swimmer.target_activity, false)
+
 
 func _on_activity_done():
 	_end_activity()
@@ -100,5 +100,7 @@ func _finish_activity():
 	if swimmer.target_activity and swimmer.target_activity.has_method("notify_done"):
 		swimmer.target_activity.notify_done(swimmer)
 		swimmer.target_activity = null
+	if swimmer.curr_action == Util.ACT_POOL_DROWN:
+		Log.err("bad act exit!!", swimmer.name)
 	swimmer.curr_action = null
 	swimmer.start_next_action()

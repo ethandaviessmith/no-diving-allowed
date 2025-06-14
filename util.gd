@@ -3,14 +3,16 @@ class_name Util extends Node
 
 ## Activities that have a State should match names
 const ACT_IDLE := "Idle"
+const ACT_WANDER := "Wandering"
+const ACT_POOL_LAPS := "PoolLaps"
+const ACT_POOL_DROWN := "Drown"
+
 const ACT_ENTRANCE := "Entrance"
 const ACT_LOCKER := "Locker"
 const ACT_SHOWER := "Shower"
 const ACT_SUNBATHE := "Lounger"
-const ACT_WANDER := "Wandering"
 const ACT_EXIT := "Exit"
 
-const ACT_POOL_LAPS := "PoolLaps"
 const ACT_POOL_SWIM := "PoolSwim"
 const ACT_POOL_PLAY := "PoolPlay"
 
@@ -18,7 +20,6 @@ const ACT_POOL_ENTER := "PoolEnter"
 const ACT_POOL_EXIT := "PoolExit"
 const ACT_POOL_DIVE := "PoolDive"
 
-const ACT_POOL_DROWN := "Drown"
 const ACT_SLIP := "Slip"
 const ACT_FIRSTAID := "FirstAid"
 const WANDER_POOL := "WanderPool"
@@ -35,7 +36,7 @@ const POOL_LOW_ENERGY := [ACT_POOL_SWIM, ACT_SUNBATHE, WANDER_POOL, ACT_POOL_ENT
 const POOL_ENERGY = [ACT_LOCKER, ACT_SHOWER, WANDER_POOL, ACT_POOL_LAPS, ACT_POOL_SWIM, ACT_SUNBATHE, ACT_POOL_DIVE]
 
 const ACTIVITY_DURATION := {
-	ACT_POOL_DROWN: 8.0,
+	ACT_POOL_DROWN: 25.0,
 	ACT_ENTRANCE: 0.2,
 	ACT_LOCKER: 4.0,
 	ACT_SHOWER: 5.0,
@@ -63,6 +64,7 @@ const wander_speed_range := Vector2(40, 80)
 const wander_pause_range := Vector2(0.5, 2.5)
 
 
+## Maps state file names to class_names for cleaner looking calls to set_state(Idle)
 const STATE_ENUM : Dictionary = {
 	"idle": "Idle",
 	"active": "Active",
@@ -91,7 +93,14 @@ static func get_state_key(state) -> String:
 			return fname # fallback, but strongly prefer enum match!
 	return str(state)
 
-
+static func get_caller_func_name() -> String:
+	var stack = get_stack()
+	# stack[0] is set_state, stack[1] is the caller
+	var i = 3
+	if stack.size() > i and stack[i].has("function"):
+		return stack[i]["function"]
+	return "unknown"
+	
 #region SCHEDULE
 static func get_schedule_enter(swimmer):
 	return Util.add_schedule(swimmer, POOL_ENTER.duplicate())
@@ -116,7 +125,7 @@ static func _pick_rand(source:Array, n:int) -> Array:
 	opts.shuffle()
 	return opts.slice(0, n)
 
-static func add_schedule(swimmer: Swimmer, activities):
+static func add_schedule(swimmer, activities):
 	var schedule = []
 	var was_in_pool = swimmer.is_swimming
 	for i in activities.size():

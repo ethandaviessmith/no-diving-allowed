@@ -1,0 +1,374 @@
+[gd_scene load_steps=34 format=3 uid="uid://clnliyc6fmqy6"]
+
+[ext_resource type="Script" uid="uid://cymy63qc7uyxb" path="res://addons/simple-state/classes/debugger.gd" id="1_ufm07"]
+[ext_resource type="Script" uid="uid://dg4md6a1gsgll" path="res://addons/simple-state/demo/description_box.gd" id="2_q43t1"]
+[ext_resource type="Script" uid="uid://dx1rg3ctaul0t" path="res://state/default.gd" id="3_1tyh0"]
+[ext_resource type="Script" uid="uid://cimmk851hrt1w" path="res://swimmer_test.gd" id="3_q43t1"]
+[ext_resource type="Script" uid="uid://d4nas8o01jhmd" path="res://state/idle.gd" id="4_2h5ho"]
+[ext_resource type="Script" uid="uid://csebqglnxbm6p" path="res://state/active.gd" id="5_iuuij"]
+[ext_resource type="Script" uid="uid://dk4nmwuafmwnt" path="res://state/approach.gd" id="6_58rba"]
+[ext_resource type="Script" uid="uid://dmrnvaiq4vk5k" path="res://state/in_line.gd" id="7_ou7at"]
+[ext_resource type="Script" uid="uid://crteapg5li0hx" path="res://state/wandering.gd" id="8_syqrd"]
+[ext_resource type="Script" uid="uid://bsoqv317f2ttg" path="res://state/wander_move.gd" id="9_w4qd0"]
+[ext_resource type="Script" uid="uid://bp7yx7ctkn0e1" path="res://state/wander_pause.gd" id="10_6oxiq"]
+[ext_resource type="Script" uid="uid://b57cacpoi08ug" path="res://state/act.gd" id="11_n2fns"]
+[ext_resource type="Script" uid="uid://cwcsr7tg0vdhu" path="res://state/act_default.gd" id="12_bhsln"]
+[ext_resource type="Script" uid="uid://cee2vse26sixd" path="res://state/laps.gd" id="13_6i5sx"]
+[ext_resource type="Script" uid="uid://dg3cdwrcitqpp" path="res://state/drown.gd" id="14_8n5xh"]
+[ext_resource type="Script" uid="uid://btvtv5td1emx5" path="res://state/sit.gd" id="15_m73cy"]
+[ext_resource type="Script" uid="uid://dyxpas0kj08q1" path="res://state/carry.gd" id="16_3ex82"]
+[ext_resource type="Script" uid="uid://cwvjua7gqpa26" path="res://state/sleep.gd" id="17_ggp5m"]
+[ext_resource type="Script" uid="uid://drb0cy2hm1ydk" path="res://mood_component.gd" id="19_58rba"]
+[ext_resource type="Texture2D" uid="uid://6iawdmindero" path="res://assets/debug.png" id="20_ou7at"]
+[ext_resource type="Texture2D" uid="uid://8f8lgxr12ygd" path="res://assets/debug_bar.png" id="21_syqrd"]
+[ext_resource type="Texture2D" uid="uid://cut4o8bdcwi2g" path="res://assets/sprites.png" id="22_w4qd0"]
+[ext_resource type="Script" uid="uid://dsegwpsafpulq" path="res://activity_manager.gd" id="23_ou7at"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ysqm7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wxupu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7gdgn"]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+
+[sub_resource type="Animation" id="Animation_5pgem"]
+resource_name = "RESET"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_mwhj1"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_yyph0"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 0, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_xmkhy"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 1, 0, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_4pwkk"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 0, 0, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_gt7hj"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_01hf1"]
+_data = {
+&"RESET": SubResource("Animation_5pgem"),
+&"black": SubResource("Animation_mwhj1"),
+&"blue": SubResource("Animation_yyph0"),
+&"green": SubResource("Animation_xmkhy"),
+&"red": SubResource("Animation_4pwkk"),
+&"yellow": SubResource("Animation_gt7hj")
+}
+
+[node name="Node2D" type="CharacterBody2D"]
+script = ExtResource("3_q43t1")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
+script = ExtResource("3_1tyh0")
+animation_player = NodePath("../SimpleStateDemo/MarginContainer/AnimationPlayer")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4_2h5ho")
+debug_mode = true
+metadata/_custom_type_script = "uid://d4nas8o01jhmd"
+
+[node name="Active" type="Node" parent="StateMachine"]
+script = ExtResource("5_iuuij")
+metadata/_custom_type_script = "uid://csebqglnxbm6p"
+
+[node name="Approach" type="Node" parent="StateMachine/Active"]
+script = ExtResource("6_58rba")
+debug_mode = true
+metadata/_custom_type_script = "uid://dk4nmwuafmwnt"
+
+[node name="InLine" type="Node" parent="StateMachine/Active"]
+script = ExtResource("7_ou7at")
+metadata/_custom_type_script = "uid://dmrnvaiq4vk5k"
+
+[node name="Wandering" type="Node" parent="StateMachine/Active"]
+script = ExtResource("8_syqrd")
+metadata/_custom_type_script = "uid://crteapg5li0hx"
+
+[node name="WanderMove" type="Node" parent="StateMachine/Active/Wandering"]
+script = ExtResource("9_w4qd0")
+metadata/_custom_type_script = "uid://bsoqv317f2ttg"
+
+[node name="WanderPause" type="Node" parent="StateMachine/Active/Wandering"]
+script = ExtResource("10_6oxiq")
+metadata/_custom_type_script = "uid://bp7yx7ctkn0e1"
+
+[node name="Act" type="Node" parent="StateMachine"]
+script = ExtResource("11_n2fns")
+metadata/_custom_type_script = "uid://b57cacpoi08ug"
+
+[node name="ActDefault" type="Node" parent="StateMachine/Act"]
+script = ExtResource("12_bhsln")
+metadata/_custom_type_script = "uid://cwcsr7tg0vdhu"
+
+[node name="PoolLaps" type="Node" parent="StateMachine/Act"]
+script = ExtResource("13_6i5sx")
+metadata/_custom_type_script = "uid://cee2vse26sixd"
+
+[node name="Drown" type="Node" parent="StateMachine/Act"]
+script = ExtResource("14_8n5xh")
+timer = 64.0
+debug_mode = true
+metadata/_custom_type_script = "uid://dg3cdwrcitqpp"
+
+[node name="Sit" type="Node" parent="StateMachine"]
+script = ExtResource("15_m73cy")
+metadata/_custom_type_script = "uid://btvtv5td1emx5"
+
+[node name="Carry" type="Node" parent="StateMachine"]
+script = ExtResource("16_3ex82")
+metadata/_custom_type_script = "uid://dyxpas0kj08q1"
+
+[node name="Sleep" type="Node" parent="StateMachine"]
+script = ExtResource("17_ggp5m")
+metadata/_custom_type_script = "uid://cwvjua7gqpa26"
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+
+[node name="SwimmingGPUParticles2D" type="GPUParticles2D" parent="."]
+
+[node name="Label" type="Label" parent="."]
+offset_left = 425.0
+offset_top = 128.0
+offset_right = 572.0
+offset_bottom = 164.0
+
+[node name="SimpleStateDemo" type="Panel" parent="."]
+offset_left = 431.0
+offset_top = 270.0
+offset_right = 431.0
+offset_bottom = 270.0
+pivot_offset = Vector2(-30, 31)
+
+[node name="MarginContainer" type="MarginContainer" parent="SimpleStateDemo"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -382.0
+offset_top = -242.0
+offset_right = 1283.0
+offset_bottom = 779.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SimpleStateDemo/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StateMachineDebugger" type="Tree" parent="SimpleStateDemo/MarginContainer/HBoxContainer" node_paths=PackedStringArray("state_machine_root")]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/draw_guides = 0
+theme_override_constants/relationship_line_width = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ysqm7")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_wxupu")
+theme_override_styles/selected = SubResource("StyleBoxFlat_7gdgn")
+theme_override_styles/selected_focus = SubResource("StyleBoxFlat_7gdgn")
+select_mode = 1
+script = ExtResource("1_ufm07")
+state_machine_root = NodePath("../../../../StateMachine")
+allow_state_switching = true
+signal_show = true
+
+[node name="DescriptionBox" type="Label" parent="SimpleStateDemo/MarginContainer/HBoxContainer" node_paths=PackedStringArray("tree")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+autowrap_mode = 3
+script = ExtResource("2_q43t1")
+tree = NodePath("../StateMachineDebugger")
+show_descriptions = 1
+
+[node name="InputInfo" type="Label" parent="SimpleStateDemo/MarginContainer/HBoxContainer/DescriptionBox"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -415.0
+offset_top = -267.0
+offset_right = -66.0
+offset_bottom = -189.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "MOUSE CLICK on state: select
+DOUBLE MOUSE CLICK on state: start
+TAB: next substate (only has effect on leaves)"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="ColorRect" type="ColorRect" parent="SimpleStateDemo/MarginContainer"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="SimpleStateDemo/MarginContainer"]
+libraries = {
+&"": SubResource("AnimationLibrary_01hf1")
+}
+
+[node name="MoodComponent" type="Node2D" parent="." node_paths=PackedStringArray("bar_happy", "bar_energy", "bar_safety", "bar_clean", "bar_mood", "mood_icon_stack")]
+position = Vector2(431, 270)
+script = ExtResource("19_58rba")
+bar_happy = NodePath("HappyProgressBar")
+bar_energy = NodePath("EnergyProgressBar")
+bar_safety = NodePath("SafetyProgressBar")
+bar_clean = NodePath("CleanProgressBar")
+bar_mood = NodePath("MoodBar")
+mood_icon_stack = NodePath("MoodIconStack")
+mood_color_great = Color(0.334926, 0.166766, 1, 1)
+mood_color_good = Color(0, 0.623529, 0, 1)
+mood_color_bad = Color(0.385237, 0.312582, 0.0032855, 1)
+mood_color_issue = Color(0.811765, 0, 0, 1)
+
+[node name="MoodBar" type="ColorRect" parent="MoodComponent"]
+offset_left = -16.0
+offset_top = -107.0
+offset_right = 16.0
+offset_bottom = -75.0
+color = Color(0.572442, 0.380153, 0.670682, 1)
+
+[node name="DebugBar" type="Sprite2D" parent="MoodComponent"]
+texture_filter = 1
+position = Vector2(0, -91)
+texture = ExtResource("20_ou7at")
+
+[node name="HappyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -103.0
+offset_right = 31.0
+offset_bottom = -95.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("21_syqrd")
+
+[node name="EnergyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -96.0
+offset_right = 31.0
+offset_bottom = -88.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("21_syqrd")
+
+[node name="SafetyProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -89.0
+offset_right = 31.0
+offset_bottom = -81.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("21_syqrd")
+
+[node name="CleanProgressBar" type="TextureProgressBar" parent="MoodComponent"]
+offset_left = -7.0
+offset_top = -82.0
+offset_right = 31.0
+offset_bottom = -74.0
+scale = Vector2(0.5, 0.5)
+value = 100.0
+nine_patch_stretch = true
+texture_progress = ExtResource("21_syqrd")
+
+[node name="MoodIconStack" type="Node2D" parent="MoodComponent"]
+position = Vector2(0, -69)
+scale = Vector2(0.5, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(431, 239)
+texture = ExtResource("22_w4qd0")
+hframes = 32
+
+[node name="ActivityManager" type="Node2D" parent="."]
+script = ExtResource("23_ou7at")
+line_positions = NodePath(".")
+activity_position_path = NodePath(".")
+activity = 5
+prevent_move = true
+metadata/_custom_type_script = "uid://dsegwpsafpulq"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]

@@ -77,7 +77,7 @@ func has_available_line_position() -> bool:
 
 
 
-func try_queue_swimmer(swimmer: Swimmer) -> bool:
+func try_queue_swimmer(swimmer) -> bool:
 	# Find random free activity slot
 	var free_indices = []
 	for i in activity_positions.size():
@@ -136,20 +136,20 @@ func send_swimmer_to_wander(swimmer):
 		Log.pr("Missing Wander Area", name)
 		pass
 
-func assign_swimmer_to_slot(swimmer:Swimmer) -> int:
+func assign_swimmer_to_slot(swimmer) -> int:
 	for i in current_swimmers.size():
 		if current_swimmers[i] == null:
 			current_swimmers[i] = swimmer
 			return i
 	return -1 # No free slot
 
-func release_swimmer_from_slot(swimmer:Swimmer):
+func release_swimmer_from_slot(swimmer):
 	for i in current_swimmers.size():
 		if current_swimmers[i] == swimmer:
 			current_swimmers[i] = null
 			break
 
-func get_interaction_pos(swimmer:Swimmer) -> Vector2:
+func get_interaction_pos(swimmer) -> Vector2:
 	if prevent_move: return swimmer.global_position
 	
 	# Only return lane if swimmer is in that slot
@@ -170,7 +170,7 @@ func get_interaction_pos(swimmer:Swimmer) -> Vector2:
 	return global_position # fallback
 
 
-func notify_done(swimmer: Swimmer) -> void:
+func notify_done(swimmer) -> void:
 	release_swimmer_from_slot(swimmer)
 	_process_next_in_line()
 

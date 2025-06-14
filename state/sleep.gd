@@ -1,14 +1,14 @@
 @icon("res://addons/simple-state/icons/state.png")
 class_name Sleep extends State
 
-@onready var swimmer: Swimmer = owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter() -> void:
-	swimmer.set_anim("sleep") # change as needed
+	#swimmer.set_anim("sleep") # change as needed
 	swimmer.velocity = Vector2.ZERO
 
 func _update(delta: float) -> void:
-	if swimmer.energy >= 1.0:
+	if swimmer.mood.energy >= 1.0:
 		swimmer.set_state(Idle)
 
 # Optionally, add an _exit for cleanup

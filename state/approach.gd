@@ -2,26 +2,30 @@
 class_name Approach
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter():
 	if debug_mode:
 		print("Entering Approach state.")
-	swimmer.navigation_agent.set_target_position(swimmer.move_target)
+	if swimmer:
+		swimmer.navigation_agent.set_target_position(swimmer.move_target)
 
 func _update(delta):
-	if not swimmer.navigation_agent.is_navigation_finished():
-		var dir = (swimmer.navigation_agent.get_next_path_position() - swimmer.global_position).normalized()
-		swimmer.navigation_agent.set_velocity(dir * swimmer.get_walk_speed())
-	else:
-		swimmer.velocity = Vector2.ZERO
-		# Check distance threshold
-		var dist = swimmer.global_position.distance_to(swimmer.move_target)
-		if dist > 50.0:
-			Log.pr("Too far from activity; resetting path: %s → %s" % [swimmer.global_position, swimmer.move_target])
-			swimmer.navigation_agent.set_target_position(swimmer.move_target)
+	if swimmer:
+		if not swimmer.navigation_agent.is_navigation_finished():
+			var dir = (swimmer.navigation_agent.get_next_path_position() - swimmer.global_position).normalized()
+			swimmer.navigation_agent.set_velocity(dir * swimmer.get_walk_speed())
 		else:
-			swimmer.perform_activity()
+			swimmer.velocity = Vector2.ZERO
+			# Check distance threshold
+			var dist = swimmer.global_position.distance_to(swimmer.move_target)
+			if dist > 50.0:
+				Log.pr("Too far from activity; resetting path: %s → %s" % [swimmer.global_position, swimmer.move_target])
+				swimmer.navigation_agent.set_target_position(swimmer.move_target)
+			else:
+				if debug_mode:
+					Log.pr("approach done", swimmer.name)
+				swimmer.set_state(Act)
 
 func standard_move() -> void:
 	if swimmer.navigation_agent.get_target_position() != swimmer.move_target:

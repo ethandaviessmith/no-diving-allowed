@@ -2,7 +2,7 @@
 class_name StateMachine
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 var state_class_to_mapping = {}
 
 func _ready():

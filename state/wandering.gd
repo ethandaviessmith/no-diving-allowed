@@ -2,7 +2,7 @@
 class_name Wandering
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 var wander_state: String = "WanderMove" # default child state
 

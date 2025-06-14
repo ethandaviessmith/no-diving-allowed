@@ -2,7 +2,7 @@
 class_name Active
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 var current_behavior: Variant = null
 

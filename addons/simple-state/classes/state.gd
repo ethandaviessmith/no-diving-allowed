@@ -116,9 +116,14 @@ func _physics_process(delta: float) -> void:
 
 
 ## [b][parents, then children][/b] Called when the state is activated.
-func _enter() -> void:
-	pass
+#func _enter() -> void:
+	#pass
 
+func _enter() -> void:
+	print(owner.name, " ENTER STATE:", self.name, " parent:", get_parent().name if get_parent() else "none")
+
+func _exit() -> void:
+	print(owner.name, " EXIT STATE:", self.name, " parent:", get_parent().name if get_parent() else "none")
 
 ## [b][children, then parents][/b] Called after the state is activated.
 func _after_enter() -> void:
@@ -141,8 +146,8 @@ func _before_exit() -> void:
 
 
 ## [b][children, then parents][/b] Called when the state is deactivated.
-func _exit() -> void:
-	pass
+#func _exit() -> void:
+	#pass
 
 
 ## You can define which state is picked automatically (like on [method enter]).

@@ -1,7 +1,7 @@
 @icon("res://addons/simple-state/icons/state.png")
 class_name Drown extends State
 
-@onready var swimmer: Swimmer = owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter() -> void:
 	Log.pr("drowning started")
@@ -14,12 +14,14 @@ func _enter() -> void:
 	else:
 		swimmer.anim.play("drown_f")
 	swimmer.mood.change_happy(-0.3)
-	swimmer.schedule.clear()
-	swimmer.schedule.append(Util.ACT_POOL_DROWN)
+	#swimmer.schedule.clear()
+	#swimmer.schedule.append(Util.ACT_POOL_DROWN)
 
 func _update(delta: float) -> void:
 	# Could add time-in-state or auto-fail if not rescued in time
+	Log.pr("drowning")
 	pass
 
 func _exit() -> void:
-	swimmer.curr_action = null
+	Log.err("drown exit", swimmer.curr_action)
+	#swimmer.curr_action = null

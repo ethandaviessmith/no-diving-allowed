@@ -1,7 +1,7 @@
 @icon("res://addons/simple-state/icons/state.png")
 class_name PoolLaps extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 var path_buffer = 0.0
 
 func _enter():

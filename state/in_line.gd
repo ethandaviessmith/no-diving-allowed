@@ -2,7 +2,7 @@
 class_name InLine
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter():
 	owner.navigation_agent.set_target_position(swimmer.move_target)

@@ -695,7 +695,7 @@ wander_area = NodePath("../../LockerRoom")
 metadata/_custom_type_script = "uid://dsegwpsafpulq"
 
 [node name="Node2D" type="Node2D" parent="Exit/ActivityManager"]
-position = Vector2(0, 17)
+position = Vector2(0, 4)
 
 [node name="Locker" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -1378,7 +1378,7 @@ y_sort_enabled = true
 [node name="Swimmer" parent="PoolSwimmers" node_paths=PackedStringArray("pool") instance=ExtResource("4_76ob0")]
 position = Vector2(315, 396)
 pool = NodePath("../..")
-schedule = ["PoolEnter", "PoolLaps", "PoolSwim", "PoolLaps", "PoolExit", "Exit"]
+schedule = ["PoolEnter", "PoolLaps", "PoolSwim", "Drown", "PoolExit", "Exit"]
 
 [node name="LifeGuard" parent="PoolSwimmers" instance=ExtResource("1_03hax")]
 position = Vector2(1027, 929)
@@ -1414,6 +1414,7 @@ travel_cost = 10.0
 
 [node name="NavRegion_Ground" type="NavigationRegion2D" parent="."]
 unique_name_in_owner = true
+visible = false
 position = Vector2(182, 175)
 navigation_polygon = ExtResource("15_xv5nx")
 

@@ -2,7 +2,7 @@
 class_name ActDefault
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter():
 	get_parent()._enter()

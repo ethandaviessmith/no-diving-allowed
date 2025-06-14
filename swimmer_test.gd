@@ -1,4 +1,8 @@
-class_name Swimmer extends CharacterBody2D
+extends CharacterBody2D
+
+## Test class for state debugging
+
+
 
 # == EXPORTED VARS & NODES ==
 @export var pool: Pool
@@ -13,9 +17,10 @@ class_name Swimmer extends CharacterBody2D
 @onready var state_label: Label = $Label
 @onready var splash: GPUParticles2D = $SwimmingGPUParticles2D
 @onready var drip_particles: GPUParticles2D = $DrippingGPUParticles2D
-@onready var anim: AnimationPlayer = $AnimationPlayer
+@onready var anim: AnimationPlayer = $SimpleStateDemo/MarginContainer/AnimationPlayer
 @onready var mood: MoodComponent = $MoodComponent
 @onready var sprite: Sprite2D = $Sprite2D
+
 
 signal left_pool
 signal rule_broken(swimmer, amount)
@@ -23,7 +28,7 @@ signal rule_broken(swimmer, amount)
 # == BASIC PROPERTIES ==
 var state = null: set = set_state, get = get_state
 var move_target: Vector2
-var target_activity: ActivityManager
+@onready var target_activity: ActivityManager = $ActivityManager
 var curr_action = null
 var is_running := false
 var is_swimming := false
@@ -104,6 +109,7 @@ func _ready():
 	set_is_swimming(false)
 	if schedule.is_empty():
 		schedule = Util.get_schedule_enter(self)
+	
 	splash.visible = false
 	update_state_label()
 	sprite_frame = randi() % 4
@@ -175,7 +181,7 @@ func start_next_action():
 	var activity_manager: ActivityManager = pool.getActivityManager(curr_action, self)
 	if activity_manager:
 		if curr_action == Util.ACT_POOL_DROWN:
-			set_state(Drown) ## Hacky, should not be Idle and starting next action when curr_action == Drown
+			#Log.err("drowning anddealing with activity manager - canceled")
 			return
 		if activity_manager.has_open_direct_slot():
 			target_activity = activity_manager

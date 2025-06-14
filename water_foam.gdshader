@@ -50,4 +50,3 @@ void fragment() {
 	COLOR = mix(color, waterColor, colorCorection);
 	COLOR.a *= alpha;
 }
-

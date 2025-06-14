@@ -15,12 +15,17 @@ func _ready():
 	position = Vector2(16, 16)
 	_on_timescale_changed(slider.value)
 
-func _on_reset():
+func _on_reset(): 
 	get_tree().reload_current_scene()
 
 func _on_timescale_changed(value):
 	Engine.time_scale = value
 	scale_label.text = "%.1f" % value
+	
+func _notification(what):
+	if what == MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_on_timescale_changed(0.0)
+		slider.value = 0.0
 
 func _on_toggle_swimmer_labels_pressed():
 	_swimmer_labels_visible = not _swimmer_labels_visible

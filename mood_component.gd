@@ -88,7 +88,7 @@ func _setup_mood_timer():
 
 func _on_mood_timer_timeout():
 	if not owner: return
-	var swimmer:Swimmer = owner
+	var swimmer = owner
 	swimmer.call_update_mood() # calls mood_update with swimmer params
 	process_misbehaves()
 
@@ -136,7 +136,7 @@ func mood_update(curr_action, state, is_swimming, in_puddle) -> void:
 func try_misbehave(curr_action, state, is_swimming, in_puddle, is_running):
 	if randf() > safety:
 		if not owner: return
-		var swimmer:Swimmer = owner
+		var swimmer = owner
 		#Log.pr("misbehave tick", swimmer.name)
 		var pf_child_athlete = _personality_factor([PersonalityType.CHILD, PersonalityType.ATHLETE], 0.2)
 		var pf_child_leisure = _personality_factor([PersonalityType.CHILD, PersonalityType.LEISURE], 0.3)
@@ -149,7 +149,7 @@ func try_misbehave(curr_action, state, is_swimming, in_puddle, is_running):
 			elif randf() > 0.5 + pf_child_leisure:
 				swimmer.toggle_run()
 		elif is_swimming and curr_action != Util.ACT_POOL_LAPS:
-			if  energy > 0.3 and randf() < energy:
+			if  energy > 0.3 and randf() < energy+0.2: ## lots of drowning during testing
 				swimmer.start_drown()
 			if randf() > 0.5 + pf_child_athlete:
 				swimmer.splashplay()

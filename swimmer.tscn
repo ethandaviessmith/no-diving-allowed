@@ -716,7 +716,6 @@ position = Vector2(0, -5)
 shape = SubResource("CapsuleShape2D_2pdhi")
 
 [node name="Label" type="Label" parent="."]
-visible = false
 offset_left = -36.0
 offset_top = -75.0
 offset_right = 108.0
@@ -768,7 +767,6 @@ one_shot = true
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
 script = ExtResource("7_3kjvg")
 animation_player = NodePath("../AnimationPlayer")
-debug_mode = true
 
 [node name="Idle" type="Node" parent="StateMachine"]
 script = ExtResource("9_buip2")
@@ -813,6 +811,8 @@ metadata/_custom_type_script = "uid://cee2vse26sixd"
 
 [node name="Drown" type="Node" parent="StateMachine/Act"]
 script = ExtResource("18_tei0a")
+timer = 64.0
+debug_mode = true
 metadata/_custom_type_script = "uid://dg3cdwrcitqpp"
 
 [node name="Sit" type="Node" parent="StateMachine"]
@@ -828,9 +828,9 @@ script = ExtResource("20_rfocf")
 metadata/_custom_type_script = "uid://cwvjua7gqpa26"
 
 [node name="StateMachineDebugger" type="Tree" parent="." node_paths=PackedStringArray("state_machine_root")]
-visible = false
-offset_right = 154.0
-offset_bottom = 386.0
+offset_right = 1215.0
+offset_bottom = 1488.0
+scale = Vector2(0.5, 0.5)
 pivot_offset = Vector2(-122.5, 13.3333)
 size_flags_horizontal = 3
 theme_override_constants/draw_guides = 0

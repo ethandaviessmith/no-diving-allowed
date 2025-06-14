@@ -2,7 +2,7 @@
 class_name WanderMove
 extends State
 
-@onready var swimmer := owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter():
 	# Optionally log or reset

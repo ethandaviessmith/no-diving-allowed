@@ -1,7 +1,7 @@
 @icon("res://addons/simple-state/icons/state.png")
 class_name Carry extends State
 
-@onready var swimmer: Swimmer = owner as Swimmer
+@onready var swimmer := owner# as Swimmer
 
 func _enter() -> void:
 	swimmer.navigation_agent.process_mode = Node.PROCESS_MODE_DISABLED
